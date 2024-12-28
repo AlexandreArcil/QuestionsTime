@@ -2,6 +2,7 @@ package fr.canardnocturne.questionstime.config;
 
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.Prize;
+import fr.canardnocturne.questionstime.question.component.PrizeCommand;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.question.type.QuestionMulti;
 import net.kyori.adventure.text.Component;
@@ -49,14 +50,14 @@ public class QuestionTimeConfiguration {
                             .quantity(64)
                             .add(Keys.CUSTOM_NAME, Component.text("Sandy", NamedTextColor.YELLOW))
                             .add(Keys.LORE, Arrays.asList(Component.text("It's just a sand block with a cool name"), Component.text("What did you expect")))
-                            .build()}))
+                            .build()}, null))
                     .setMalus(new Malus(100, true))
                     .build(),
             QuestionMulti.builder()
                     .setQuestion("Who created the QuestionsTime plugin ?")
                     .setPropositions(Arrays.asList("CanardNocturne", "Notch", "Pewdiepie", "Donald Trump", "Chicky the chicken"))
                     .setAnswer("1")
-                    .setPrize(new Prize(500, true, null))
+                    .setPrize(new Prize(500, true, null, new PrizeCommand[]{new PrizeCommand("A secret about the plugin's creator", "msg @winner Here is the secret about the plugin's creator: he's not a real duck")}))
                     .setTimer(1800)
                     .setTimeBetweenAnswer(300)
                     .setWeight(2)

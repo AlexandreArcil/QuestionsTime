@@ -2,12 +2,12 @@ package fr.canardnocturne.questionstime.question.ask.announcer;
 
 import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.message.Messages;
+import fr.canardnocturne.questionstime.question.component.PrizeCommand;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.question.type.QuestionMulti;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
@@ -51,16 +51,16 @@ public class SimpleQuestionAnnouncer implements QuestionAnnouncer {
                         question.getPrize().ifPresent(prize -> {
                             if (prize.isAnnounce() && (prize.getItemStacks().length > 0 || prize.getCommands().length > 0 || economyService != null)) {
                                 player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.PRIZE_ANNOUNCE.getMessage())));
-                                if (prize.getItemStacks().length > 0) {
-                                    for (int i = 0; i < prize.getItemStacks().length; i++) {
-                                        final ItemStack is = prize.getItemStacks()[i];
-                                        if (!is.type().equals(ItemTypes.AIR))
-                                            player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_ITEM.format()
-                                                    .setItem(is)
-                                                    .setModId(is)
-                                                    .setQuantity(is.quantity())
-                                                    .message()));
-                                    }
+                                for (ItemStack is : prize.getItemStacks()) {
+                                    player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_ITEM.format()
+                                            .setItem(is)
+                                            .setModId(is)
+                                            .setQuantity(is.quantity())
+                                            .message()));
+                                }
+                                for (PrizeCommand command : prize.getCommands()) {
+                                    player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_COMMAND.format()
+                                            .setCommand(command).message()));
                                 }
                                 if (prize.getMoney() > 0 && economyService != null) {
                                     player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_MONEY.format()

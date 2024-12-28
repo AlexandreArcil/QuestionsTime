@@ -43,7 +43,7 @@ public class AnnouncePrizeStep implements CreationStep {
 
     @Override
     public boolean shouldSkip(final QuestionsTime plugin, final QuestionCreator questionCreator) {
-        return questionCreator.getMoneyPrize() <= 0 && questionCreator.getItemsPrize().isEmpty();
+        return questionCreator.getMoneyPrize() <= 0 && questionCreator.getItemsPrize().isEmpty() && questionCreator.getCommandsPrize().isEmpty();
     }
 
     @Override

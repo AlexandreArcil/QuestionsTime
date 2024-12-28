@@ -3,9 +3,12 @@ package fr.canardnocturne.questionstime.question.ask.answer;
 import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.message.Messages;
 import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.text.Component;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -68,21 +71,25 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     private void givePrize(final Player winner) {
         this.question.getPrize().ifPresent(prize -> {
             final Task givePrizeTask = Task.builder().execute(task -> {
-                        if (prize.getItemStacks().length == 0 && economyService == null) {
+                        if (prize.getItemStacks().length == 0 && prize.getCommands().length == 0 && economyService == null) {
                             return;
                         }
                         winner.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.REWARD_ANNOUNCE.getMessage())));
-                        if (prize.getItemStacks().length > 0) {
-                            for (int i = 0; i < prize.getItemStacks().length; i++) {
-                                final ItemStack item = prize.getItemStacks()[i];
-                                winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_PRIZE.format()
-                                        .setQuantity(item.quantity())
-                                        .setModId(item)
-                                        .setItem(item)
-                                        .message()));
-                                winner.inventory().offer(prize.getItemStacks()[i].copy());
-                            }
+
+                        for (ItemStack item: prize.getItemStacks()) {
+                            winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_PRIZE.format()
+                                    .setQuantity(item.quantity())
+                                    .setModId(item)
+                                    .setItem(item)
+                                    .message()));
+                            winner.inventory().offer(item.copy());
                         }
+
+                        List<String> formattedCommands = Arrays.stream(prize.getCommands())
+                                .map(command -> command.command().replace("@winner", winner.name()))
+                                .toList();
+                        this.executePrizeCommands(formattedCommands, winner);
+
                         if (prize.getMoney() > 0 && economyService != null) {
                             winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_MONEY.format()
                                     .setMoney(prize.getMoney())
@@ -100,6 +107,21 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
                     .build();
             this.game.asyncScheduler().submit(givePrizeTask, "[QT]GiveWinnerPrize");
         });
+    }
+
+    private void executePrizeCommands(final Collection<String> commands, final Player winner) {
+        Task commandExecutorTask = Task.builder().execute(() -> {
+            for (String command : commands) {
+                try {
+                    this.game.server().causeStackManager().pushCause(winner);
+                    this.game.server().commandManager().process(Sponge.systemSubject(), winner, command);
+                } catch (CommandException e) {
+                    this.logger.error("An error occurred when executing the prize command '" + command + "'", e);
+                    winner.sendMessage(TextUtils.errorWithPrefix("A prize command had a problem when it was executed"));
+                }
+            }
+        }).plugin(this.plugin).build();
+        this.game.server().scheduler().submit(commandExecutorTask);
     }
 
     private void giveCooldown(final Player loser) {

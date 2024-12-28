@@ -2,6 +2,7 @@ package fr.canardnocturne.questionstime.question.creation;
 
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.Prize;
+import fr.canardnocturne.questionstime.question.component.PrizeCommand;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.question.type.Question.Types;
 import fr.canardnocturne.questionstime.question.type.QuestionMulti;
@@ -18,6 +19,7 @@ public class QuestionCreator {
     private String answer;
     private final List<String> propositions;
     private final List<ItemStack> itemsPrize;
+    private final List<PrizeCommand> commandsPrize;
     private int moneyPrize = -1;
     private boolean announcePrize;
     private int moneyMalus = -1;
@@ -30,11 +32,13 @@ public class QuestionCreator {
     public QuestionCreator() {
         this.propositions = new ArrayList<>();
         this.itemsPrize = new ArrayList<>();
+        this.commandsPrize = new ArrayList<>();
     }
 
     public Question build() {
         final ItemStack[] itemsPrize = this.itemsPrize.toArray(new ItemStack[0]);
-        final Prize prize = this.moneyPrize > 0 || itemsPrize.length > 0 ? new Prize(this.moneyPrize, this.announcePrize, itemsPrize) : null;
+        final PrizeCommand[] commandsPrize = this.commandsPrize.toArray(new PrizeCommand[0]);
+        final Prize prize = this.moneyPrize > 0 || itemsPrize.length > 0 || commandsPrize.length > 0 ? new Prize(this.moneyPrize, this.announcePrize, itemsPrize, commandsPrize) : null;
         final Malus malus = this.moneyMalus > 0 ? new Malus(this.moneyMalus, this.announceMalus) : null;
         final Question.QuestionBuilder questionBuilder;
         if (this.questionType == Types.MULTI) {
@@ -66,6 +70,14 @@ public class QuestionCreator {
 
     public List<ItemStack> getItemsPrize() {
         return itemsPrize;
+    }
+
+    public void addCommandPrize(final PrizeCommand prizeCommand) {
+        this.commandsPrize.add(prizeCommand);
+    }
+
+    public List<PrizeCommand> getCommandsPrize() {
+        return commandsPrize;
     }
 
     public String getQuestion() {

@@ -21,6 +21,7 @@ public class Messages {
     public static final SimpleMessage PRIZE_ANNOUNCE = register(new SimpleMessage("prize.announce", "§eThe winner win :"));
     public static final MessageFormat<PrizeMoneyMessage.Format> PRIZE_MONEY = register(new PrizeMoneyMessage("prize.money", "§9•{money} §r{currency}"));
     public static final MessageFormat<PrizeItemMessage.Format> PRIZE_ITEM = register(new PrizeItemMessage("prize.item", "§9• {quantity} * {modid}§f{item}"));
+    public static final MessageFormat<PrizeCommandMessage.Format> PRIZE_COMMAND = register(new PrizeCommandMessage("prize.command", "§9• {command}"));
     public static final SimpleMessage MALUS_ANNOUNCE = register(new SimpleMessage("malus.announce", "§cBut a wrong answer :"));
     public static final MessageFormat<MalusMoneyMessage.Format> MALUS_MONEY = register(new MalusMoneyMessage("malus.money", "§4• -{money} §r{currency}"));
     public static final SimpleMessage ANSWER_ANNOUNCE = register(new SimpleMessage("answer.announce", "§eAnswer with : \"§bqt>answer§e\""));

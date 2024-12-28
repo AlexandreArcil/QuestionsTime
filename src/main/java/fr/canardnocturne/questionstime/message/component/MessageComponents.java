@@ -13,5 +13,6 @@ public class MessageComponents {
     public static final ComponentModID MOD_ID = new ComponentModID("modid");
     public static final ComponentItem ITEM = new ComponentItem("item");
     public static final ComponentDefault<String> ANSWER = new ComponentDefault<>("answer");
+    public static final ComponentCommand COMMAND = new ComponentCommand("command");
 
 }

@@ -1,7 +1,6 @@
 package fr.canardnocturne.questionstime.util;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import fr.canardnocturne.questionstime.question.serializer.ItemStackSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;

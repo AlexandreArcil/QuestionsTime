@@ -9,7 +9,7 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
 
-public class MalusSerializer implements TypeSerializer<Malus> {
+public class MalusTypeSerializer implements TypeSerializer<Malus> {
 
     @Nullable
     @Override

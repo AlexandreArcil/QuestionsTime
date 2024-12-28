@@ -24,16 +24,17 @@ import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import fr.canardnocturne.questionstime.question.ask.pool.WeightSortedQuestionPool;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.Prize;
+import fr.canardnocturne.questionstime.question.component.PrizeCommand;
 import fr.canardnocturne.questionstime.question.creation.CreateQuestionCommand;
 import fr.canardnocturne.questionstime.question.creation.CreatorLeftServerEventHandler;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreationManager;
 import fr.canardnocturne.questionstime.question.save.HoconQuestionRegister;
 import fr.canardnocturne.questionstime.question.save.QuestionRegister;
-import fr.canardnocturne.questionstime.question.serializer.MalusSerializer;
-import fr.canardnocturne.questionstime.question.serializer.PrizeSerializer;
-import fr.canardnocturne.questionstime.question.serializer.QuestionSerializer;
+import fr.canardnocturne.questionstime.question.serializer.MalusTypeSerializer;
+import fr.canardnocturne.questionstime.question.serializer.PrizeCommandTypeSerializer;
+import fr.canardnocturne.questionstime.question.serializer.PrizeTypeSerializer;
+import fr.canardnocturne.questionstime.question.serializer.QuestionTypeSerializer;
 import fr.canardnocturne.questionstime.question.type.Question;
-import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -126,9 +127,10 @@ public class QuestionsTime {
         final ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder()
                 .defaultOptions(ConfigurationOptions.defaults()
                         .serializers(ConfigurationOptions.defaults().serializers().childBuilder()
-                                .register(TypeToken.get(Question.class), new QuestionSerializer())
-                                .register(TypeToken.get(Prize.class), new PrizeSerializer(this.logger))
-                                .register(TypeToken.get(Malus.class), new MalusSerializer())
+                                .register(Question.class, new QuestionTypeSerializer())
+                                .register(Prize.class, new PrizeTypeSerializer())
+                                .register(Malus.class, new MalusTypeSerializer())
+                                .register(PrizeCommand.class, new PrizeCommandTypeSerializer())
                                 .build())).path(configFile)
                 .build();
         final QuestionRegister questionRegister = new HoconQuestionRegister(configLoader, logger);

@@ -15,7 +15,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
-public class QuestionSerializer implements TypeSerializer<Question> {
+public class QuestionTypeSerializer implements TypeSerializer<Question> {
 
     @Override
     public Question deserialize(final Type type, final ConfigurationNode node) throws SerializationException {
