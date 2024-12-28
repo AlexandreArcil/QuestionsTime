@@ -49,7 +49,7 @@ public class SimpleQuestionAnnouncer implements QuestionAnnouncer {
                         }
 
                         question.getPrize().ifPresent(prize -> {
-                            if (prize.isAnnounce() && economyService != null) {
+                            if (prize.isAnnounce() && (prize.getItemStacks().length > 0 || prize.getCommands().length > 0 || economyService != null)) {
                                 player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.PRIZE_ANNOUNCE.getMessage())));
                                 if (prize.getItemStacks().length > 0) {
                                     for (int i = 0; i < prize.getItemStacks().length; i++) {
@@ -62,7 +62,7 @@ public class SimpleQuestionAnnouncer implements QuestionAnnouncer {
                                                     .message()));
                                     }
                                 }
-                                if (prize.getMoney() > 0) {
+                                if (prize.getMoney() > 0 && economyService != null) {
                                     player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_MONEY.format()
                                             .setMoney(prize.getMoney())
                                             .setCurrency(economyService)
