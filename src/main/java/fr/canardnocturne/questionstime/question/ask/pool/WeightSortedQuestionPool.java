@@ -19,6 +19,13 @@ public class WeightSortedQuestionPool implements QuestionPool {
     }
 
     @Override
+    public Optional<Question> get(String question) {
+        return this.weightTree.stream()
+                .filter(registeredQuestion -> registeredQuestion.getQuestion().equals(question))
+                .findFirst();
+    }
+
+    @Override
     public Collection<Question> getAll() {
         return Collections.unmodifiableSet(weightTree);
     }

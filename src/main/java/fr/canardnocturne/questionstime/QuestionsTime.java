@@ -1,6 +1,7 @@
 package fr.canardnocturne.questionstime;
 
 import com.google.inject.Inject;
+import fr.canardnocturne.questionstime.command.BaseCommandExecutor;
 import fr.canardnocturne.questionstime.config.QuestionTimeConfiguration;
 import fr.canardnocturne.questionstime.config.loader.PluginConfigurationLoader;
 import fr.canardnocturne.questionstime.config.loader.SafePluginConfigurationLoader;
@@ -16,6 +17,7 @@ import fr.canardnocturne.questionstime.question.ask.QuestionAskManager;
 import fr.canardnocturne.questionstime.question.ask.announcer.QuestionAnnouncer;
 import fr.canardnocturne.questionstime.question.ask.announcer.SimpleQuestionAnnouncer;
 import fr.canardnocturne.questionstime.question.ask.answer.PlayerAnswerQuestionEventHandler;
+import fr.canardnocturne.questionstime.question.ask.launcher.ManualAskQuestionCommand;
 import fr.canardnocturne.questionstime.question.ask.launcher.QuestionLauncher;
 import fr.canardnocturne.questionstime.question.ask.launcher.QuestionLauncherFactory;
 import fr.canardnocturne.questionstime.question.ask.picker.QuestionPicker;
@@ -43,6 +45,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -87,6 +90,7 @@ public class QuestionsTime {
     private QuestionCreationManager questionCreationManager;
     private QuestionLauncher questionLauncher;
     private QuestionPool questionPool;
+    private QuestionAskManager questionAskManager;
 
     @Inject
     public QuestionsTime(final Logger logger, final Game game, @ConfigDir(sharedRoot = false) final Path pluginFolder, final PluginContainer pluginContainer) {
@@ -105,17 +109,7 @@ public class QuestionsTime {
         instance = this;
         Sponge.server().serviceProvider().provide(EconomyService.class).ifPresent(economyService -> this.economy = economyService);
 
-        final QuestionPicker questionPicker = new WeightedRandomnessQuestionPicker(this.questionPool, this.logger);
-        final QuestionAnnouncer questionAnnouncer = new SimpleQuestionAnnouncer(this.game, this.economy, this.plugin);
-        final QuestionAskManager questionAskManager = new QuestionAskManager(questionPicker, questionAnnouncer, this.questionCreationManager, this.game, this.economy, this.plugin, this.logger, this.pluginConfig.getMinConnected());
-        try {
-            this.questionLauncher = QuestionLauncherFactory.create(this.pluginConfig, this.plugin, this.game, questionAskManager);
-            questionAskManager.setQuestionLauncher(questionLauncher);
-        } catch (final IllegalStateException e) {
-            this.logger.error(e.getMessage(), e);
-        }
-
-        Sponge.eventManager().registerListeners(this.plugin, new PlayerAnswerQuestionEventHandler(questionAskManager, this.pluginConfig.isPersonalAnswer()));
+        Sponge.eventManager().registerListeners(this.plugin, new PlayerAnswerQuestionEventHandler(this.questionAskManager, this.pluginConfig.isPersonalAnswer()));
         Sponge.eventManager().registerListeners(this.plugin, new CreatorLeftServerEventHandler(this.questionCreationManager));
     }
 
@@ -151,14 +145,41 @@ public class QuestionsTime {
         this.questionPool = new WeightSortedQuestionPool(this.pluginConfig.getQuestions());
         this.questionCreationManager = new QuestionCreationManager(this, this.questionPool, questionRegister);
 
-        final Command.Parameterized commandQTBase = Command.builder()
+        final QuestionPicker questionPicker = new WeightedRandomnessQuestionPicker(this.questionPool, this.logger);
+        final QuestionAnnouncer questionAnnouncer = new SimpleQuestionAnnouncer(this.game, this.economy, this.plugin);
+        this.questionAskManager = new QuestionAskManager(questionPicker, questionAnnouncer, this.questionCreationManager, this.game, this.economy, this.plugin, this.logger, this.pluginConfig.getMinConnected());
+        try {
+            this.questionLauncher = QuestionLauncherFactory.create(this.pluginConfig, this.plugin, this.game, this.questionAskManager);
+            this.questionAskManager.setQuestionLauncher(questionLauncher);
+        } catch (final IllegalStateException e) {
+            this.logger.error(e.getMessage(), e);
+        }
+
+        final Command.Parameterized commandQTCreator = Command.builder()
                 .shortDescription(Component.text("Create a question").color(NamedTextColor.YELLOW))
                 .permission("questionstime.command.create")
                 .executionRequirements(commandCause -> commandCause.root() instanceof ServerPlayer)
                 .addParameter(CreateQuestionCommand.STEP_ARG)
                 .executor(new CreateQuestionCommand(this.questionCreationManager))
                 .build();
-        event.register(this.plugin, commandQTBase, "questionstimecreator", "qtc");
+        event.register(this.plugin, commandQTCreator, "questionstimecreator", "qtc");
+
+        //For the Optional#get: As specified in the doc, the function should take as argument a choice which is from the collection of questions, so I assume that it should always get a question from a player choice
+        Parameter.Value<Question> specificQuestionParameter = Parameter.choices(Question.class, s -> this.questionPool.get(s).get(), () -> this.questionPool.getAll().stream().map(Question::getQuestion).toList()).key("question").build();
+        Parameter questionParameter = Parameter.firstOf(ManualAskQuestionCommand.RANDOM_QUESTION_ARG, specificQuestionParameter);
+        final Command.Parameterized commandQTAskQuestion = Command.builder()
+                .shortDescription(Component.text("Ask a question").color(NamedTextColor.YELLOW))
+                .permission("questionstime.command.ask")
+                .addParameter(questionParameter)
+                .executor(new ManualAskQuestionCommand(this.questionAskManager, this.questionLauncher, specificQuestionParameter, this.logger))
+                .build();
+        final Command.Parameterized commandQTBase = Command.builder()
+                .shortDescription(Component.text("List of all subcommands").color(NamedTextColor.YELLOW))
+                .permission("questionstime.command.base")
+                .executor(new BaseCommandExecutor())
+                .addChild(commandQTAskQuestion, "ask")
+                .build();
+        event.register(this.plugin, commandQTBase, "questionstime", "qt");
     }
 
     @Listener

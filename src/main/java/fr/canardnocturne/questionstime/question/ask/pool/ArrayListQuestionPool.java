@@ -5,6 +5,7 @@ import fr.canardnocturne.questionstime.question.type.Question;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class ArrayListQuestionPool implements QuestionPool {
 
@@ -17,6 +18,13 @@ public class ArrayListQuestionPool implements QuestionPool {
     @Override
     public void add(final Question question) {
         this.questions.add(question);
+    }
+
+    @Override
+    public Optional<Question> get(String question) {
+        return this.questions.stream()
+                .filter(registeredQuestion -> registeredQuestion.getQuestion().equals(question))
+                .findFirst();
     }
 
     @Override

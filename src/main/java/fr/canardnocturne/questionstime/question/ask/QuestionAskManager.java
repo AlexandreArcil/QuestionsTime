@@ -50,19 +50,26 @@ public class QuestionAskManager {
         this.minimumConnectedPlayers = minimumConnectedPlayers;
     }
 
-    public void askQuestion() {
-        if (this.currentQuestion == null) {
+    public void askRandomQuestion() {
+        final Question randomQuestion = this.questionPicker.pick();
+        this.askQuestion(randomQuestion);
+    }
+
+    public void askQuestion(final Question question) {
+        if (!this.isQuestionHasBeenAsked()) {
             final List<ServerPlayer> eligiblePlayers = this.getEligiblePlayers();
-            if (eligiblePlayers.size() >= this.minimumConnectedPlayers) {
-                this.currentQuestion = this.questionPicker.pick();
+            if (this.enoughEligiblePlayers(eligiblePlayers)) {
+                this.currentQuestion = question;
                 this.questionAnnouncer.announce(this.currentQuestion, eligiblePlayers);
                 this.playerAnswerQuestionHandler = new PlayerAnswerQuestionHandler(this.logger, this.currentQuestion, this.game, this.economyService, this.plugin);
                 if (this.currentQuestion.isTimed()) {
                     this.startTimer(this.currentQuestion.getTimer());
                 }
             } else {
-                this.logger.info("No enough eligible players ({}/{}), the question will be reported.", eligiblePlayers.size(), this.minimumConnectedPlayers);
-                this.questionLauncher.start();
+                this.logger.info("No enough eligible players ({}/{}), no question asked.", eligiblePlayers.size(), this.minimumConnectedPlayers);
+                if (this.questionLauncher != null) {
+                    this.questionLauncher.start();
+                }
             }
         } else {
             this.logger.warn("Tried to ask a question while one is in progress");
@@ -124,8 +131,19 @@ public class QuestionAskManager {
         }
     }
 
+    public boolean enoughEligiblePlayers() {
+        final List<ServerPlayer> eligiblePlayers = this.getEligiblePlayers();
+        return this.enoughEligiblePlayers(eligiblePlayers);
+    }
+
+    private boolean enoughEligiblePlayers(List<ServerPlayer> eligiblePlayers) {
+        return eligiblePlayers.size() >= this.minimumConnectedPlayers;
+    }
+
     private List<ServerPlayer> getEligiblePlayers() {
-        return this.game.server().onlinePlayers().stream().filter(player -> !this.questionCreationManager.isCreator(player.uniqueId())).toList();
+        return this.game.server().onlinePlayers().stream()
+                .filter(player -> !this.questionCreationManager.isCreator(player.uniqueId()))
+                .toList();
     }
 
     public boolean isQuestionHasBeenAsked() {

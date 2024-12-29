@@ -7,6 +7,8 @@ import org.spongepowered.plugin.PluginContainer;
 
 public class QuestionLauncherFactory {
 
+    private QuestionLauncherFactory() {}
+
     public static QuestionLauncher create(final QuestionTimeConfiguration config, final PluginContainer pluginContainer, final Game game, final QuestionAskManager questionAskManager) {
         if (config.isRandom()) {
             return new IntervalTimeQuestionLauncher(pluginContainer, game, questionAskManager, config.getMinCooldown(), config.getMaxCooldown());
