@@ -14,9 +14,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @ConfigSerializable
 public class QuestionTimeConfiguration {
@@ -40,7 +38,7 @@ public class QuestionTimeConfiguration {
     @Comment("The minimum of connected  players required to ask a question")
     private int minConnected = DefaultValues.MIN_CONNECTED;
 
-    private final List<Question> questions = Arrays.asList(Question.builder()
+    private final Set<Question> questions = Set.of(Question.builder()
                     .setQuestion("Who created the QuestionsTime plugin ?")
                     .setAnswer("CanardNocturne")
                     .setWeight(5)
@@ -54,7 +52,7 @@ public class QuestionTimeConfiguration {
                     .setMalus(new Malus(100, true))
                     .build(),
             QuestionMulti.builder()
-                    .setQuestion("Who created the QuestionsTime plugin ?")
+                    .setQuestion("Among these propositions, who created the QuestionsTime plugin ?")
                     .setPropositions(Arrays.asList("CanardNocturne", "Notch", "Pewdiepie", "Donald Trump", "Chicky the chicken"))
                     .setAnswer("1")
                     .setPrize(new Prize(500, true, null, new PrizeCommand[]{new PrizeCommand("A secret about the plugin's creator", "msg @winner Here is the secret about the plugin's creator: he's not a real duck")}))
@@ -104,8 +102,8 @@ public class QuestionTimeConfiguration {
         return isRandom;
     }
 
-    public List<Question> getQuestions() {
-        return new ArrayList<>(questions);
+    public Collection<Question> getQuestions() {
+        return Collections.unmodifiableSet(questions);
     }
 
     @Override
