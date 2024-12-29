@@ -84,8 +84,7 @@ public class Question {
 
     @Override
     public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        final Question question1 = (Question) o;
+        if (!(o instanceof Question question1)) return false;
         return Objects.equals(question, question1.question);
     }
 
