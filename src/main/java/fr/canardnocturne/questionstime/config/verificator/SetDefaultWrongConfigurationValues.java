@@ -35,6 +35,11 @@ public class SetDefaultWrongConfigurationValues implements VerifyConfigurationVa
             config.setMinCooldown(QuestionTimeConfiguration.DefaultValues.MIN_COOLDOWN);
             config.setMaxCooldown(QuestionTimeConfiguration.DefaultValues.MAX_COOLDOWN);
         }
+
+        if(config.getVersion() > QuestionTimeConfiguration.DefaultValues.VERSION) {
+            this.pluginLogger.warn("The configuration version is higher than the current version, so it will be updated to version {}. You should not modify this value !", QuestionTimeConfiguration.DefaultValues.VERSION);
+            config.setVersion(QuestionTimeConfiguration.DefaultValues.VERSION);
+        }
     }
 
     private void logWrongConfigValue(final String configName, final int valueInConfig, final String wrongReason, final int defaultValue) {

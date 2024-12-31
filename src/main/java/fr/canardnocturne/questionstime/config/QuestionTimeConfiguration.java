@@ -19,23 +19,26 @@ import java.util.*;
 @ConfigSerializable
 public class QuestionTimeConfiguration {
 
-    @Comment("The time in ticks between each questions")
+    @Comment(Comments.VERSION)
+    private int version = DefaultValues.VERSION;
+
+    @Comment("The time in ticks between each questions. Used when 'mode' is set to 'fixed'")
     private int cooldown = DefaultValues.COOLDOWN;
 
-    @Setting("randomTime")
-    @Comment("If true, he will say a new question between minCooldown and maxCooldown, if false, he will say a new question after the cooldown")
-    private boolean isRandom = false;
+    @Setting("mode")
+    @Comment(Comments.MODE)
+    private Mode mode = DefaultValues.MODE;
 
-    @Comment("The min cooldown in ticks before a question can be asked")
+    @Comment("The min cooldown in ticks before a question can be asked. Used when 'mode' is set to 'interval'")
     private int minCooldown = DefaultValues.MIN_COOLDOWN;
 
-    @Comment("The max cooldown in ticks before a question can be asked")
+    @Comment("The max cooldown in ticks before a question can be asked. Used when 'mode' is set to 'interval'")
     private int maxCooldown = DefaultValues.MAX_COOLDOWN;
 
     @Comment("If true, the answer given by a player remains personal and is not sent to the global chat. If false, every answer is sent to the global chat")
     private boolean personalAnswer = false;
 
-    @Comment("The minimum of connected  players required to ask a question")
+    @Comment("The minimum of connected players required to ask a question")
     private int minConnected = DefaultValues.MIN_CONNECTED;
 
     private final Set<Question> questions = Set.of(Question.builder()
@@ -98,19 +101,28 @@ public class QuestionTimeConfiguration {
         return personalAnswer;
     }
 
-    public boolean isRandom() {
-        return isRandom;
-    }
-
     public Collection<Question> getQuestions() {
         return Collections.unmodifiableSet(questions);
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(final int version) {
+        this.version = version;
+    }
+
+    public Mode getMode() {
+        return mode;
     }
 
     @Override
     public String toString() {
         return "QuestionTimeConfiguration{" +
-                "cooldown=" + cooldown +
-                ", isRandom=" + isRandom +
+                "version=" + version +
+                ", cooldown=" + cooldown +
+                ", mode=" + mode +
                 ", minCooldown=" + minCooldown +
                 ", maxCooldown=" + maxCooldown +
                 ", personalAnswer=" + personalAnswer +
@@ -119,11 +131,26 @@ public class QuestionTimeConfiguration {
                 '}';
     }
 
+    public enum Mode {
+        FIXED,
+        INTERVAL
+    }
+
     public static class DefaultValues {
+        public static final int VERSION = 1;
+        public static final Mode MODE = Mode.FIXED;
         public static final int COOLDOWN = 36000;
         public static final int MIN_COOLDOWN = 36000;
         public static final int MAX_COOLDOWN = 72000;
         public static final int MIN_CONNECTED = 2;
+    }
+
+    public static class Comments {
+        public static final String VERSION = "The version of the configuration file. Do not modify this value";
+        public static final String MODE = """
+            Define how the questions are asked:
+            - fixed: a new question is asked after the cooldown
+            - interval: a new question is asked between minCooldown and maxCooldown""";
     }
 
 }

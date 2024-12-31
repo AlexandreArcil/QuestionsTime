@@ -5,6 +5,9 @@ import fr.canardnocturne.questionstime.command.BaseCommandExecutor;
 import fr.canardnocturne.questionstime.config.QuestionTimeConfiguration;
 import fr.canardnocturne.questionstime.config.loader.PluginConfigurationLoader;
 import fr.canardnocturne.questionstime.config.loader.SafePluginConfigurationLoader;
+import fr.canardnocturne.questionstime.config.serializer.ModeTypeSerializer;
+import fr.canardnocturne.questionstime.config.update.ConfigurationUpgradeOrchestrator;
+import fr.canardnocturne.questionstime.config.update.NoVersionConfigurationUpdate;
 import fr.canardnocturne.questionstime.config.verificator.SetDefaultWrongConfigurationValues;
 import fr.canardnocturne.questionstime.config.verificator.VerifyConfigurationValues;
 import fr.canardnocturne.questionstime.message.Messages;
@@ -66,6 +69,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -86,6 +90,7 @@ public class QuestionsTime {
     private final MessageUpdater messageUpdater;
     private final MessageConfigurationUpdater messageConfigurationUpdater;
     private final PluginConfigurationLoader pluginConfigurationLoader;
+    private final ConfigurationUpgradeOrchestrator configurationUpgradeOrchestrator;
     private final VerifyConfigurationValues verifyConfigurationValues;
 
     private EconomyService economy;
@@ -105,6 +110,7 @@ public class QuestionsTime {
         this.messageUpdater = new SafeMessageUpdater(logger);
         this.messageConfigurationUpdater = new AddMissingMessageConfiguration(logger);
         this.pluginConfigurationLoader = new SafePluginConfigurationLoader(logger);
+        this.configurationUpgradeOrchestrator = new ConfigurationUpgradeOrchestrator(List.of(new NoVersionConfigurationUpdate()), logger);
         this.verifyConfigurationValues = new SetDefaultWrongConfigurationValues(logger);
     }
 
@@ -129,7 +135,9 @@ public class QuestionsTime {
                                 .register(Prize.class, new PrizeTypeSerializer())
                                 .register(Malus.class, new MalusTypeSerializer())
                                 .register(PrizeCommand.class, new PrizeCommandTypeSerializer())
-                                .build())).path(configFile)
+                                .register(QuestionTimeConfiguration.Mode.class, new ModeTypeSerializer())
+                                .build()))
+                .path(configFile)
                 .build();
         final QuestionRegister questionRegister = new HoconQuestionRegister(configLoader, logger);
         try {
@@ -215,6 +223,7 @@ public class QuestionsTime {
 
     private void loadConfig(final ConfigurationLoader<CommentedConfigurationNode> configLoader) {
         this.logger.info("Loading configurations from config.conf...");
+        this.configurationUpgradeOrchestrator.upgradeConfiguration(configLoader);
         final QuestionTimeConfiguration questionTimeConfiguration = this.pluginConfigurationLoader.load(configLoader);
         this.verifyConfigurationValues.verify(questionTimeConfiguration);
         this.pluginConfig = questionTimeConfiguration;

@@ -10,11 +10,11 @@ public class QuestionLauncherFactory {
     private QuestionLauncherFactory() {}
 
     public static QuestionLauncher create(final QuestionTimeConfiguration config, final PluginContainer pluginContainer, final Game game, final QuestionAskManager questionAskManager) {
-        if (config.isRandom()) {
-            return new IntervalTimeQuestionLauncher(pluginContainer, game, questionAskManager, config.getMinCooldown(), config.getMaxCooldown());
-        } else {
-            return new FixTimeQuestionLauncher(pluginContainer, game, questionAskManager, config.getCooldown());
-        }
+        return switch (config.getMode()) {
+            case FIXED -> new FixTimeQuestionLauncher(pluginContainer, game, questionAskManager, config.getCooldown());
+            case INTERVAL ->
+                    new IntervalTimeQuestionLauncher(pluginContainer, game, questionAskManager, config.getMinCooldown(), config.getMaxCooldown());
+        };
     }
 
 }
