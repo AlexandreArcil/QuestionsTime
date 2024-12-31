@@ -13,6 +13,8 @@ import fr.canardnocturne.questionstime.message.reader.HoconMessageReader;
 import fr.canardnocturne.questionstime.message.reader.MessageReader;
 import fr.canardnocturne.questionstime.message.updater.MessageUpdater;
 import fr.canardnocturne.questionstime.message.updater.SafeMessageUpdater;
+import fr.canardnocturne.questionstime.message.updater.config.AddMissingMessageConfiguration;
+import fr.canardnocturne.questionstime.message.updater.config.MessageConfigurationUpdater;
 import fr.canardnocturne.questionstime.question.ask.QuestionAskManager;
 import fr.canardnocturne.questionstime.question.ask.announcer.QuestionAnnouncer;
 import fr.canardnocturne.questionstime.question.ask.announcer.SimpleQuestionAnnouncer;
@@ -82,6 +84,7 @@ public class QuestionsTime {
     private final Path pluginFolder;
     private final MessageReader messageReader;
     private final MessageUpdater messageUpdater;
+    private final MessageConfigurationUpdater messageConfigurationUpdater;
     private final PluginConfigurationLoader pluginConfigurationLoader;
     private final VerifyConfigurationValues verifyConfigurationValues;
 
@@ -100,6 +103,7 @@ public class QuestionsTime {
         this.plugin = pluginContainer;
         this.messageReader = new HoconMessageReader(logger);
         this.messageUpdater = new SafeMessageUpdater(logger);
+        this.messageConfigurationUpdater = new AddMissingMessageConfiguration(logger);
         this.pluginConfigurationLoader = new SafePluginConfigurationLoader(logger);
         this.verifyConfigurationValues = new SetDefaultWrongConfigurationValues(logger);
     }
@@ -165,8 +169,8 @@ public class QuestionsTime {
         event.register(this.plugin, commandQTCreator, "questionstimecreator", "qtc");
 
         //For the Optional#get: As specified in the doc, the function should take as argument a choice which is from the collection of questions, so I assume that it should always get a question from a player choice
-        Parameter.Value<Question> specificQuestionParameter = Parameter.choices(Question.class, s -> this.questionPool.get(s).get(), () -> this.questionPool.getAll().stream().map(Question::getQuestion).toList()).key("question").build();
-        Parameter questionParameter = Parameter.firstOf(ManualAskQuestionCommand.RANDOM_QUESTION_ARG, specificQuestionParameter);
+        final Parameter.Value<Question> specificQuestionParameter = Parameter.choices(Question.class, s -> this.questionPool.get(s).get(), () -> this.questionPool.getAll().stream().map(Question::getQuestion).toList()).key("question").build();
+        final Parameter questionParameter = Parameter.firstOf(ManualAskQuestionCommand.RANDOM_QUESTION_ARG, specificQuestionParameter);
         final Command.Parameterized commandQTAskQuestion = Command.builder()
                 .shortDescription(Component.text("Ask a question").color(NamedTextColor.YELLOW))
                 .permission("questionstime.command.ask")
@@ -241,6 +245,9 @@ public class QuestionsTime {
             this.logger.info("Loading messages from messages.conf...");
             final Map<String, String> readMessages = this.messageReader.readMessages(messagesConfig);
             this.messageUpdater.updateMessages(readMessages);
+            if(readMessages.size() < Messages.registeredMessagesCount()) {
+                this.messageConfigurationUpdater.updateConfig(readMessages, messagesConfig);
+            }
         }
     }
 
