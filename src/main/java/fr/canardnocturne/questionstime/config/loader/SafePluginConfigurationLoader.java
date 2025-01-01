@@ -20,7 +20,7 @@ public class SafePluginConfigurationLoader implements PluginConfigurationLoader 
         try {
             configNodeRoot = configLoader.load();
         } catch (final ConfigurateException e) {
-            this.logger.info("Unable to read the configuration file, the default values will be used");
+            this.logger.info("Unable to read the configuration file, the default values will be used. Reason: '{}'", e.getMessage());
             this.logger.debug(e);
             return new QuestionTimeConfiguration();
         }
@@ -29,7 +29,7 @@ public class SafePluginConfigurationLoader implements PluginConfigurationLoader 
         try {
             qTConfiguration = configNodeRoot.get(QuestionTimeConfiguration.class);
         } catch (final SerializationException e) {
-            this.logger.info("Unable to read the values in the config file, check if it contains errors. The default values will be used until it is fixed");
+            this.logger.info("Unable to read the values in the config file, check if it contains errors. The default values will be used until it is fixed. Reason: '{}'", e.getMessage());
             this.logger.debug(e);
             return new QuestionTimeConfiguration();
         }
