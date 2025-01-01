@@ -1,6 +1,5 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.audience.Audience;
@@ -12,7 +11,7 @@ public class QuestionStep implements CreationStep {
     public static final CreationStep INSTANCE = new QuestionStep();
 
     @Override
-    public Component question(final QuestionsTime plugin) {
+    public Component question() {
         return TextUtils.composed("What's the question ? Answer with ", "/qtc [question]", "");
     }
 
@@ -30,7 +29,7 @@ public class QuestionStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(final QuestionsTime plugin, final QuestionCreator questionCreator) {
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
         return false;
     }
 

@@ -7,6 +7,7 @@ import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.question.type.QuestionMulti;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Task;
@@ -19,17 +20,16 @@ import java.util.concurrent.TimeUnit;
 public class SimpleQuestionAnnouncer implements QuestionAnnouncer {
 
     private final Game game;
-    private final EconomyService economyService;
     private final PluginContainer plugin;
 
-    public SimpleQuestionAnnouncer(final Game game, final EconomyService economyService, final PluginContainer plugin) {
+    public SimpleQuestionAnnouncer(final Game game, final PluginContainer plugin) {
         this.game = game;
-        this.economyService = economyService;
         this.plugin = plugin;
     }
 
     @Override
     public void announce(final Question question, final List<ServerPlayer> players) {
+        final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class).orElse(null);
         players.forEach(player -> {
             player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.QUESTION_NEW.getMessage())));
         });

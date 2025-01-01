@@ -22,13 +22,9 @@ public class ComponentModID extends MessageComponent<ItemStack> {
         if (modId.startsWith(ResourceKey.MINECRAFT_NAMESPACE))
             return Component.empty();
         else {
-            final Optional<PluginContainer> pluginCont = Sponge.pluginManager().plugin(modId);
-            if (pluginCont.isPresent()) {
-                return Component.text(pluginCont.get().metadata().name().orElse(modId));
-            } else {
-                QuestionsTime.getInstance().getLogger().warn("The mod id {} has not been found", modId);
-                return Component.text(modId);
-            }
+            final PluginContainer pluginCont = Sponge.pluginManager().plugin(modId)
+                    .orElseThrow(() -> new IllegalArgumentException("The mod '" + modId + "' doesn't exist, but it should have been detected when loading the config, report the bug please."));
+            return Component.text(pluginCont.metadata().name().orElse(modId));
         }
     }
 }

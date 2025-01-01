@@ -28,15 +28,13 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     private final Map<UUID, Long> playersAnswerCooldown;
     private final Question question;
     private final Game game;
-    private final EconomyService economyService;
 
-    public PlayerAnswerQuestionHandler(final Logger logger, final Question question, final Game game, final EconomyService economyService, final PluginContainer plugin) {
+    public PlayerAnswerQuestionHandler(final Logger logger, final Question question, final Game game, final PluginContainer plugin) {
         this.logger = logger;
         this.plugin = plugin;
         this.playersAnswerCooldown = new HashMap<>();
         this.question = question;
         this.game = game;
-        this.economyService = economyService;
     }
 
     @Override
@@ -69,6 +67,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     }
 
     private void givePrize(final Player winner) {
+        final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class).orElse(null);
         this.question.getPrize().ifPresent(prize -> {
             final Task givePrizeTask = Task.builder().execute(task -> {
                         if (prize.getItemStacks().length == 0 && prize.getCommands().length == 0 && economyService == null) {
@@ -93,11 +92,11 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
                         if (prize.getMoney() > 0 && economyService != null) {
                             winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_MONEY.format()
                                     .setMoney(prize.getMoney())
-                                    .setCurrency(this.economyService)
+                                    .setCurrency(economyService)
                                     .message()));
-                            final Optional<UniqueAccount> account = this.economyService.findOrCreateAccount(winner.uniqueId());
+                            final Optional<UniqueAccount> account = economyService.findOrCreateAccount(winner.uniqueId());
                             if (account.isPresent()) {
-                                account.get().deposit(this.economyService.defaultCurrency(), BigDecimal.valueOf(prize.getMoney()));
+                                account.get().deposit(economyService.defaultCurrency(), BigDecimal.valueOf(prize.getMoney()));
                             } else {
                                 this.logger.error("The economy account for {} ({}) can't be found or created.", winner.name(), winner.uniqueId());
                             }
@@ -131,6 +130,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     }
 
     private void giveMalus(final Player loser) {
+        final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class).orElse(null);
         question.getMalus().ifPresent(malus -> {
             if (economyService != null) {
                 loser.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWER_MALUS.format()

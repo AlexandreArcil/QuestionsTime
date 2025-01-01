@@ -1,6 +1,5 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.audience.Audience;
@@ -11,7 +10,7 @@ public class WeightStep implements CreationStep {
     public static CreationStep INSTANCE = new WeightStep();
 
     @Override
-    public Component question(final QuestionsTime plugin) {
+    public Component question() {
         return TextUtils.composed("Which ", "weight", " this question should have ?")
                 .appendNewline()
                 .append(TextUtils.composedWithoutPrefix("Answer with ", "/qtc [weight]", " where ", "weight", " is a positive number"))
@@ -50,7 +49,7 @@ public class WeightStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(final QuestionsTime plugin, final QuestionCreator questionCreator) {
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
         return false;
     }
 

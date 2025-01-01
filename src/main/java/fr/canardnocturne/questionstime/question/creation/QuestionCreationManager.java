@@ -11,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.entity.living.player.Player;
 
 import java.io.IOException;
@@ -21,14 +22,14 @@ import java.util.UUID;
 public class QuestionCreationManager {
 
     private final Map<UUID, QuestionCreationOrchestrator> questionCreators;
-    private final QuestionsTime plugin;
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
+    private final Logger logger;
 
-    public QuestionCreationManager(final QuestionsTime plugin, final QuestionPool questionPool, final QuestionRegister questionRegister) {
-        this.plugin = plugin;
+    public QuestionCreationManager(final QuestionPool questionPool, final QuestionRegister questionRegister, final Logger logger) {
         this.questionPool = questionPool;
         this.questionRegister = questionRegister;
+        this.logger = logger;
         this.questionCreators = new HashMap<>();
     }
 
@@ -56,7 +57,7 @@ public class QuestionCreationManager {
     }
 
     private void startQuestionCreation(final Player player) {
-        final QuestionCreationOrchestrator orchestrator = new StoppableQuestionCreationOrchestrator(this.plugin, player);
+        final QuestionCreationOrchestrator orchestrator = new StoppableQuestionCreationOrchestrator(player);
         this.questionCreators.put(player.uniqueId(), orchestrator);
         orchestrator.start();
     }
@@ -80,7 +81,7 @@ public class QuestionCreationManager {
     public void onPlayerDisconnect(final UUID uuid, final String name) {
         if (this.questionCreators.containsKey(uuid)) {
             this.questionCreators.remove(uuid);
-            this.plugin.getLogger().warn("Player {} ({}) was creating a question. Its progress has been deleted.", name, uuid);
+            this.logger.warn("Player {} ({}) was creating a question. Its progress has been deleted.", name, uuid);
         }
     }
 

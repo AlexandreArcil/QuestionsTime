@@ -1,6 +1,5 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.audience.Audience;
@@ -17,7 +16,7 @@ public class TimeBetweenAnswerStep implements CreationStep {
     public static final CreationStep INSTANCE = new TimeBetweenAnswerStep();
 
     @Override
-    public Component question(final QuestionsTime plugin) {
+    public Component question() {
         return TextUtils.composed("What is the time between two answers ? Answer with this time format ", "/qtc xhxmxs", ", where ")
                 .append(TextUtils.special("x")).append(TextUtils.normal(" is a number"))
                 .appendNewline()
@@ -48,7 +47,7 @@ public class TimeBetweenAnswerStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(final QuestionsTime plugin, final QuestionCreator questionCreator) {
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
         return false;
     }
 

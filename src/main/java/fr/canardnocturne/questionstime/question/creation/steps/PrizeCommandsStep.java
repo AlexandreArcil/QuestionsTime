@@ -1,6 +1,5 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.component.PrizeCommand;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.question.serializer.PrizeCommandSerializer;
@@ -18,7 +17,7 @@ public class PrizeCommandsStep implements CreationStep {
     private static final String COMMAND_FORMAT = "[message];[command]";
 
     @Override
-    public Component question(QuestionsTime plugin) {
+    public Component question() {
         return TextUtils.composed("Execute commands as prize with ", "/qtc " + COMMAND_FORMAT)
                 .appendNewline().append(TextUtils.composed("The ", "message", " is displayed to the players when announcing the prizes"))
                 .appendNewline().append(TextUtils.composed("And ", "command", " is executed on the player who find the answer, specified with ", "@winner"))
@@ -47,7 +46,7 @@ public class PrizeCommandsStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(QuestionsTime plugin, QuestionCreator questionCreator) {
+    public boolean shouldSkip(QuestionCreator questionCreator) {
         return false;
     }
 

@@ -1,6 +1,5 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.question.serializer.ItemStackSerializer;
 import fr.canardnocturne.questionstime.util.TextUtils;
@@ -16,7 +15,7 @@ public class PrizeItemsStep implements CreationStep {
     private static final String ITEM_FORMAT = "{ModID:}[ItemID];{Count};{DisplayName};{Lore}";
 
     @Override
-    public Component question(final QuestionsTime plugin) {
+    public Component question() {
         return TextUtils.composed("Add an item as prize with ",  "/qtc "+ITEM_FORMAT)
                 .appendNewline().append(TextUtils.composed("Which ", "[...]", " is mandatory"))
                 .appendNewline().append(TextUtils.composed("And ", "{...}", " optional"))
@@ -46,7 +45,7 @@ public class PrizeItemsStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(final QuestionsTime plugin, final QuestionCreator questionCreator) {
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
         return false;
     }
 

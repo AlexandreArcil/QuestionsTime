@@ -16,7 +16,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.List;
@@ -28,7 +27,6 @@ public class QuestionAskManager {
     private final QuestionAnnouncer questionAnnouncer;
     private final QuestionCreationManager questionCreationManager;
     private final Game game;
-    private final EconomyService economyService;
     private final PluginContainer plugin;
     private final Logger logger;
     private final int minimumConnectedPlayers;
@@ -39,12 +37,11 @@ public class QuestionAskManager {
     private AnswerHandler playerAnswerQuestionHandler;
     private long timerStarted;
 
-    public QuestionAskManager(final QuestionPicker questionPicker, final QuestionAnnouncer questionAnnouncer, final QuestionCreationManager questionCreationManager, final Game game, final EconomyService economyService, final PluginContainer plugin, final Logger logger, final int minimumConnectedPlayers) {
+    public QuestionAskManager(final QuestionPicker questionPicker, final QuestionAnnouncer questionAnnouncer, final QuestionCreationManager questionCreationManager, final Game game, final PluginContainer plugin, final Logger logger, final int minimumConnectedPlayers) {
         this.questionPicker = questionPicker;
         this.questionAnnouncer = questionAnnouncer;
         this.questionCreationManager = questionCreationManager;
         this.game = game;
-        this.economyService = economyService;
         this.plugin = plugin;
         this.logger = logger;
         this.minimumConnectedPlayers = minimumConnectedPlayers;
@@ -61,7 +58,7 @@ public class QuestionAskManager {
             if (this.enoughEligiblePlayers(eligiblePlayers)) {
                 this.currentQuestion = question;
                 this.questionAnnouncer.announce(this.currentQuestion, eligiblePlayers);
-                this.playerAnswerQuestionHandler = new PlayerAnswerQuestionHandler(this.logger, this.currentQuestion, this.game, this.economyService, this.plugin);
+                this.playerAnswerQuestionHandler = new PlayerAnswerQuestionHandler(this.logger, this.currentQuestion, this.game, this.plugin);
                 if (this.currentQuestion.isTimed()) {
                     this.startTimer(this.currentQuestion.getTimer());
                 }

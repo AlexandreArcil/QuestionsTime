@@ -1,6 +1,5 @@
 package fr.canardnocturne.questionstime.question.orchestrator;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.question.creation.steps.CreationStep;
 import fr.canardnocturne.questionstime.question.creation.steps.QuestionStep;
@@ -9,14 +8,12 @@ import org.spongepowered.api.entity.living.player.Player;
 
 public class StoppableQuestionCreationOrchestrator implements QuestionCreationOrchestrator {
 
-    private final QuestionsTime plugin;
     private final Player player;
     private final QuestionCreator questionCreator;
     private CreationStep currentStep;
     private Status status;
 
-    public StoppableQuestionCreationOrchestrator(final QuestionsTime plugin, final Player player) {
-        this.plugin = plugin;
+    public StoppableQuestionCreationOrchestrator(final Player player) {
         this.player = player;
         this.questionCreator = new QuestionCreator();
         this.status = Status.NOT_STARTED;
@@ -29,7 +26,7 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
     }
 
     private void resume() {
-        this.player.sendMessage(this.currentStep.question(this.plugin));
+        this.player.sendMessage(this.currentStep.question());
         this.status = Status.RUNNING;
     }
 
@@ -47,7 +44,7 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
                 }
             }
         } else if ("stop".equals(answer)) {
-            this.player.sendMessage(StopQuestionCreationStep.INSTANCE.question(this.plugin));
+            this.player.sendMessage(StopQuestionCreationStep.INSTANCE.question());
             this.status = Status.STOPPING;
         } else {
             final boolean nextStep = this.currentStep.handle(this.player, answer, this.questionCreator);
@@ -58,8 +55,8 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
                         this.status = Status.FINISHED_SUCCESS;
                         return;
                     }
-                } while (this.currentStep.shouldSkip(this.plugin, this.questionCreator));
-                this.player.sendMessage(this.currentStep.question(this.plugin));
+                } while (this.currentStep.shouldSkip(this.questionCreator));
+                this.player.sendMessage(this.currentStep.question());
             }
         }
     }

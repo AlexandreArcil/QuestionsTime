@@ -1,6 +1,5 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.audience.Audience;
@@ -14,7 +13,7 @@ public class StopQuestionCreationStep implements CreationStep {
     private static final String NO = "no";
 
     @Override
-    public Component question(final QuestionsTime plugin) {
+    public Component question() {
         return TextUtils.normalWithPrefix("Do you really want to stop the creation of the question ?")
                 .appendNewline().append(TextUtils.normal("Answer with "))
                 .append(TextUtils.commandShortcut("yes"))
@@ -38,7 +37,7 @@ public class StopQuestionCreationStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(final QuestionsTime plugin, final QuestionCreator questionCreator) {
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
         return false;
     }
 

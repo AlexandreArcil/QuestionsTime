@@ -18,7 +18,7 @@ public class QuestionPropositionStep implements CreationStep {
     public static final CreationStep INSTANCE = new QuestionPropositionStep();
 
     @Override
-    public Component question(final QuestionsTime plugin) {
+    public Component question() {
         return TextUtils.composed("Write a proposition with ", "/qtc add [proposition]", "")
                 .appendNewline().append(TextUtils.composed("You can separate each proposition with a ", ";", ""))
                 .appendNewline().append(TextUtils.composed("Modify a proposition with ", "/qtc set [position] [proposition]", ""))
@@ -187,7 +187,7 @@ public class QuestionPropositionStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(final QuestionsTime plugin, final QuestionCreator questionCreator) {
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
         return false;
     }
 

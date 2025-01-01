@@ -1,18 +1,21 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.service.economy.EconomyService;
 
 public class PrizeMoneyAmountStep implements CreationStep {
 
     public static final CreationStep INSTANCE = new PrizeMoneyAmountStep();
 
     @Override
-    public Component question(final QuestionsTime plugin) {
-        return TextUtils.normalWithPrefix("How much ").append(plugin.getEconomy().get().defaultCurrency().pluralDisplayName())
+    public Component question() {
+        final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class)
+                .orElseThrow(() -> new IllegalStateException("Economy service should be present as this step is skipped if it's not"));
+        return TextUtils.normalWithPrefix("How much ").append(economyService.defaultCurrency().pluralDisplayName())
                 .append(TextUtils.normal(" do players win if they give the correct answer? Answer with "))
                 .append(TextUtils.special("/qtc amount"))
                 .appendNewline()
@@ -38,7 +41,7 @@ public class PrizeMoneyAmountStep implements CreationStep {
                     message = TextUtils.normalWithPrefix("You really don't want to add money as a prize ?");
                 }
                 sender.sendMessage(message
-                        .append(TextUtils.normal("If yes, answer with "))
+                        .append(TextUtils.normal(" If yes, answer with "))
                         .append(TextUtils.commandShortcut("yes"))
                         .append(TextUtils.normal(" or just re-answer to change the value")));
             } else {
@@ -53,8 +56,8 @@ public class PrizeMoneyAmountStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(final QuestionsTime plugin, final QuestionCreator questionCreator) {
-        return plugin.getEconomy().isEmpty();
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
+        return Sponge.server().serviceProvider().provide(EconomyService.class).isEmpty();
     }
 
     @Override

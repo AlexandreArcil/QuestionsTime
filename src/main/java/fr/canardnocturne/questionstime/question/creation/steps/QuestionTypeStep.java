@@ -1,6 +1,5 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
@@ -15,7 +14,7 @@ public class QuestionTypeStep implements CreationStep {
     private static final String PROPOSITION = "proposition";
 
     @Override
-    public Component question(final QuestionsTime plugin) {
+    public Component question() {
         return TextUtils.normalWithPrefix("What's the question's type ? Answer with ")
                 .append(TextUtils.commandShortcut(SIMPLE))
                 .append(TextUtils.normal(" or "))
@@ -42,7 +41,7 @@ public class QuestionTypeStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(final QuestionsTime plugin, final QuestionCreator questionCreator) {
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
         return false;
     }
 

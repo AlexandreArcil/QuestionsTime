@@ -71,12 +71,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Plugin("questionstime")
 public class QuestionsTime {
-
-    private static QuestionsTime instance;
 
     public static final TextComponent PREFIX = Component.text("[", NamedTextColor.AQUA)
             .append(Component.text("QT", NamedTextColor.YELLOW))
@@ -93,7 +90,6 @@ public class QuestionsTime {
     private final ConfigurationUpgradeOrchestrator configurationUpgradeOrchestrator;
     private final VerifyConfigurationValues verifyConfigurationValues;
 
-    private EconomyService economy;
     private QuestionTimeConfiguration pluginConfig;
     private QuestionCreationManager questionCreationManager;
     private QuestionLauncher questionLauncher;
@@ -116,9 +112,6 @@ public class QuestionsTime {
 
     @Listener
     public void onServerStarted(final StartedEngineEvent<Server> event) {
-        instance = this;
-        Sponge.server().serviceProvider().provide(EconomyService.class).ifPresent(economyService -> this.economy = economyService);
-
         Sponge.eventManager().registerListeners(this.plugin, new PlayerAnswerQuestionEventHandler(this.questionAskManager, this.pluginConfig.isPersonalAnswer()));
         Sponge.eventManager().registerListeners(this.plugin, new CreatorLeftServerEventHandler(this.questionCreationManager));
     }
@@ -155,11 +148,11 @@ public class QuestionsTime {
         }
 
         this.questionPool = new WeightSortedQuestionPool(this.pluginConfig.getQuestions());
-        this.questionCreationManager = new QuestionCreationManager(this, this.questionPool, questionRegister);
+        this.questionCreationManager = new QuestionCreationManager(this.questionPool, questionRegister, this.logger);
 
         final QuestionPicker questionPicker = new WeightedRandomnessQuestionPicker(this.questionPool, this.logger);
-        final QuestionAnnouncer questionAnnouncer = new SimpleQuestionAnnouncer(this.game, this.economy, this.plugin);
-        this.questionAskManager = new QuestionAskManager(questionPicker, questionAnnouncer, this.questionCreationManager, this.game, this.economy, this.plugin, this.logger, this.pluginConfig.getMinConnected());
+        final QuestionAnnouncer questionAnnouncer = new SimpleQuestionAnnouncer(this.game, this.plugin);
+        this.questionAskManager = new QuestionAskManager(questionPicker, questionAnnouncer, this.questionCreationManager, this.game, this.plugin, this.logger, this.pluginConfig.getMinConnected());
         try {
             this.questionLauncher = QuestionLauncherFactory.create(this.pluginConfig, this.plugin, this.game, this.questionAskManager);
             this.questionAskManager.setQuestionLauncher(questionLauncher);
@@ -258,18 +251,6 @@ public class QuestionsTime {
                 this.messageConfigurationUpdater.updateConfig(readMessages, messagesConfig);
             }
         }
-    }
-
-    public Logger getLogger() {
-        return logger;
-    }
-
-    public static QuestionsTime getInstance() {
-        return instance;
-    }
-
-    public Optional<EconomyService> getEconomy() {
-        return Optional.ofNullable(economy);
     }
 
 }

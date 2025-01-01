@@ -1,6 +1,5 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.audience.Audience;
@@ -17,7 +16,7 @@ public class QuestionDurationStep implements CreationStep {
     public static final CreationStep INSTANCE = new QuestionDurationStep();
 
     @Override
-    public Component question(final QuestionsTime plugin) {
+    public Component question() {
         return TextUtils.composed("How long the players have to answer the question ? Answer with this format ", "/qtc xhxmxs", ", where ", "x", " is a number")
                 .appendNewline().append(TextUtils.normalWithPrefix("If you doesn't want, just answer with "))
                 .append(TextUtils.commandShortcut("0h0m0s"));
@@ -49,7 +48,7 @@ public class QuestionDurationStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(final QuestionsTime plugin, final QuestionCreator questionCreator) {
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
         return false;
     }
 
