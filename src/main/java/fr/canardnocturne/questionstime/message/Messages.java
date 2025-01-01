@@ -19,7 +19,7 @@ public class Messages {
     public static final MessageFormat<QuestionTimerLeftMessage.Format> QUESTION_TIMER_LEFT = register(new QuestionTimerLeftMessage("question.timer.left", "§eYou have §9§l{timer}§r§e to answer !"));
     public static final SimpleMessage QUESTION_TIMER_OUT = register(new SimpleMessage("question.timer.out", "§cNobody have found the answer, maybe a next time"));
     public static final SimpleMessage PRIZE_ANNOUNCE = register(new SimpleMessage("prize.announce", "§eThe winner win :"));
-    public static final MessageFormat<PrizeMoneyMessage.Format> PRIZE_MONEY = register(new PrizeMoneyMessage("prize.money", "§9•{money} §r{currency}"));
+    public static final MessageFormat<PrizeMoneyMessage.Format> PRIZE_MONEY = register(new PrizeMoneyMessage("prize.money", "§9• {money} §r{currency}"));
     public static final MessageFormat<PrizeItemMessage.Format> PRIZE_ITEM = register(new PrizeItemMessage("prize.item", "§9• {quantity} * {modid}§f{item}"));
     public static final MessageFormat<PrizeCommandMessage.Format> PRIZE_COMMAND = register(new PrizeCommandMessage("prize.command", "§9• {command}"));
     public static final SimpleMessage MALUS_ANNOUNCE = register(new SimpleMessage("malus.announce", "§cBut a wrong answer :"));
