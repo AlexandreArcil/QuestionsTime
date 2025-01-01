@@ -133,7 +133,8 @@ public class QuestionTimeConfiguration {
 
     public enum Mode {
         FIXED,
-        INTERVAL
+        INTERVAL,
+        MANUAL
     }
 
     public static class DefaultValues {
@@ -150,7 +151,8 @@ public class QuestionTimeConfiguration {
         public static final String MODE = """
             Define how the questions are asked:
             - fixed: a new question is asked after the cooldown
-            - interval: a new question is asked between minCooldown and maxCooldown""";
+            - interval: a new question is asked between minCooldown and maxCooldown
+            - manual: new questions are asked only manually""";
     }
 
 }

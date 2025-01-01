@@ -19,7 +19,7 @@ public class ManualAskQuestionCommand implements CommandExecutor {
     private final Parameter.Value<Question> specificQuestionParam;
     private final Logger logger;
 
-    public ManualAskQuestionCommand(QuestionAskManager askManager, QuestionLauncher questionLauncher, Parameter.Value<Question> specificQuestionParam, Logger logger) {
+    public ManualAskQuestionCommand(final QuestionAskManager askManager, final QuestionLauncher questionLauncher, final Parameter.Value<Question> specificQuestionParam, final Logger logger) {
         this.askManager = askManager;
         this.questionLauncher = questionLauncher;
         this.specificQuestionParam = specificQuestionParam;
@@ -27,7 +27,7 @@ public class ManualAskQuestionCommand implements CommandExecutor {
     }
 
     @Override
-    public CommandResult execute(CommandContext context) throws CommandException {
+    public CommandResult execute(final CommandContext context) throws CommandException {
         if(this.askManager.isQuestionHasBeenAsked()) {
             return CommandResult.error(TextUtils.errorWithPrefix("A question has already being asked"));
         }
@@ -35,8 +35,10 @@ public class ManualAskQuestionCommand implements CommandExecutor {
             return CommandResult.error(TextUtils.errorWithPrefix("Not enough eligible players to ask a question"));
         }
 
-        String causeIdentifier = context.friendlyIdentifier().orElse(context.identifier());
-        this.questionLauncher.stop();
+        final String causeIdentifier = context.friendlyIdentifier().orElse(context.identifier());
+        if(this.questionLauncher != null) {
+            this.questionLauncher.stop();
+        }
         if(context.hasAny(RANDOM_QUESTION_ARG)) {
             this.logger.info("A random question has been manually asked by {}", causeIdentifier);
             this.askManager.askRandomQuestion();

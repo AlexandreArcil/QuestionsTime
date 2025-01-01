@@ -14,6 +14,7 @@ public class QuestionLauncherFactory {
             case FIXED -> new FixTimeQuestionLauncher(pluginContainer, game, questionAskManager, config.getCooldown());
             case INTERVAL ->
                     new IntervalTimeQuestionLauncher(pluginContainer, game, questionAskManager, config.getMinCooldown(), config.getMaxCooldown());
+            case MANUAL -> null;
         };
     }
 
