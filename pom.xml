@@ -4,9 +4,9 @@
 
     <groupId>fr.cananocturne</groupId>
     <artifactId>questionstime</artifactId>
-    <version>1.1.8</version>
+    <version>1.2.0</version>
 
-    <name>QuestionTime</name>
+    <name>QuestionsTime</name>
     <description>Ask questions and gain prize for the winner !</description>
     <url>https://github.com/AlexandreArcil/QuestionsTime</url>
     <developers>
