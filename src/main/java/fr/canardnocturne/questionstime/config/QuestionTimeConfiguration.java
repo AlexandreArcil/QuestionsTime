@@ -152,7 +152,7 @@ public class QuestionTimeConfiguration {
             Define how the questions are asked:
             - fixed: a new question is asked after the cooldown
             - interval: a new question is asked between minCooldown and maxCooldown
-            - manual: new questions are asked only manually""";
+            - manual: questions are asked only manually""";
     }
 
 }
