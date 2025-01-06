@@ -9,7 +9,8 @@ public class WeightSortedQuestionPool implements QuestionPool {
     private final Set<Question> weightTree;
 
     public WeightSortedQuestionPool(final Collection<Question> questions) {
-        this.weightTree = new TreeSet<>(Comparator.comparingInt(Question::getWeight));
+        this.weightTree = new TreeSet<>(Comparator.comparingInt(Question::getWeight)
+                .thenComparing(Question::getQuestion));
         this.weightTree.addAll(questions);
     }
 
@@ -19,7 +20,7 @@ public class WeightSortedQuestionPool implements QuestionPool {
     }
 
     @Override
-    public Optional<Question> get(String question) {
+    public Optional<Question> get(final String question) {
         return this.weightTree.stream()
                 .filter(registeredQuestion -> registeredQuestion.getQuestion().equals(question))
                 .findFirst();
