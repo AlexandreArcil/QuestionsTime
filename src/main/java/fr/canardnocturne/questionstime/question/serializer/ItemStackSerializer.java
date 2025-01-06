@@ -56,7 +56,7 @@ public class ItemStackSerializer {
         }
         //Convert the lore
         if (itemSplit.length >= 4) {
-            final String[] itemLore = itemSplit[3].split("\\\\n");
+            final String[] itemLore = itemSplit[3].split("\n");
             for (final String line : itemLore) {
                 lore.add(MiniMessage.miniMessage().deserialize(line));
             }
