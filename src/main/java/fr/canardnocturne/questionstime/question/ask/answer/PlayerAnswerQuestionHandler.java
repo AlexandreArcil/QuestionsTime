@@ -41,7 +41,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     public boolean answer(final Player player, final String answer, final List<ServerPlayer> eligiblePlayers) {
         if (!this.canAnswer(player, eligiblePlayers)) return false;
 
-        if (answer.equals(this.question.getAnswer())) {
+        if (this.question.getAnswers().contains(answer)) {
             this.announceWinner(player, eligiblePlayers);
             this.givePrize(player);
             return true;
@@ -75,7 +75,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
                         }
                         winner.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.REWARD_ANNOUNCE.getMessage())));
 
-                        for (ItemStack item: prize.getItemStacks()) {
+                        for (final ItemStack item : prize.getItemStacks()) {
                             winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_PRIZE.format()
                                     .setQuantity(item.quantity())
                                     .setModId(item)
@@ -84,7 +84,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
                             winner.inventory().offer(item.copy());
                         }
 
-                        List<String> formattedCommands = Arrays.stream(prize.getCommands())
+                        final List<String> formattedCommands = Arrays.stream(prize.getCommands())
                                 .map(command -> command.command().replace("@winner", winner.name()))
                                 .toList();
                         this.executePrizeCommands(formattedCommands, winner);
@@ -109,12 +109,12 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     }
 
     private void executePrizeCommands(final Collection<String> commands, final Player winner) {
-        Task commandExecutorTask = Task.builder().execute(() -> {
-            for (String command : commands) {
+        final Task commandExecutorTask = Task.builder().execute(() -> {
+            for (final String command : commands) {
                 try {
                     this.game.server().causeStackManager().pushCause(winner);
                     this.game.server().commandManager().process(Sponge.systemSubject(), winner, command);
-                } catch (CommandException e) {
+                } catch (final CommandException e) {
                     this.logger.error("An error occurred when executing the prize command '" + command + "'", e);
                     winner.sendMessage(TextUtils.errorWithPrefix("A prize command had a problem when it was executed"));
                 }

@@ -9,7 +9,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.function.Consumer;
 
@@ -19,13 +18,15 @@ public class QuestionPropositionStep implements CreationStep {
 
     @Override
     public Component question() {
-        return TextUtils.composed("Write a proposition with ", "/qtc add [proposition]", "")
-                .appendNewline().append(TextUtils.composed("You can separate each proposition with a ", ";", ""))
-                .appendNewline().append(TextUtils.composed("Modify a proposition with ", "/qtc set [position] [proposition]", ""))
-                .appendNewline().append(TextUtils.composed("Delete a proposition with ", "/qtc del [position]", ""))
-                .appendNewline().append(TextUtils.composed("Choose the answer with ", "/qtc answer [position]", ""))
-                .appendNewline().append(TextUtils.composed("You can list the propositions with ", "/qtc list", ""))
-                .appendNewline().append(TextUtils.composed("The number of proposition need to be between ", "2", " and ", "127"));
+        return TextUtils.composed("Write a proposition with ", "/qtc add [proposition]")
+                .appendNewline().append(TextUtils.composed("You can separate each proposition with a ", ";"))
+                .appendNewline().append(TextUtils.composed("Modify a proposition with ", "/qtc set [position] [proposition]"))
+                .appendNewline().append(TextUtils.composed("Delete a proposition with ", "/qtc del [position]"))
+                .appendNewline().append(TextUtils.composed("Choose the answers with ", "/qtc answers [position]"))
+                .appendNewline().append(TextUtils.composed("You can list the propositions with ", "/qtc list"))
+                .appendNewline().append(TextUtils.composed("The number of proposition need to be between ", "2", " and ", "127"))
+                .appendNewline().append(TextUtils.normalWithPrefix("When you're done, type "))
+                .append(TextUtils.commandShortcut("confirm"));
     }
 
     @Override
@@ -55,12 +56,12 @@ public class QuestionPropositionStep implements CreationStep {
                 sender.sendMessage(TextUtils.composed("Command ", "del", " need to be followed by a position"));
                 yield false;
             }
-            case "answer" -> {
-                sender.sendMessage(TextUtils.composed("Command ", "answer", " need to be followed by a position"));
+            case "answers" -> {
+                sender.sendMessage(TextUtils.composed("Command ", "answers", " need to be followed by a position"));
                 yield false;
             }
             case null, default -> {
-                sender.sendMessage(TextUtils.composed("Answer ", answer, " not recognized between ", "add, set, del, list, answer or confirm"));
+                sender.sendMessage(TextUtils.composed("Answer ", answer, " not recognized between ", "add, set, del, list, answers or confirm"));
                 yield false;
             }
         };
@@ -70,22 +71,21 @@ public class QuestionPropositionStep implements CreationStep {
         if (questionCreator.getPropositions().isEmpty()) {
             sender.sendMessage(TextUtils.normalWithPrefix("No propositions have been made"));
         } else {
-            final int propositionAnswer = StringUtils.isEmpty(questionCreator.getAnswer()) ? -1 : Integer.parseInt(questionCreator.getAnswer());
             for (int position = 0; position < questionCreator.getPropositions().size(); position++) {
                 final String proposition = questionCreator.getPropositions().get(position);
-                if (propositionAnswer == position) {
+                if (questionCreator.getAnswers().contains(proposition)) {
                     sender.sendMessage(QuestionsTime.PREFIX.append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
                                     .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/qtc del " + (position + 1)))
                                     .hoverEvent(HoverEvent.showText(Component.text("Delete the proposition " + (position + 1)))))
                             .append(Component.text("     "))
-                            .append(Component.text(" " + (position + 1) + "] " + proposition + " (the answer)", NamedTextColor.BLUE)));
+                            .append(Component.text(" " + (position + 1) + "] " + proposition + " (an answer)", NamedTextColor.BLUE)));
                 } else {
                     sender.sendMessage(QuestionsTime.PREFIX.append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
                                     .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/qtc del " + (position + 1)))
                                     .hoverEvent(HoverEvent.showText(Component.text("Delete the proposition " + (position + 1)))))
                             .append(Component.text("[A]", NamedTextColor.BLUE, TextDecoration.BOLD)
-                                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/qtc answer " + (position + 1)))
-                                    .hoverEvent(HoverEvent.showText(Component.text("Set the proposition " + (position + 1) + " as answer "))))
+                                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/qtc answers " + (position + 1)))
+                                    .hoverEvent(HoverEvent.showText(Component.text("Add the proposition " + (position + 1) + " as answer "))))
                             .append(TextUtils.composedWithoutPrefix(" ", (position + 1) + "] ", proposition)));
                 }
             }
@@ -95,9 +95,9 @@ public class QuestionPropositionStep implements CreationStep {
 
     private boolean confirmPropositions(final Audience sender, final QuestionCreator questionCreator) {
         if (questionCreator.getPropositions().size() < 2) {
-            sender.sendMessage(TextUtils.composed("You need to write at least ", String.valueOf(2), " propositions"));
-        } else if (StringUtils.isEmpty(questionCreator.getAnswer())) {
-            sender.sendMessage(TextUtils.composed("You need to choose an answer with ", "/qtc answer [proposition]", " before confirming"));
+            sender.sendMessage(TextUtils.composed("You need to write at least ", String.valueOf(2), " propositions with ", "/qtc add [proposition]", " before confirming"));
+        } else if (questionCreator.getAnswers().isEmpty()) {
+            sender.sendMessage(TextUtils.composed("You need to choose at least one answer with ", "/qtc answers [proposition]", " before confirming"));
         } else {
             return true;
         }
@@ -111,11 +111,11 @@ public class QuestionPropositionStep implements CreationStep {
             case "add" -> addProposition(sender, argument, questionCreator);
             case "set" -> setProposition(sender, argument, questionCreator);
             case "del" -> deleteProposition(sender, argument, questionCreator);
-            case "answer" -> setAnswer(sender, argument, questionCreator);
+            case "answers" -> addAnswer(sender, argument, questionCreator);
             case "list", "confirm" ->
                     sender.sendMessage(TextUtils.composed("Command ", action, " doesn't take a second argument"));
             default ->
-                    sender.sendMessage(TextUtils.composed("Answer ", action + " " + argument, " not recognized between ", "add, set, del, list, answer or confirm"));
+                    sender.sendMessage(TextUtils.composed("Answer ", action + " " + argument, " not recognized between ", "add, set, del, list, answers or confirm"));
         }
     }
 
@@ -127,8 +127,12 @@ public class QuestionPropositionStep implements CreationStep {
             sender.sendMessage(TextUtils.normalWithPrefix("Propositions added: "));
             for (int i = 0; i < propositions.length; i++) {
                 final String proposition = propositions[i];
-                questionCreator.getPropositions().add(proposition);
-                sender.sendMessage(TextUtils.composed("", "[" + (i + 1) + "] ", proposition));
+                if(questionCreator.getPropositions().contains(proposition)) {
+                    sender.sendMessage(TextUtils.composed("Proposition ", proposition, " already exists"));
+                } else {
+                    questionCreator.getPropositions().add(proposition);
+                    sender.sendMessage(TextUtils.composed("", "[" + (i + 1) + "] ", proposition));
+                }
             }
         }
     }
@@ -150,17 +154,22 @@ public class QuestionPropositionStep implements CreationStep {
         this.handlePositionArgument(sender, answer, questionCreator, position -> {
             final String removedProposition = questionCreator.getPropositions().remove(position.intValue());
             sender.sendMessage(TextUtils.composed("Proposition ", "[" + (position + 1) + "] " + removedProposition, " deleted !"));
-            if (questionCreator.getAnswer().equals(String.valueOf(position + 1))) {
-                questionCreator.setAnswer(null);
-                sender.sendMessage(TextUtils.composed("The proposition was the answer, you will have to choose an another one"));
+            final boolean answerRemoved = questionCreator.getAnswers().remove(removedProposition);
+            if (answerRemoved) {
+                sender.sendMessage(TextUtils.composed("The proposition was automatically removed from the answers"));
             }
         });
     }
 
-    private void setAnswer(final Audience sender, final String answer, final QuestionCreator questionCreator) {
+    private void addAnswer(final Audience sender, final String answer, final QuestionCreator questionCreator) {
         this.handlePositionArgument(sender, answer, questionCreator, position -> {
-            questionCreator.setAnswer(answer);
-            sender.sendMessage(TextUtils.composed("Answer set to the proposition ", "[" + (position + 1) + "] " + questionCreator.getPropositions().get(position)));
+            final String answerProposition = questionCreator.getPropositions().get(position);
+            if (questionCreator.getAnswers().contains(answerProposition)) {
+                sender.sendMessage(TextUtils.composed("Proposition ", "[" + (position + 1) + "] " + answerProposition, " is already an answer"));
+            } else {
+                questionCreator.getAnswers().add(answerProposition);
+                sender.sendMessage(TextUtils.composed("Proposition ", "[" + (position + 1) + "] " + answerProposition, " added as an answer"));
+            }
         });
     }
 

@@ -57,7 +57,6 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
-import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -67,6 +66,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -112,8 +112,9 @@ public class QuestionsTime {
 
     @Listener
     public void onServerStarted(final StartedEngineEvent<Server> event) {
-        Sponge.eventManager().registerListeners(this.plugin, new PlayerAnswerQuestionEventHandler(this.questionAskManager, this.pluginConfig.isPersonalAnswer()));
-        Sponge.eventManager().registerListeners(this.plugin, new CreatorLeftServerEventHandler(this.questionCreationManager));
+        Sponge.eventManager()
+                .registerListeners(this.plugin, new PlayerAnswerQuestionEventHandler(this.questionAskManager, this.pluginConfig.isPersonalAnswer()), MethodHandles.lookup())
+                .registerListeners(this.plugin, new CreatorLeftServerEventHandler(this.questionCreationManager), MethodHandles.lookup());
     }
 
     @Listener

@@ -8,11 +8,12 @@ import org.spongepowered.configurate.ConfigurationNode;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public class Question {
 
     protected final String question;
-    protected final String answer;
+    protected final Set<String> answers;
     protected final Prize prize;
     protected final Malus malus;
     protected final int timer;
@@ -21,7 +22,7 @@ public class Question {
 
     protected Question(final QuestionBuilder builder) {
         this.question = builder.question;
-        this.answer = builder.answer;
+        this.answers = builder.answers;
         this.timer = builder.timer;
         this.prize = builder.prize;
         this.malus = builder.malus;
@@ -46,8 +47,8 @@ public class Question {
         return Types.ERROR;
     }
 
-    public String getAnswer() {
-        return answer;
+    public Set<String> getAnswers() {
+        return answers;
     }
 
     public String getQuestion() {
@@ -84,7 +85,7 @@ public class Question {
 
     @Override
     public boolean equals(final Object o) {
-        if (!(o instanceof Question question1)) return false;
+        if (!(o instanceof final Question question1)) return false;
         return Objects.equals(question, question1.question);
     }
 
@@ -97,7 +98,7 @@ public class Question {
     public String toString() {
         return "Question{" +
                 "question='" + question + '\'' +
-                ", answer='" + answer + '\'' +
+                ", answers='" + answers + '\'' +
                 ", prize=" + prize +
                 ", malus=" + malus +
                 ", timer=" + timer +
@@ -113,7 +114,7 @@ public class Question {
     public static class QuestionBuilder<T extends QuestionBuilder<T>> {
 
         protected String question;
-        protected String answer;
+        protected Set<String> answers;
         protected Prize prize;
         protected Malus malus;
         protected int timer;
@@ -125,8 +126,8 @@ public class Question {
             return (T) this;
         }
 
-        public T setAnswer(final String answer) {
-            this.answer = answer;
+        public T setAnswers(final Set<String> answers) {
+            this.answers = answers;
             return (T) this;
         }
 
@@ -159,7 +160,7 @@ public class Question {
             if (StringUtils.isEmpty(this.question)) {
                 throw new QuestionException("The question is not defined");
             }
-            if (StringUtils.isEmpty(this.answer)) {
+            if (this.answers == null || this.answers.isEmpty()) {
                 throw new QuestionException("The answer is not defined");
             }
             if (this.weight <= 0) {

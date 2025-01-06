@@ -40,25 +40,27 @@ public class SimpleQuestionAnnouncer implements QuestionAnnouncer {
 
                         if (question.getType() == Question.Types.MULTI) {
                             final QuestionMulti qMulti = (QuestionMulti) question;
-                            for (int i = 0; i < qMulti.getPropositions().size(); i++) {
+                            byte position = 1;
+                            for (final String proposition : qMulti.getPropositions()) {
                                 player.sendMessage(QuestionsTime.PREFIX.append(Messages.QUESTION_PROPOSITION.format()
-                                        .setPosition((byte) (i + 1))
-                                        .setProposition(qMulti.getPropositions().get(i))
+                                        .setPosition(position)
+                                        .setProposition(proposition)
                                         .message()));
+                                position++;
                             }
                         }
 
                         question.getPrize().ifPresent(prize -> {
                             if (prize.isAnnounce() && (prize.getItemStacks().length > 0 || prize.getCommands().length > 0 || economyService != null)) {
                                 player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.PRIZE_ANNOUNCE.getMessage())));
-                                for (ItemStack is : prize.getItemStacks()) {
+                                for (final ItemStack is : prize.getItemStacks()) {
                                     player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_ITEM.format()
                                             .setItem(is)
                                             .setModId(is)
                                             .setQuantity(is.quantity())
                                             .message()));
                                 }
-                                for (PrizeCommand command : prize.getCommands()) {
+                                for (final PrizeCommand command : prize.getCommands()) {
                                     player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_COMMAND.format()
                                             .setCommand(command).message()));
                                 }

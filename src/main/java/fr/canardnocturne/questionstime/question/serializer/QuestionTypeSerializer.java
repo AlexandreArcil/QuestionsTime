@@ -6,14 +6,12 @@ import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.question.type.Question.Types;
 import fr.canardnocturne.questionstime.question.type.QuestionMulti;
 import io.leangen.geantyref.TypeToken;
-import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class QuestionTypeSerializer implements TypeSerializer<Question> {
 
@@ -26,7 +24,7 @@ public class QuestionTypeSerializer implements TypeSerializer<Question> {
         }
 
         final String askedQuestion = node.node("question").getString();
-        final String answer = node.node("answer").getString();
+        final Set<String> answers = new HashSet<>(node.node("answer").getList(String.class, Collections.emptyList()));
         final int timer = node.node("timer").getInt(-1);
         final int timeBetweenAnswer = node.node("time-between-answer").getInt(-1);
         final int weight = node.node("weight").getInt(1);
@@ -36,32 +34,26 @@ public class QuestionTypeSerializer implements TypeSerializer<Question> {
         final Malus malus = malusNode.get(TypeToken.get(Malus.class));
 
         final Question.QuestionBuilder questionBuilder;
-
         if (questionType == Types.MULTI) {
-            final byte propositionAnswer = Byte.parseByte(answer);
-            if (!StringUtils.isNumeric(answer) || propositionAnswer < 1) {
-                throw new SerializationException("The question '" + askedQuestion + "' answer '" + answer + "' need to be a number between 1 and 128");
-            }
-            final ConfigurationNode propositionsNode = node.node("proposition");
-            if (!(propositionsNode.isList()) || propositionsNode.childrenList().size() <= 1) {
-                throw new SerializationException("The question '\"+askedQuestion+\"' need to have at least 2 propositions");
-            }
-            final List<String> propositions = propositionsNode.childrenList().stream().map(ConfigurationNode::getString).toList();
+            final LinkedHashSet<String> propositions = new LinkedHashSet<>(node.node("proposition").getList(String.class, Collections.emptyList()));
             questionBuilder = QuestionMulti.builder().setPropositions(propositions);
         } else {
             questionBuilder = Question.builder();
         }
-
-        return questionBuilder.setAnswer(answer).setQuestion(askedQuestion).setPrize(prize)
-                .setMalus(malus).setTimer(timer).setTimeBetweenAnswer(timeBetweenAnswer)
-                .setWeight(weight).build();
+        try {
+            return questionBuilder.setAnswers(answers).setQuestion(askedQuestion).setPrize(prize)
+                    .setMalus(malus).setTimer(timer).setTimeBetweenAnswer(timeBetweenAnswer)
+                    .setWeight(weight).build();
+        } catch (final Exception e) {
+            throw new SerializationException(e);
+        }
     }
 
     @Override
     public void serialize(final Type type, final Question question, final ConfigurationNode node) throws SerializationException {
         if (question != null) {
             node.node("question").set(question.getQuestion());
-            node.node("answer").set(question.getAnswer());
+            node.node("answer").set(question.getAnswers());
             node.node("timer").set(question.getTimer());
             node.node("time-between-answer").set(question.getTimeBetweenAnswer());
             node.node("weight").set(question.getWeight());

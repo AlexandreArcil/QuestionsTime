@@ -12,7 +12,7 @@ public class QuestionStep implements CreationStep {
 
     @Override
     public Component question() {
-        return TextUtils.composed("What's the question ? Answer with ", "/qtc [question]", "");
+        return TextUtils.composed("What's the question ? Answer with ", "/qtc [question]");
     }
 
     @Override

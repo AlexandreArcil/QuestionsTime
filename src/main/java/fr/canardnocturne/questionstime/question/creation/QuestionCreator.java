@@ -10,13 +10,15 @@ import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public class QuestionCreator {
 
     private Types questionType;
     private String question;
-    private String answer;
+    private final List<String> answers;
     private final List<String> propositions;
     private final List<ItemStack> itemsPrize;
     private final List<PrizeCommand> commandsPrize;
@@ -30,6 +32,7 @@ public class QuestionCreator {
     private int weight = 1;
 
     public QuestionCreator() {
+        this.answers = new ArrayList<>();
         this.propositions = new ArrayList<>();
         this.itemsPrize = new ArrayList<>();
         this.commandsPrize = new ArrayList<>();
@@ -42,11 +45,12 @@ public class QuestionCreator {
         final Malus malus = this.moneyMalus > 0 ? new Malus(this.moneyMalus, this.announceMalus) : null;
         final Question.QuestionBuilder questionBuilder;
         if (this.questionType == Types.MULTI) {
-            questionBuilder = QuestionMulti.builder().setPropositions(this.propositions);
+            this.answers.replaceAll(proposition -> String.valueOf(this.propositions.indexOf(proposition) + 1));
+            questionBuilder = QuestionMulti.builder().setPropositions(new LinkedHashSet<>(this.propositions));
         } else {
             questionBuilder = Question.builder();
         }
-        return questionBuilder.setQuestion(this.question).setAnswer(this.answer)
+        return questionBuilder.setQuestion(this.question).setAnswers(new HashSet<>(this.answers))
                 .setPrize(prize).setMalus(malus).setTimer(this.duration).setTimeBetweenAnswer(this.timeBetweenAnswer).setWeight(this.weight).build();
     }
 
@@ -124,12 +128,8 @@ public class QuestionCreator {
         this.announcePrize = announcePrize;
     }
 
-    public void setAnswer(final String answer) {
-        this.answer = answer;
-    }
-
-    public String getAnswer() {
-        return answer;
+    public List<String> getAnswers() {
+        return answers;
     }
 
     public void setQuestionType(final Types questionType) {

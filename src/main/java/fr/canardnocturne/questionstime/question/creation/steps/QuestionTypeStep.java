@@ -18,8 +18,7 @@ public class QuestionTypeStep implements CreationStep {
         return TextUtils.normalWithPrefix("What's the question's type ? Answer with ")
                 .append(TextUtils.commandShortcut(SIMPLE))
                 .append(TextUtils.normal(" or "))
-                .append(TextUtils.commandShortcut(PROPOSITION))
-                .append(TextUtils.normal(""));
+                .append(TextUtils.commandShortcut(PROPOSITION));
     }
 
     @Override

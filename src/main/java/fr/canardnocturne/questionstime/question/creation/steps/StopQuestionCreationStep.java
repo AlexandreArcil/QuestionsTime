@@ -30,7 +30,7 @@ public class StopQuestionCreationStep implements CreationStep {
             }
             case NO -> true;
             default -> {
-                sender.sendMessage(TextUtils.composed("The answer need to be ", "yes OR no", ""));
+                sender.sendMessage(TextUtils.composed("The answer need to be ", "yes OR no"));
                 yield false;
             }
         };

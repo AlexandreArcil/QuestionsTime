@@ -43,7 +43,7 @@ public class QuestionTimeConfiguration {
 
     private final Set<Question> questions = Set.of(Question.builder()
                     .setQuestion("Who created the QuestionsTime plugin ?")
-                    .setAnswer("CanardNocturne")
+                    .setAnswers(Set.of("CanardNocturne"))
                     .setWeight(5)
                     .setTimer(600)
                     .setPrize(new Prize(0, true, new ItemStack[]{ItemStack.builder()
@@ -56,8 +56,8 @@ public class QuestionTimeConfiguration {
                     .build(),
             QuestionMulti.builder()
                     .setQuestion("Among these propositions, who created the QuestionsTime plugin ?")
-                    .setPropositions(Arrays.asList("CanardNocturne", "Notch", "Pewdiepie", "Donald Trump", "Chicky the chicken"))
-                    .setAnswer("1")
+                    .setPropositions(new LinkedHashSet<>(Arrays.asList("CanardNocturne", "Notch", "Pewdiepie", "Donald Trump", "Chicky the chicken")))
+                    .setAnswers(Set.of("1"))
                     .setPrize(new Prize(500, true, null, new PrizeCommand[]{new PrizeCommand("A secret about the plugin's creator", "msg @winner Here is the secret about the plugin's creator: he's not a real duck")}))
                     .setTimer(1800)
                     .setTimeBetweenAnswer(300)
