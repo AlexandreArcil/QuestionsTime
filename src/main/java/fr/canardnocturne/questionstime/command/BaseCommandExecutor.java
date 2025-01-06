@@ -12,7 +12,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 public class BaseCommandExecutor implements CommandExecutor {
 
     @Override
-    public CommandResult execute(CommandContext context) throws CommandException {
+    public CommandResult execute(final CommandContext context) throws CommandException {
         context.sendMessage(Component.text("---- ", NamedTextColor.AQUA)
                 .append(Component.text("QuestionsTime", NamedTextColor.YELLOW, TextDecoration.BOLD))
                 .append(Component.text(" ----", NamedTextColor.AQUA)));
@@ -21,7 +21,7 @@ public class BaseCommandExecutor implements CommandExecutor {
         return CommandResult.success();
     }
 
-    private Component commandDescription(String command, String description) {
+    private Component commandDescription(final String command, final String description) {
         return Component.text().append(Component.text(command, NamedTextColor.GREEN, TextDecoration.BOLD))
                 .appendSpace().append(TextUtils.special(description)).build();
     }

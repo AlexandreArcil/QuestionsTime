@@ -25,13 +25,13 @@ public class PrizeTypeSerializer implements TypeSerializer<Prize> {
         final ArrayList<ItemStack> itemPrizes = new ArrayList<>();
         final ConfigurationNode items = node.node("items");
         if (!items.isNull()) {
-            for (ConfigurationNode itemNode : items.childrenList()) {
+            for (final ConfigurationNode itemNode : items.childrenList()) {
                 final String item = itemNode.getString();
                 if (item != null) {
                     try {
                         final ItemStack is = ItemStackSerializer.fromString(item);
                         itemPrizes.add(is);
-                    } catch (IllegalArgumentException e) {
+                    } catch (final IllegalArgumentException e) {
                         throw new SerializationException(e);
                     }
                 } else {

@@ -13,17 +13,17 @@ public class HoconMessageReaderTest {
 
     @Test
     public void testInvalidFile() {
-        HoconMessageReader reader = new HoconMessageReader(LogManager.getLogger());
-        Path path = Path.of("invalid_file.conf");
-        Map<String, String> result = reader.readMessages(path);
+        final HoconMessageReader reader = new HoconMessageReader(LogManager.getLogger());
+        final Path path = Path.of("invalid_file.conf");
+        final Map<String, String> result = reader.readMessages(path);
         Assertions.assertEquals(Collections.emptyMap(), result);
     }
 
     @Test
     public void testVisitor() throws URISyntaxException {
-        HoconMessageReader reader = new HoconMessageReader(LogManager.getLogger());
-        Path path = Path.of(this.getClass().getClassLoader().getResource("./message.conf").toURI());
-        Map<String, String> result = reader.readMessages(path);
+        final HoconMessageReader reader = new HoconMessageReader(LogManager.getLogger());
+        final Path path = Path.of(this.getClass().getClassLoader().getResource("./message.conf").toURI());
+        final Map<String, String> result = reader.readMessages(path);
         Assertions.assertEquals(Map.of("test.test", "test"), result);
     }
 

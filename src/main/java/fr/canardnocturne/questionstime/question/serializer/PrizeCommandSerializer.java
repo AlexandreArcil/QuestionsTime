@@ -13,11 +13,11 @@ public class PrizeCommandSerializer {
      * @return A PrizeCommand representation of the String
      * @throws IllegalArgumentException if the String doesn't contain a message and a command
      */
-    public static PrizeCommand deserialize(String prizeCommand) {
+    public static PrizeCommand deserialize(final String prizeCommand) {
         final String[] commandParts = prizeCommand.split(";", 2);
         if(commandParts.length >= 2 && StringUtils.isNotBlank(commandParts[0]) && StringUtils.isNotBlank(commandParts[1])) {
-            String command = commandParts[1];
-            String fixedCommand = command.startsWith("/") ? command.substring(1) : command;
+            final String command = commandParts[1];
+            final String fixedCommand = command.startsWith("/") ? command.substring(1) : command;
             return new PrizeCommand(commandParts[0], fixedCommand);
         } else {
             throw new IllegalArgumentException("The command prize '"+prizeCommand+"' doesn't have a message or a command");
@@ -29,7 +29,7 @@ public class PrizeCommandSerializer {
      * @param prizeCommand The PrizeCommand to convert
      * @return A String representation of the PrizeCommand
      */
-    public static String serialize(PrizeCommand prizeCommand) {
+    public static String serialize(final PrizeCommand prizeCommand) {
         return prizeCommand.message() + ";" + prizeCommand.command();
     }
 

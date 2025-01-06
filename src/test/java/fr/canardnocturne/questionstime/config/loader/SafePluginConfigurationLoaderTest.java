@@ -21,7 +21,7 @@ public class SafePluginConfigurationLoaderTest {
             final ConfigurationLoader<CommentedConfigurationNode> loader = Mockito.mock(ConfigurationLoader.class);
             Mockito.when(loader.load()).thenThrow(new ConfigurateException());
 
-            QuestionTimeConfiguration defaultConfig = pluginConfigLoader.load(loader);
+            final QuestionTimeConfiguration defaultConfig = pluginConfigLoader.load(loader);
             Assertions.assertNotNull(defaultConfig);
         });
     }
@@ -35,7 +35,7 @@ public class SafePluginConfigurationLoaderTest {
             final ConfigurationLoader<CommentedConfigurationNode> loader = Mockito.mock(ConfigurationLoader.class);
             Mockito.when(loader.load()).thenReturn(rootNode);
 
-            QuestionTimeConfiguration defaultConfig = pluginConfigLoader.load(loader);
+            final QuestionTimeConfiguration defaultConfig = pluginConfigLoader.load(loader);
             Assertions.assertNotNull(defaultConfig);
         });
     }
@@ -49,7 +49,7 @@ public class SafePluginConfigurationLoaderTest {
             final ConfigurationLoader<CommentedConfigurationNode> loader = Mockito.mock(ConfigurationLoader.class);
             Mockito.when(loader.load()).thenReturn(rootNode);
 
-            QuestionTimeConfiguration defaultConfig = pluginConfigLoader.load(loader);
+            final QuestionTimeConfiguration defaultConfig = pluginConfigLoader.load(loader);
             Assertions.assertNotNull(defaultConfig);
         });
     }
@@ -63,7 +63,7 @@ public class SafePluginConfigurationLoaderTest {
             final ConfigurationLoader<CommentedConfigurationNode> loader = Mockito.mock(ConfigurationLoader.class);
             Mockito.when(loader.load()).thenReturn(rootNode);
 
-            QuestionTimeConfiguration defaultConfig = pluginConfigLoader.load(loader);
+            final QuestionTimeConfiguration defaultConfig = pluginConfigLoader.load(loader);
             Assertions.assertNotNull(defaultConfig);
         });
     }

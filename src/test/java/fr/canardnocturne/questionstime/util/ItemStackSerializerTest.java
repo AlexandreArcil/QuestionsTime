@@ -18,20 +18,20 @@ public class ItemStackSerializerTest {
 
     @Test
     public void serializeItemStackToString() {
-        ItemStack is = ItemStack.builder().itemType(ItemTypes.SAND)
+        final ItemStack is = ItemStack.builder().itemType(ItemTypes.SAND)
                 .quantity(5)
                 .add(Keys.DISPLAY_NAME, Component.text("test", NamedTextColor.YELLOW, TextDecoration.BOLD))
                 .add(Keys.LORE, Arrays.asList(Component.text("line1", NamedTextColor.RED, TextDecoration.ITALIC),
                         Component.text("line2", NamedTextColor.BLUE, TextDecoration.UNDERLINED)))
                 .build();
-        String isStr = ItemStackSerializer.fromItemStack(is);
+        final String isStr = ItemStackSerializer.fromItemStack(is);
         Assertions.assertEquals("minecraft:sand;5;§e§ltest;§c§oline1\\n§9§nline2", isStr);
     }
 
     @Test
     public void serializeStringToItemStack() {
-        String isStr = "minecraft:sand;5;§e§ltest;§c§oline1\\n§9§nline2";
-        ItemStack is = ItemStackSerializer.fromString(isStr);
+        final String isStr = "minecraft:sand;5;§e§ltest;§c§oline1\\n§9§nline2";
+        final ItemStack is = ItemStackSerializer.fromString(isStr);
         Assertions.assertEquals(ItemStack.builder().itemType(ItemTypes.SAND)
                 .quantity(5)
                 .add(Keys.DISPLAY_NAME, Component.text("test", NamedTextColor.YELLOW, TextDecoration.BOLD))

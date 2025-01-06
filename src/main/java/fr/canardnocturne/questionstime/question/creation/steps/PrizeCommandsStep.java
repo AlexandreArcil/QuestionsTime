@@ -27,31 +27,31 @@ public class PrizeCommandsStep implements CreationStep {
     }
 
     @Override
-    public boolean handle(Audience sender, String answer, QuestionCreator questionCreator) {
+    public boolean handle(final Audience sender, final String answer, final QuestionCreator questionCreator) {
         if("confirm".equals(answer)) {
             return true;
         }
 
         try {
-            PrizeCommand prizeCommand = PrizeCommandSerializer.deserialize(answer);
+            final PrizeCommand prizeCommand = PrizeCommandSerializer.deserialize(answer);
             questionCreator.addCommandPrize(prizeCommand);
             sender.sendMessage(TextUtils.normalWithPrefix("Added ")
                     .append(Component.text(prizeCommand.message(), NamedTextColor.BLUE, TextDecoration.UNDERLINED)
                             .hoverEvent(HoverEvent.showText(Component.text(prizeCommand.command()))))
                     .append(TextUtils.normal(" command as prize")));
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             sender.sendMessage(TextUtils.composed("The command prize ", answer, " doesn't follow the syntax ", COMMAND_FORMAT));
         }
         return false;
     }
 
     @Override
-    public boolean shouldSkip(QuestionCreator questionCreator) {
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
         return false;
     }
 
     @Override
-    public CreationStep next(QuestionCreator questionCreator) {
+    public CreationStep next(final QuestionCreator questionCreator) {
         return PrizeMoneyAmountStep.INSTANCE;
     }
 }

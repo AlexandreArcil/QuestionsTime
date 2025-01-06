@@ -19,8 +19,8 @@ class SafeMessageUpdaterTest {
         final String malusMoney = Messages.MALUS_MONEY.getMessage(); //one component removed
         final String prizeAnnounce = "new prize announce message"; //normal message modified
         final String prizeMoney = "§9•{money} §r{currency} added text"; //format message modified
-        SafeMessageUpdater updater = new SafeMessageUpdater(LogManager.getLogger());
-        Map<String, String> messagesToUpdate = Map.of("section.doesnt.exist", "test",
+        final SafeMessageUpdater updater = new SafeMessageUpdater(LogManager.getLogger());
+        final Map<String, String> messagesToUpdate = Map.of("section.doesnt.exist", "test",
                 "answer.announce", answerAnnounce,
                 "answer.win", "",
                 "answer.win-announce", "§e§l{name}{oneMoreComponent} win !",

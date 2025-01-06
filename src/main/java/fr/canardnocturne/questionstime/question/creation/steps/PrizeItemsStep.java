@@ -38,7 +38,7 @@ public class PrizeItemsStep implements CreationStep {
                     .append(TextUtils.displayItem(is))
                     .append(Component.text(" * " + is.quantity(), NamedTextColor.LIGHT_PURPLE))
                     .append(TextUtils.normal("")));
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             sender.sendMessage(TextUtils.normalWithPrefix(e.getMessage()));
         }
         return false;

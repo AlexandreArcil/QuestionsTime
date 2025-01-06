@@ -11,7 +11,7 @@ public class Prize {
     private final ItemStack[] items;
     private final PrizeCommand[] commands;
 
-    public Prize(final int money, final boolean announce, final ItemStack[] is, PrizeCommand[] commands) {
+    public Prize(final int money, final boolean announce, final ItemStack[] is, final PrizeCommand[] commands) {
         this.money = Math.max(money, 0);
         this.announce = announce;
         this.items = is != null ? is : new ItemStack[0];

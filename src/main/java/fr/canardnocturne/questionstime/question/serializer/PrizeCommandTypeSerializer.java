@@ -11,12 +11,12 @@ import java.lang.reflect.Type;
 public class PrizeCommandTypeSerializer implements TypeSerializer<PrizeCommand> {
 
     @Override
-    public PrizeCommand deserialize(Type type, ConfigurationNode node) throws SerializationException {
+    public PrizeCommand deserialize(final Type type, final ConfigurationNode node) throws SerializationException {
         final String command = node.getString();
         if(command != null) {
             try {
                 return PrizeCommandSerializer.deserialize(command);
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 throw new SerializationException(e);
             }
         } else {
@@ -25,7 +25,7 @@ public class PrizeCommandTypeSerializer implements TypeSerializer<PrizeCommand> 
     }
 
     @Override
-    public void serialize(Type type, @Nullable PrizeCommand prizeCommand, ConfigurationNode node) throws SerializationException {
+    public void serialize(final Type type, @Nullable final PrizeCommand prizeCommand, final ConfigurationNode node) throws SerializationException {
         if(prizeCommand != null) {
             node.set(PrizeCommandSerializer.serialize(prizeCommand));
         }

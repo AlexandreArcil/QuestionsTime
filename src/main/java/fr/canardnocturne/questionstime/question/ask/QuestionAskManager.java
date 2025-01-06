@@ -133,7 +133,7 @@ public class QuestionAskManager {
         return this.enoughEligiblePlayers(eligiblePlayers);
     }
 
-    private boolean enoughEligiblePlayers(List<ServerPlayer> eligiblePlayers) {
+    private boolean enoughEligiblePlayers(final List<ServerPlayer> eligiblePlayers) {
         return eligiblePlayers.size() >= this.minimumConnectedPlayers;
     }
 

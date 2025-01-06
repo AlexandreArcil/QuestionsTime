@@ -1,14 +1,11 @@
 package fr.canardnocturne.questionstime.message.component;
 
-import fr.canardnocturne.questionstime.QuestionsTime;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.plugin.PluginContainer;
-
-import java.util.Optional;
 
 public class ComponentModID extends MessageComponent<ItemStack> {
 

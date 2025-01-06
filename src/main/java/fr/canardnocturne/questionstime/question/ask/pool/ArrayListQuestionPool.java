@@ -21,7 +21,7 @@ public class ArrayListQuestionPool implements QuestionPool {
     }
 
     @Override
-    public Optional<Question> get(String question) {
+    public Optional<Question> get(final String question) {
         return this.questions.stream()
                 .filter(registeredQuestion -> registeredQuestion.getQuestion().equals(question))
                 .findFirst();
