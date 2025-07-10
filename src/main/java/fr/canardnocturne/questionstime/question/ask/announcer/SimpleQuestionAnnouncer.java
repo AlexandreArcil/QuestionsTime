@@ -2,6 +2,7 @@ package fr.canardnocturne.questionstime.question.ask.announcer;
 
 import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.message.Messages;
+import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.component.PrizeCommand;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.question.type.QuestionMulti;
@@ -50,27 +51,34 @@ public class SimpleQuestionAnnouncer implements QuestionAnnouncer {
                             }
                         }
 
-                        question.getPrize().ifPresent(prize -> {
-                            if (prize.isAnnounce() && (prize.getItemStacks().length > 0 || prize.getCommands().length > 0 || economyService != null)) {
-                                player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.PRIZE_ANNOUNCE.getMessage())));
-                                for (final ItemStack is : prize.getItemStacks()) {
-                                    player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_ITEM.format()
-                                            .setItem(is)
-                                            .setModId(is)
-                                            .setQuantity(is.quantity())
-                                            .message()));
-                                }
-                                for (final PrizeCommand command : prize.getCommands()) {
-                                    player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_COMMAND.format()
-                                            .setCommand(command).message()));
-                                }
-                                if (prize.getMoney() > 0 && economyService != null) {
-                                    player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_MONEY.format()
-                                            .setMoney(prize.getMoney())
-                                            .setCurrency(economyService)
-                                            .message()));
+                        question.getPrizes().ifPresent(prizes -> {
+                            for (final Prize prize : prizes) {
+                                if (prize.isAnnounce() && (prize.getItemStacks().length > 0 || prize.getCommands().length > 0 || economyService != null)) {
+                                    if(prizes.size() == 1) {
+                                        player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.PRIZE_ANNOUNCE.getMessage())));
+                                    } else {
+                                        player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_ANNOUNCE_POSITION.format().setWinnerPosition(prize.getPosition()).message()));
+                                    }
+                                    for (final ItemStack is : prize.getItemStacks()) {
+                                        player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_ITEM.format()
+                                                .setItem(is)
+                                                .setModId(is)
+                                                .setQuantity(is.quantity())
+                                                .message()));
+                                    }
+                                    for (final PrizeCommand command : prize.getCommands()) {
+                                        player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_COMMAND.format()
+                                                .setCommand(command).message()));
+                                    }
+                                    if (prize.getMoney() > 0 && economyService != null) {
+                                        player.sendMessage(QuestionsTime.PREFIX.append(Messages.PRIZE_MONEY.format()
+                                                .setMoney(prize.getMoney())
+                                                .setCurrency(economyService)
+                                                .message()));
+                                    }
                                 }
                             }
+
                         });
 
                         question.getMalus().ifPresent(malus -> {

@@ -2,7 +2,7 @@ package fr.canardnocturne.questionstime.message.component;
 
 public class MessageComponents {
 
-    public static final ComponentPlayer PLAYER_NAME = new ComponentPlayer("name");
+    public static final ComponentPlayersName PLAYERS_NAME = new ComponentPlayersName("name");
     public static final ComponentDefault<String> QUESTION = new ComponentDefault<>("question");
     public static final ComponentDefault<Byte> POSITION = new ComponentDefault<>("position");
     public static final ComponentDefault<String> PROPOSITION = new ComponentDefault<>("proposition");
@@ -14,5 +14,6 @@ public class MessageComponents {
     public static final ComponentItem ITEM = new ComponentItem("item");
     public static final ComponentDefault<String> ANSWER = new ComponentDefault<>("answer");
     public static final ComponentCommand COMMAND = new ComponentCommand("command");
+    public static final ComponentWinnerPosition WINNER_POSITION = new ComponentWinnerPosition("position");
 
 }

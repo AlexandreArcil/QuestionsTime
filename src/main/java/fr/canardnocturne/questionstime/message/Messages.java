@@ -19,6 +19,7 @@ public class Messages {
     public static final MessageFormat<QuestionTimerLeftMessage.Format> QUESTION_TIMER_LEFT = register(new QuestionTimerLeftMessage("question.timer.left", "§eYou have §9§l{timer}§r§e to answer !"));
     public static final SimpleMessage QUESTION_TIMER_OUT = register(new SimpleMessage("question.timer.out", "§cNobody have found the answer, maybe a next time"));
     public static final SimpleMessage PRIZE_ANNOUNCE = register(new SimpleMessage("prize.announce", "§eThe winner win :"));
+    public static final MessageFormat<PrizeAnnouncePosition.Format> PRIZE_ANNOUNCE_POSITION = register(new PrizeAnnouncePosition("prize.announce.position", "§eThe §b{position} §ewin :"));
     public static final MessageFormat<PrizeMoneyMessage.Format> PRIZE_MONEY = register(new PrizeMoneyMessage("prize.money", "§9• {money} §r{currency}"));
     public static final MessageFormat<PrizeItemMessage.Format> PRIZE_ITEM = register(new PrizeItemMessage("prize.item", "§9• {quantity} * {modid}§f{item}"));
     public static final MessageFormat<PrizeCommandMessage.Format> PRIZE_COMMAND = register(new PrizeCommandMessage("prize.command", "§9• {command}"));
@@ -30,6 +31,7 @@ public class Messages {
     public static final MessageFormat<AnswerFalseMessage.Format> ANSWER_FALSE = register(new AnswerFalseMessage("answer.false", "§e§l{answer} §cisn't the right answer :("));
     public static final MessageFormat<AnswerMalusMessage.Format> ANSWER_MALUS = register(new AnswerMalusMessage("answer.malus", "§cYou lose §4{money} §r{currency}"));
     public static final MessageFormat<AnswerCooldownMessage.Format> ANSWER_COOLDOWN = register(new AnswerCooldownMessage("answer.cooldown", "§cYou have to wait {timer} §cto suggest an another answer"));
+    public static final SimpleMessage ANSWER_ALREADY_WINNER = register(new SimpleMessage("answer.already_winner", "§eYou already found the answer"));
     public static final SimpleMessage REWARD_ANNOUNCE = register(new SimpleMessage("reward.announce", "§e§lHere's your reward :"));
     public static final MessageFormat<RewardPrizeMessage.Format> REWARD_PRIZE = register(new RewardPrizeMessage("reward.prize", "§9• {quantity} * {modid}§f{item}"));
     public static final MessageFormat<RewardMoneyMessage.Format> REWARD_MONEY = register(new RewardMoneyMessage("reward.money", "§9•{money} §r{currency}"));

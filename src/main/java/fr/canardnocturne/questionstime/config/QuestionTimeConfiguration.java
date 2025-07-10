@@ -46,19 +46,22 @@ public class QuestionTimeConfiguration {
                     .setAnswers(Set.of("CanardNocturne"))
                     .setWeight(5)
                     .setTimer(600)
-                    .setPrize(new Prize(0, true, new ItemStack[]{ItemStack.builder()
+                    .setPrizes(Set.of(new Prize(0, true, new ItemStack[]{ItemStack.builder()
                             .itemType(ItemTypes.SAND)
                             .quantity(64)
                             .add(Keys.CUSTOM_NAME, Component.text("Sandy", NamedTextColor.YELLOW))
                             .add(Keys.LORE, Arrays.asList(Component.text("It's just a sand block with a cool name"), Component.text("What did you expect")))
-                            .build()}, null))
+                            .build()}, null, 1)))
                     .setMalus(new Malus(100, true))
                     .build(),
             QuestionMulti.builder()
                     .setQuestion("Among these propositions, who created the QuestionsTime plugin ?")
                     .setPropositions(new LinkedHashSet<>(Arrays.asList("CanardNocturne", "Notch", "Pewdiepie", "Donald Trump", "Chicky the chicken")))
                     .setAnswers(Set.of("1"))
-                    .setPrize(new Prize(500, true, null, new PrizeCommand[]{new PrizeCommand("A secret about the plugin's creator", "msg @winner Here is the secret about the plugin's creator: he's not a real duck")}))
+                    .setPrizes(Set.of(new Prize(500, true, null,
+                            new PrizeCommand[]{new PrizeCommand("A secret about the plugin's creator",
+                                    "msg @winner Here is the secret about the plugin's creator: he's not a real duck")},
+                            1)))
                     .setTimer(1800)
                     .setTimeBetweenAnswer(300)
                     .setWeight(2)
@@ -138,7 +141,7 @@ public class QuestionTimeConfiguration {
     }
 
     public static class DefaultValues {
-        public static final int VERSION = 1;
+        public static final int VERSION = 2;
         public static final Mode MODE = Mode.FIXED;
         public static final int COOLDOWN = 36000;
         public static final int MIN_COOLDOWN = 36000;

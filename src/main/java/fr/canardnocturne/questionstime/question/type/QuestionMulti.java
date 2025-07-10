@@ -29,7 +29,7 @@ public class QuestionMulti extends Question {
                 "propositions=" + propositions +
                 ", question='" + question + '\'' +
                 ", answers=" + answers +
-                ", prize=" + prize +
+                ", prize=" + prizes +
                 ", malus=" + malus +
                 ", timer=" + timer +
                 ", timeBetweenAnswer=" + timeBetweenAnswer +

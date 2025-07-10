@@ -22,6 +22,11 @@ public class PrizeTypeSerializer implements TypeSerializer<Prize> {
         final boolean announce = node.node("announce").getBoolean(false);
         final List<PrizeCommand> commandPrizes = node.node("commands").getList(PrizeCommand.class, new ArrayList<>());
 
+        final int position = node.node("position").getInt(1);
+        if(position <= 0) {
+            throw new SerializationException("Position must be greater than 0");
+        }
+
         final ArrayList<ItemStack> itemPrizes = new ArrayList<>();
         final ConfigurationNode items = node.node("items");
         if (!items.isNull()) {
@@ -40,7 +45,7 @@ public class PrizeTypeSerializer implements TypeSerializer<Prize> {
             }
         }
 
-        return new Prize(money, announce, itemPrizes.toArray(new ItemStack[0]), commandPrizes.toArray(new PrizeCommand[0]));
+        return new Prize(money, announce, itemPrizes.toArray(new ItemStack[0]), commandPrizes.toArray(new PrizeCommand[0]), position);
     }
 
     @Override
@@ -48,6 +53,7 @@ public class PrizeTypeSerializer implements TypeSerializer<Prize> {
         if (this.needToSerialize(prize)) {
             node.node("announce").set(prize.isAnnounce());
             node.node("money").set(prize.getMoney());
+            node.node("position").set(prize.getPosition());
             if (prize.getItemStacks().length > 0) {
                 final List<String> isList = Arrays.stream(prize.getItemStacks())
                         .map(ItemStackSerializer::fromItemStack)

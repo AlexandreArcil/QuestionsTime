@@ -2,8 +2,8 @@ package fr.canardnocturne.questionstime.question.creation;
 
 import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
-import fr.canardnocturne.questionstime.question.orchestrator.QuestionCreationOrchestrator;
-import fr.canardnocturne.questionstime.question.orchestrator.StoppableQuestionCreationOrchestrator;
+import fr.canardnocturne.questionstime.question.creation.orchestrator.QuestionCreationOrchestrator;
+import fr.canardnocturne.questionstime.question.creation.orchestrator.StoppableQuestionCreationOrchestrator;
 import fr.canardnocturne.questionstime.question.save.QuestionRegister;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;

@@ -112,7 +112,7 @@ public class QuestionAskManager {
                 .plugin(this.plugin)
                 .build();
         this.timerTask = this.game.asyncScheduler().submit(task, "[QT]QuestionTimer");
-        this.timerStarted = System.currentTimeMillis();
+        this.timerStarted = System.currentTimeMillis(); //TODO transform to second, then decrease it every seconds, more simpler than this
     }
 
     private void askNewQuestion() {

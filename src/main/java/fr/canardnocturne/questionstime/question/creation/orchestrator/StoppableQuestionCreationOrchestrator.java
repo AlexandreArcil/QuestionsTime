@@ -1,8 +1,10 @@
-package fr.canardnocturne.questionstime.question.orchestrator;
+package fr.canardnocturne.questionstime.question.creation.orchestrator;
 
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
+import fr.canardnocturne.questionstime.question.creation.Visitor;
 import fr.canardnocturne.questionstime.question.creation.steps.CreationStep;
 import fr.canardnocturne.questionstime.question.creation.steps.QuestionStep;
+import fr.canardnocturne.questionstime.question.creation.steps.Step;
 import fr.canardnocturne.questionstime.question.creation.steps.StopQuestionCreationStep;
 import org.spongepowered.api.entity.living.player.Player;
 
@@ -10,8 +12,10 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
 
     private final Player player;
     private final QuestionCreator questionCreator;
-    private CreationStep currentStep;
+    private Step currentStep;
     private Status status;
+
+    Visitor stepOrchestrator; //TODO renommage / creation instance
 
     public StoppableQuestionCreationOrchestrator(final Player player) {
         this.player = player;
@@ -26,7 +30,8 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
     }
 
     private void resume() {
-        this.player.sendMessage(this.currentStep.question());
+        this.currentStep = this.currentStep.accept(this.stepOrchestrator, null);
+//        this.player.sendMessage(this.currentStep.question());
         this.status = Status.RUNNING;
     }
 
@@ -47,7 +52,11 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
             this.player.sendMessage(StopQuestionCreationStep.INSTANCE.question());
             this.status = Status.STOPPING;
         } else {
-            final boolean nextStep = this.currentStep.handle(this.player, answer, this.questionCreator);
+            this.currentStep = this.currentStep.accept(this.stepOrchestrator, null);
+            if (this.currentStep == null) {
+                this.status = Status.FINISHED_SUCCESS;
+            }
+            /*final boolean nextStep = this.currentStep.handle(this.player, answer, this.questionCreator);
             if (nextStep) {
                 do {
                     this.currentStep = this.currentStep.next(this.questionCreator);
@@ -57,7 +66,7 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
                     }
                 } while (this.currentStep.shouldSkip(this.questionCreator));
                 this.player.sendMessage(this.currentStep.question());
-            }
+            }*/
         }
     }
 

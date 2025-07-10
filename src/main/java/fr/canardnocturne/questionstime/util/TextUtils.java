@@ -96,4 +96,22 @@ public final class TextUtils {
         return QuestionsTime.PREFIX.append(Component.text(message, NamedTextColor.RED));
     }
 
+    public record AnswerPosition(String answer, int position){}
+    /**
+     * Extract the position and an answer of a string in the format "answer;position". Position is a number that can be parsed to an integer.
+     * Also, position is optional. In this case, position will be 1;
+     * @param answer The original answer
+     * @return The extracted position and the answer without the position
+     */
+    public static AnswerPosition extractPositionFromAnswer(final String answer) {
+        final int lastSemicolon = answer.lastIndexOf(";");
+        if(lastSemicolon > 0 && org.apache.commons.lang3.math.NumberUtils.isDigits(answer.substring(lastSemicolon + 1))) {
+            final int position = Integer.parseInt(answer.substring(lastSemicolon + 1));
+            final String fixedAnswer = answer.substring(0, lastSemicolon);
+            return new AnswerPosition(fixedAnswer, position);
+        } else{
+            return new AnswerPosition(answer, 1);
+        }
+    }
+
 }

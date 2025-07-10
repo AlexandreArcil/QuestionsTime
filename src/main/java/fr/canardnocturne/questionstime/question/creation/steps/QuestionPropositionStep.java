@@ -201,7 +201,7 @@ public class QuestionPropositionStep implements CreationStep {
     }
 
     @Override
-    public CreationStep next(final QuestionCreator questionCreator) {
+    public Step next(final QuestionCreator questionCreator) {
         return PrizeItemsStep.INSTANCE;
     }
 }

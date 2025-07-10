@@ -9,10 +9,8 @@ import fr.canardnocturne.questionstime.question.type.QuestionMulti;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class QuestionCreator {
 
@@ -20,10 +18,7 @@ public class QuestionCreator {
     private String question;
     private final List<String> answers;
     private final List<String> propositions;
-    private final List<ItemStack> itemsPrize;
-    private final List<PrizeCommand> commandsPrize;
-    private int moneyPrize = -1;
-    private boolean announcePrize;
+    private final Map<Integer, Prize.Builder> prizeBuilders;
     private int moneyMalus = -1;
     private boolean announceMalus;
     private int duration = -1;
@@ -34,14 +29,11 @@ public class QuestionCreator {
     public QuestionCreator() {
         this.answers = new ArrayList<>();
         this.propositions = new ArrayList<>();
-        this.itemsPrize = new ArrayList<>();
-        this.commandsPrize = new ArrayList<>();
+        this.prizeBuilders = new HashMap<>();
     }
 
     public Question build() {
-        final ItemStack[] itemsPrize = this.itemsPrize.toArray(new ItemStack[0]);
-        final PrizeCommand[] commandsPrize = this.commandsPrize.toArray(new PrizeCommand[0]);
-        final Prize prize = this.moneyPrize > 0 || itemsPrize.length > 0 || commandsPrize.length > 0 ? new Prize(this.moneyPrize, this.announcePrize, itemsPrize, commandsPrize) : null;
+        final Set<Prize> prizes = this.prizeBuilders.values().stream().map(Prize.Builder::build).collect(Collectors.toSet());
         final Malus malus = this.moneyMalus > 0 ? new Malus(this.moneyMalus, this.announceMalus) : null;
         final Question.QuestionBuilder questionBuilder;
         if (this.questionType == Types.MULTI) {
@@ -51,7 +43,7 @@ public class QuestionCreator {
             questionBuilder = Question.builder();
         }
         return questionBuilder.setQuestion(this.question).setAnswers(new HashSet<>(this.answers))
-                .setPrize(prize).setMalus(malus).setTimer(this.duration).setTimeBetweenAnswer(this.timeBetweenAnswer).setWeight(this.weight).build();
+                .setPrizes(prizes).setMalus(malus).setTimer(this.duration).setTimeBetweenAnswer(this.timeBetweenAnswer).setWeight(this.weight).build();
     }
 
     public Types getQuestionType() {
@@ -62,26 +54,28 @@ public class QuestionCreator {
         return propositions;
     }
 
-    public void addItemPrize(final ItemStack is) {
-        for (final ItemStack itemStack : this.itemsPrize) {
+    public void addItemPrize(final int position, final ItemStack is) {
+        final Prize.Builder prizeBuilder = this.getPrizeBuilder(position);
+        for (final ItemStack itemStack : prizeBuilder.getItems()) {
             if (itemStack.equalTo(is)) {
                 itemStack.setQuantity(itemStack.quantity() + is.quantity());
                 return;
             }
         }
-        this.itemsPrize.add(is);
+        prizeBuilder.addItem(is);
     }
 
     public List<ItemStack> getItemsPrize() {
-        return itemsPrize;
+        return this.prizeBuilders.values().stream().map(Prize.Builder::getItems).flatMap(Collection::stream).toList();
     }
 
-    public void addCommandPrize(final PrizeCommand prizeCommand) {
-        this.commandsPrize.add(prizeCommand);
+    public void addCommandPrize(final int position, final PrizeCommand prizeCommand) {
+        final Prize.Builder prizeBuilder = this.getPrizeBuilder(position);
+        prizeBuilder.addCommand(prizeCommand);
     }
 
     public List<PrizeCommand> getCommandsPrize() {
-        return commandsPrize;
+        return this.prizeBuilders.values().stream().map(Prize.Builder::getCommands).flatMap(Collection::stream).toList();
     }
 
     public String getQuestion() {
@@ -116,17 +110,29 @@ public class QuestionCreator {
         this.announceMalus = announceMalus;
     }
 
-    public int getMoneyPrize() {
-        return moneyPrize;
+    public List<Integer> getMoneyPrize() {
+        return this.prizeBuilders.values().stream().map(Prize.Builder::getMoney).filter(money -> money > 0).toList();
     }
 
-    public void setMoneyPrize(final int moneyPrize) {
-        this.moneyPrize = moneyPrize;
+    public void setMoneyPrize(final int position, final int money) {
+        final Prize.Builder prizeBuilder = this.getPrizeBuilder(position);
+        prizeBuilder.setMoney(money);
+    }
+
+    private Prize.Builder getPrizeBuilder(final int position) {
+        if(!this.prizeBuilders.containsKey(position)) {
+            this.prizeBuilders.put(position, Prize.builder(position));
+        }
+        return this.prizeBuilders.get(position);
     }
 
     public void setAnnouncePrize(final boolean announcePrize) {
-        this.announcePrize = announcePrize;
+        for (final Prize.Builder prizeBuilder : this.prizeBuilders.values()) {
+            prizeBuilder.setAnnounce(announcePrize);
+        }
     }
+
+    public
 
     public List<String> getAnswers() {
         return answers;

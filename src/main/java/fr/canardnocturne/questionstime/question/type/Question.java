@@ -6,15 +6,13 @@ import fr.canardnocturne.questionstime.question.component.Prize;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.configurate.ConfigurationNode;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class Question {
 
     protected final String question;
     protected final Set<String> answers;
-    protected final Prize prize;
+    protected final SortedSet<Prize> prizes;
     protected final Malus malus;
     protected final int timer;
     protected final int timeBetweenAnswer;
@@ -24,7 +22,7 @@ public class Question {
         this.question = builder.question;
         this.answers = builder.answers;
         this.timer = builder.timer;
-        this.prize = builder.prize;
+        this.prizes = builder.prizes;
         this.malus = builder.malus;
         this.timeBetweenAnswer = builder.timeBetweenAnswer;
         this.weight = builder.weight;
@@ -34,8 +32,8 @@ public class Question {
         return new QuestionBuilder();
     }
 
-    public Optional<Prize> getPrize() {
-        return Optional.ofNullable(this.prize);
+    public Optional<SortedSet<Prize>> getPrizes() {
+        return Optional.ofNullable(this.prizes);
     }
 
     public static Types getType(final ConfigurationNode questionNode) {
@@ -99,7 +97,7 @@ public class Question {
         return "Question{" +
                 "question='" + question + '\'' +
                 ", answers='" + answers + '\'' +
-                ", prize=" + prize +
+                ", prize=" + prizes +
                 ", malus=" + malus +
                 ", timer=" + timer +
                 ", timeBetweenAnswer=" + timeBetweenAnswer +
@@ -115,7 +113,7 @@ public class Question {
 
         protected String question;
         protected Set<String> answers;
-        protected Prize prize;
+        protected SortedSet<Prize> prizes;
         protected Malus malus;
         protected int timer;
         protected int timeBetweenAnswer;
@@ -136,8 +134,10 @@ public class Question {
             return (T) this;
         }
 
-        public T setPrize(final Prize prize) {
-            this.prize = prize;
+        public T setPrizes(final Set<Prize> prizes) {
+            final SortedSet<Prize> sortedPrizes = new TreeSet<>(Comparator.comparingInt(Prize::getPosition));
+            sortedPrizes.addAll(prizes);
+            this.prizes = sortedPrizes;
             return (T) this;
         }
 
@@ -165,6 +165,15 @@ public class Question {
             }
             if (this.weight <= 0) {
                 throw new QuestionException("weight must be greater or equal than 1");
+            }
+            //check that the positions of the prizes doesn't have "hole"
+            if(this.prizes != null) {
+                this.prizes.stream().map(Prize::getPosition).reduce((previous, current) -> {
+                    if (previous + 1 != current) {
+                        throw new QuestionException("The position prize " + current + " is missing");
+                    }
+                    return current;
+                });
             }
             return new Question(this);
         }

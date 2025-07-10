@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.question.orchestrator;
+package fr.canardnocturne.questionstime.question.creation.orchestrator;
 
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 

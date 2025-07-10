@@ -42,11 +42,11 @@ public class AnnouncePrizeStep implements CreationStep {
 
     @Override
     public boolean shouldSkip(final QuestionCreator questionCreator) {
-        return questionCreator.getMoneyPrize() <= 0 && questionCreator.getItemsPrize().isEmpty() && questionCreator.getCommandsPrize().isEmpty();
+        return questionCreator.getMoneyPrize().isEmpty() && questionCreator.getItemsPrize().isEmpty() && questionCreator.getCommandsPrize().isEmpty();
     }
 
     @Override
-    public CreationStep next(final QuestionCreator questionCreator) {
+    public Step next(final QuestionCreator questionCreator) {
         return MalusAmountStep.INSTANCE;
     }
 }

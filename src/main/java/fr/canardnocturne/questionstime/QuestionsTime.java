@@ -7,6 +7,7 @@ import fr.canardnocturne.questionstime.config.loader.PluginConfigurationLoader;
 import fr.canardnocturne.questionstime.config.loader.SafePluginConfigurationLoader;
 import fr.canardnocturne.questionstime.config.serializer.ModeTypeSerializer;
 import fr.canardnocturne.questionstime.config.update.ConfigurationUpgradeOrchestrator;
+import fr.canardnocturne.questionstime.config.update.FirstVersionConfigurationUpdate;
 import fr.canardnocturne.questionstime.config.update.NoVersionConfigurationUpdate;
 import fr.canardnocturne.questionstime.config.verificator.SetDefaultWrongConfigurationValues;
 import fr.canardnocturne.questionstime.config.verificator.VerifyConfigurationValues;
@@ -106,8 +107,24 @@ public class QuestionsTime {
         this.messageUpdater = new SafeMessageUpdater(logger);
         this.messageConfigurationUpdater = new AddMissingMessageConfiguration(logger);
         this.pluginConfigurationLoader = new SafePluginConfigurationLoader(logger);
-        this.configurationUpgradeOrchestrator = new ConfigurationUpgradeOrchestrator(List.of(new NoVersionConfigurationUpdate()), logger);
+        this.configurationUpgradeOrchestrator = new ConfigurationUpgradeOrchestrator(List.of(new NoVersionConfigurationUpdate(), new FirstVersionConfigurationUpdate()), logger);
         this.verifyConfigurationValues = new SetDefaultWrongConfigurationValues(logger);
+        //TODO: next version:
+        // - Multiple winners with different prizes according to their position -> creation steps: block if hole in winners prize position
+        // - Execute commands as malus
+        // - Show the current asked question to the players who connected after
+        // - bug: question time saved to tick rather than seconds (0h0m20s -> 300 in the config)
+        // next version:
+        // - Repeat a question only if all the other questions have been asked
+        // - Change question information (prizes, time between two answers…) through a command
+        // - When someone found an answer, he can’t respond again if the question is re-asked
+        // - Add a command to see the current question
+        // - add tags to questions (for example, a tag for the difficulty) and launch a random question with a specific tag
+        // next version
+        // - General statistics
+        // - Statistics per question
+        // - Statistics per player
+        // - Per world question
     }
 
     @Listener

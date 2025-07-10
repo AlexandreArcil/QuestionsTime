@@ -5,7 +5,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 public interface ConfigurationUpdater {
 
-    void update(CommentedConfigurationNode configNodeRoot) throws SerializationException;
+    void update(final CommentedConfigurationNode configNodeRoot) throws SerializationException;
 
     int getVersion();
 

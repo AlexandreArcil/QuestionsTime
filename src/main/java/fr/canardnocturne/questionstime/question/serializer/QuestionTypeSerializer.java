@@ -1,11 +1,11 @@
 package fr.canardnocturne.questionstime.question.serializer;
 
+import com.sun.source.tree.Tree;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.question.type.Question.Types;
 import fr.canardnocturne.questionstime.question.type.QuestionMulti;
-import io.leangen.geantyref.TypeToken;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
@@ -28,10 +28,10 @@ public class QuestionTypeSerializer implements TypeSerializer<Question> {
         final int timer = node.node("timer").getInt(-1);
         final int timeBetweenAnswer = node.node("time-between-answer").getInt(-1);
         final int weight = node.node("weight").getInt(1);
-        final ConfigurationNode prizeNode = node.node("prize");
-        final Prize prize = prizeNode.get(TypeToken.get(Prize.class));
+        final ConfigurationNode prizeNode = node.node("prizes");
+        final Set<Prize> prizes = new HashSet<>(prizeNode.getList(Prize.class, Collections.emptyList()));
         final ConfigurationNode malusNode = node.node("malus");
-        final Malus malus = malusNode.get(TypeToken.get(Malus.class));
+        final Malus malus = malusNode.get(Malus.class);
 
         final Question.QuestionBuilder questionBuilder;
         if (questionType == Types.MULTI) {
@@ -41,7 +41,7 @@ public class QuestionTypeSerializer implements TypeSerializer<Question> {
             questionBuilder = Question.builder();
         }
         try {
-            return questionBuilder.setAnswers(answers).setQuestion(askedQuestion).setPrize(prize)
+            return questionBuilder.setAnswers(answers).setQuestion(askedQuestion).setPrizes(prizes)
                     .setMalus(malus).setTimer(timer).setTimeBetweenAnswer(timeBetweenAnswer)
                     .setWeight(weight).build();
         } catch (final Exception e) {
@@ -61,15 +61,15 @@ public class QuestionTypeSerializer implements TypeSerializer<Question> {
                 node.node("proposition").set(((QuestionMulti) question).getPropositions());
             }
 
-            final ConfigurationNode prizeNode = node.node("prize");
-            final Optional<Prize> prizeOptional = question.getPrize();
-            if (prizeOptional.isPresent()) {
-                prizeNode.set(TypeToken.get(Prize.class), prizeOptional.get());
+            final ConfigurationNode prizeNode = node.node("prizes");
+            final Optional<SortedSet<Prize>> prizesOptional = question.getPrizes();
+            if (prizesOptional.isPresent()) {
+                prizeNode.setList(Prize.class, new ArrayList<>(prizesOptional.get()));
             }
             final ConfigurationNode malusNode = node.node("malus");
             final Optional<Malus> malusOptional = question.getMalus();
             if (malusOptional.isPresent()) {
-                malusNode.set(TypeToken.get(Malus.class), malusOptional.get());
+                malusNode.set(Malus.class, malusOptional.get());
             }
         }
     }

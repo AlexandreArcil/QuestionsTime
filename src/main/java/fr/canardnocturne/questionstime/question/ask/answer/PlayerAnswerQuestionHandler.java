@@ -2,6 +2,7 @@ package fr.canardnocturne.questionstime.question.ask.answer;
 
 import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.message.Messages;
+import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.text.Component;
@@ -28,6 +29,8 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     private final Map<UUID, Long> playersAnswerCooldown;
     private final Question question;
     private final Game game;
+    private final Set<Player> winners;
+    private final int winnersCount;
 
     public PlayerAnswerQuestionHandler(final Logger logger, final Question question, final Game game, final PluginContainer plugin) {
         this.logger = logger;
@@ -35,6 +38,8 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
         this.playersAnswerCooldown = new HashMap<>();
         this.question = question;
         this.game = game;
+        this.winnersCount = question.getPrizes().map(Set::size).orElse(1);
+        this.winners = new HashSet<>(this.winnersCount);
     }
 
     @Override
@@ -42,9 +47,14 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
         if (!this.canAnswer(player, eligiblePlayers)) return false;
 
         if (this.question.getAnswers().contains(answer)) {
-            this.announceWinner(player, eligiblePlayers);
-            this.givePrize(player);
-            return true;
+            this.winners.add(player);//TODO put a message to tell the winner that he founds
+            if(this.winners.size() == this.winnersCount) {
+                this.announceWinners(eligiblePlayers);
+                this.givePrizes();
+                return true;
+            } else {
+                return false;
+            }
         } else {
             player.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWER_FALSE.format().setAnswer(answer).message()));
             this.giveCooldown(player);
@@ -53,53 +63,65 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
         }
     }
 
-    private void announceWinner(final Player winner, final List<ServerPlayer> eligiblePlayers) {
+    private void announceWinners(final List<ServerPlayer> eligiblePlayers) {
 //      Task.builder().execute(wait -> TODO why a delay has been set ?
         eligiblePlayers.forEach(player -> {
-            if (player.uniqueId().equals(winner.uniqueId())) {
-                player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.ANSWER_WIN.getMessage())));
-            } else {
-                player.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWER_WIN_ANNOUNCE.format().setPlayerName(winner).message()));
+            for (final Player winner : this.winners) {
+                if (player.uniqueId().equals(winner.uniqueId())) {
+                    player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.ANSWER_WIN.getMessage())));
+                } else {
+                    player.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWER_WIN_ANNOUNCE.format().setPlayerNames(this.winners).message()));
+                }
             }
         });
 //      })).async().delay(500, TimeUnit.MILLISECONDS)
 //          .submit(instance.getContainer().getInstance().get());
     }
 
-    private void givePrize(final Player winner) {
+    private void givePrizes() {
         final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class).orElse(null);
-        this.question.getPrize().ifPresent(prize -> {
+        this.question.getPrizes().ifPresent(prizes -> {
             final Task givePrizeTask = Task.builder().execute(task -> {
-                        if (prize.getItemStacks().length == 0 && prize.getCommands().length == 0 && economyService == null) {
+                        if (prizes.isEmpty()) {
                             return;
                         }
-                        winner.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.REWARD_ANNOUNCE.getMessage())));
+                        int position = 1;
+                        for (final Player winner : this.winners) {
+                            final int finalPosition = position;
+                            final Prize prize = prizes.stream()
+                                    .filter(p -> p.getPosition() == finalPosition)
+                                    .findFirst()
+                                    .orElseThrow(() -> new IllegalStateException("The prize for the winner at position " + finalPosition + " can't be found"));
 
-                        for (final ItemStack item : prize.getItemStacks()) {
-                            winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_PRIZE.format()
-                                    .setQuantity(item.quantity())
-                                    .setModId(item)
-                                    .setItem(item)
-                                    .message()));
-                            winner.inventory().offer(item.copy());
-                        }
+                            winner.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.REWARD_ANNOUNCE.getMessage())));
 
-                        final List<String> formattedCommands = Arrays.stream(prize.getCommands())
-                                .map(command -> command.command().replace("@winner", winner.name()))
-                                .toList();
-                        this.executePrizeCommands(formattedCommands, winner);
-
-                        if (prize.getMoney() > 0 && economyService != null) {
-                            winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_MONEY.format()
-                                    .setMoney(prize.getMoney())
-                                    .setCurrency(economyService)
-                                    .message()));
-                            final Optional<UniqueAccount> account = economyService.findOrCreateAccount(winner.uniqueId());
-                            if (account.isPresent()) {
-                                account.get().deposit(economyService.defaultCurrency(), BigDecimal.valueOf(prize.getMoney()));
-                            } else {
-                                this.logger.error("The economy account for {} ({}) can't be found or created.", winner.name(), winner.uniqueId());
+                            for (final ItemStack item : prize.getItemStacks()) {
+                                winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_PRIZE.format()
+                                        .setQuantity(item.quantity())
+                                        .setModId(item)
+                                        .setItem(item)
+                                        .message()));
+                                winner.inventory().offer(item.copy());
                             }
+
+                            final List<String> formattedCommands = Arrays.stream(prize.getCommands())
+                                    .map(command -> command.command().replace("@winner", winner.name()))
+                                    .toList();
+                            this.executePrizeCommands(formattedCommands, winner);
+
+                            if (prize.getMoney() > 0 && economyService != null) {
+                                winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_MONEY.format()
+                                        .setMoney(prize.getMoney())
+                                        .setCurrency(economyService)
+                                        .message()));
+                                final Optional<UniqueAccount> account = economyService.findOrCreateAccount(winner.uniqueId());
+                                if (account.isPresent()) {
+                                    account.get().deposit(economyService.defaultCurrency(), BigDecimal.valueOf(prize.getMoney()));
+                                } else {
+                                    this.logger.error("The economy account for {} ({}) can't be found or created.", winner.name(), winner.uniqueId());
+                                }
+                            }
+                            position++;
                         }
                     }).delay(3, TimeUnit.SECONDS)
                     .plugin(this.plugin)
@@ -160,6 +182,10 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
                         .message()));
                 return false;
             }
+        }
+        if(this.winners.contains(player)) {
+            player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.ANSWER_ALREADY_WINNER.getMessage())));
+            return false;
         }
         return true;
     }

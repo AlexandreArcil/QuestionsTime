@@ -45,7 +45,7 @@ public class QuestionTypeStep implements CreationStep {
     }
 
     @Override
-    public CreationStep next(final QuestionCreator questionCreator) {
+    public Step next(final QuestionCreator questionCreator) {
         return switch (questionCreator.getQuestionType()) {
             case SIMPLE -> SimpleQuestionAnswerStep.INSTANCE;
             case MULTI -> QuestionPropositionStep.INSTANCE;

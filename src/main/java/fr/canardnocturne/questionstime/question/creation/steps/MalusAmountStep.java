@@ -21,7 +21,7 @@ public class MalusAmountStep implements CreationStep {
                 .appendNewline()
                 .append(TextUtils.composed("where ", "amount", " is a positive number"))
                 .appendNewline()
-                .append(TextUtils.normal(" If you doesn't want, just answer with "))
+                .append(TextUtils.normalWithPrefix("If you doesn't want, just answer with "))
                 .append(TextUtils.commandShortcut("0"));
     }
 
@@ -61,7 +61,7 @@ public class MalusAmountStep implements CreationStep {
     }
 
     @Override
-    public CreationStep next(final QuestionCreator questionCreator) {
+    public Step next(final QuestionCreator questionCreator) {
         return AnnounceMalusStep.INSTANCE;
     }
 }

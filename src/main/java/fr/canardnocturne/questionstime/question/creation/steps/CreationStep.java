@@ -1,10 +1,11 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
+import fr.canardnocturne.questionstime.question.creation.Visitor;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 
-public interface CreationStep {
+public interface CreationStep extends Step {
 
     Component question();
 
@@ -12,6 +13,8 @@ public interface CreationStep {
 
     boolean shouldSkip(QuestionCreator questionCreator);
 
-    CreationStep next(QuestionCreator questionCreator);
+    default Step accept(final Visitor visitor, final String answer) {
+        return visitor.visit(this, answer);
+    }
 
 }
