@@ -1,11 +1,12 @@
 package fr.canardnocturne.questionstime.question.component;
 
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackComparators;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Prize {
 
@@ -118,9 +119,8 @@ public class Prize {
             return new Prize(this);
         }
 
-        public Builder addCommand(final PrizeCommand prizeCommand) {
+        public void addCommand(final PrizeCommand prizeCommand) {
             this.commands.add(prizeCommand);
-            return this;
         }
 
         public List<PrizeCommand> getCommands() {
@@ -131,9 +131,33 @@ public class Prize {
             return items;
         }
 
-        public Builder addItem(final ItemStack is) {
+        public void addItem(final ItemStack is) {
             this.items.add(is);
-            return this;
+        }
+
+        public boolean removeItem(final ItemStack is) {
+            return this.items.removeIf(isp -> ItemStackComparators.TYPE_SIZE.get().compare(isp, is) == 0
+            && valueEquals(is, isp, Keys.CUSTOM_NAME) && valueEquals(is, isp, Keys.LORE));
+        }
+
+        private <E, V extends Value<E>> boolean valueEquals(final ItemStack is, final ItemStack iss, final Key<V> value) {
+            final Optional<V> valueIs = is.getValue(value);
+            final Optional<V> valueIss = iss.getValue(value);
+            if(valueIs.isEmpty() && valueIss.isEmpty()) {
+                return true;
+            }
+            if (valueIs.isEmpty() ^ valueIss.isEmpty()) {
+                return false;
+            }
+            return valueIs.get().get().equals(valueIss.get().get());
+        }
+
+        public boolean removeCommand(final PrizeCommand prizeCommand) {
+            return this.commands.remove(prizeCommand);
+        }
+
+        public boolean hasRewards() {
+            return !this.items.isEmpty() || !this.commands.isEmpty() || this.money > 0;
         }
     }
 }

@@ -1,8 +1,6 @@
 package fr.canardnocturne.questionstime.question.creation.orchestrator;
 
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
-import fr.canardnocturne.questionstime.question.creation.Visitor;
-import fr.canardnocturne.questionstime.question.creation.steps.CreationStep;
 import fr.canardnocturne.questionstime.question.creation.steps.QuestionStep;
 import fr.canardnocturne.questionstime.question.creation.steps.Step;
 import fr.canardnocturne.questionstime.question.creation.steps.StopQuestionCreationStep;
@@ -12,14 +10,14 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
 
     private final Player player;
     private final QuestionCreator questionCreator;
+    private final StepVisitor stepVisitor;
     private Step currentStep;
     private Status status;
-
-    Visitor stepOrchestrator; //TODO renommage / creation instance
 
     public StoppableQuestionCreationOrchestrator(final Player player) {
         this.player = player;
         this.questionCreator = new QuestionCreator();
+        this.stepVisitor = new StepOrchestrator(player, this.questionCreator);
         this.status = Status.NOT_STARTED;
     }
 
@@ -30,8 +28,7 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
     }
 
     private void resume() {
-        this.currentStep = this.currentStep.accept(this.stepOrchestrator, null);
-//        this.player.sendMessage(this.currentStep.question());
+        this.currentStep = this.currentStep.accept(this.stepVisitor, null);
         this.status = Status.RUNNING;
     }
 
@@ -52,21 +49,10 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
             this.player.sendMessage(StopQuestionCreationStep.INSTANCE.question());
             this.status = Status.STOPPING;
         } else {
-            this.currentStep = this.currentStep.accept(this.stepOrchestrator, null);
+            this.currentStep = this.currentStep.accept(this.stepVisitor, answer);
             if (this.currentStep == null) {
                 this.status = Status.FINISHED_SUCCESS;
             }
-            /*final boolean nextStep = this.currentStep.handle(this.player, answer, this.questionCreator);
-            if (nextStep) {
-                do {
-                    this.currentStep = this.currentStep.next(this.questionCreator);
-                    if (this.currentStep == null) {
-                        this.status = Status.FINISHED_SUCCESS;
-                        return;
-                    }
-                } while (this.currentStep.shouldSkip(this.questionCreator));
-                this.player.sendMessage(this.currentStep.question());
-            }*/
         }
     }
 

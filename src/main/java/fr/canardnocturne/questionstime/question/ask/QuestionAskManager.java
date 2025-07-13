@@ -9,7 +9,6 @@ import fr.canardnocturne.questionstime.question.ask.picker.QuestionPicker;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreationManager;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
-import net.kyori.adventure.text.Component;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.living.player.Player;
@@ -100,7 +99,7 @@ public class QuestionAskManager {
                     final long secondStarted = (System.currentTimeMillis() - this.timerStarted) / 1000;
                     final int timeLeft = (int) (timerSeconds - secondStarted);
                     if (timeLeft == 0) {
-                        TextUtils.sendTextToEveryone(Component.text(Messages.QUESTION_TIMER_OUT.getMessage()), eligiblePlayers);
+                        this.playerAnswerQuestionHandler.end(eligiblePlayers);
                         this.askNewQuestion();
                     } else if (timeLeft % 3600 == 0 || timeLeft == 1800 || timeLeft == 900 || timeLeft == 300 || timeLeft == 60 || timeLeft == 30 || timeLeft == 15
                             || timeLeft == 5 || timeLeft == 4 || timeLeft == 3 || timeLeft == 2 || timeLeft == 1) {

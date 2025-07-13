@@ -75,16 +75,16 @@ public class QuestionPropositionStep implements CreationStep {
                 final String proposition = questionCreator.getPropositions().get(position);
                 if (questionCreator.getAnswers().contains(proposition)) {
                     sender.sendMessage(QuestionsTime.PREFIX.append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
-                                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/qtc del " + (position + 1)))
+                                    .clickEvent(ClickEvent.runCommand( "/qtc del " + (position + 1)))
                                     .hoverEvent(HoverEvent.showText(Component.text("Delete the proposition " + (position + 1)))))
                             .append(Component.text("     "))
                             .append(Component.text(" " + (position + 1) + "] " + proposition + " (an answer)", NamedTextColor.BLUE)));
                 } else {
                     sender.sendMessage(QuestionsTime.PREFIX.append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
-                                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/qtc del " + (position + 1)))
+                                    .clickEvent(ClickEvent.runCommand("/qtc del " + (position + 1)))
                                     .hoverEvent(HoverEvent.showText(Component.text("Delete the proposition " + (position + 1)))))
                             .append(Component.text("[A]", NamedTextColor.BLUE, TextDecoration.BOLD)
-                                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/qtc answers " + (position + 1)))
+                                    .clickEvent(ClickEvent.runCommand( "/qtc answers " + (position + 1)))
                                     .hoverEvent(HoverEvent.showText(Component.text("Add the proposition " + (position + 1) + " as answer "))))
                             .append(TextUtils.composedWithoutPrefix(" ", (position + 1) + "] ", proposition)));
                 }

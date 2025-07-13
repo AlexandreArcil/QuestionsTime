@@ -9,4 +9,6 @@ public interface AnswerHandler {
 
     boolean answer(Player player, String answer, List<ServerPlayer> eligiblePlayers);
 
+    void end(final List<ServerPlayer> eligiblePlayers);
+
 }

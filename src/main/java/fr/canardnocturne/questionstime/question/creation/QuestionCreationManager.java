@@ -93,6 +93,7 @@ public class QuestionCreationManager {
         player.sendMessage(QuestionsTime.PREFIX.append(Component.text("--------Question Creator--------", NamedTextColor.DARK_GREEN, TextDecoration.BOLD))
                 .appendNewline().append(TextUtils.normalWithPrefix("A few things before starting :"))
                 .appendNewline().append(TextUtils.composed("• Command arguments with placeholders like ", "[text]", " are mandatory and must be replaced without ", "[]"))
+                .appendNewline().append(TextUtils.composed("• Command arguments with placeholders like ", "{text}", " are optional and can be replaced without ", "{}"))
                 .appendNewline().append(TextUtils.normalWithPrefix("• Sometimes, you need to confirm, I know it can be annoying but it's to avoid mistakes"))
                 .appendNewline().append(TextUtils.normalWithPrefix("• You can stop whenever you want by typing : ")).append(TextUtils.commandShortcut("stop"))
                 .appendNewline().append(TextUtils.normalWithPrefix("• If you leave the server while you were creating a question, you will lose your progress"))

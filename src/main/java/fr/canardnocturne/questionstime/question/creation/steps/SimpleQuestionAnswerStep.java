@@ -97,7 +97,7 @@ public class SimpleQuestionAnswerStep implements CreationStep {
             sender.sendMessage(TextUtils.normalWithPrefix("Answers: "));
             for (int position = 0; position < questionCreator.getAnswers().size(); position++) {
                 sender.sendMessage(QuestionsTime.PREFIX.append(Component.text("[X] ", NamedTextColor.RED, TextDecoration.BOLD)
-                                .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/qtc del " + (position + 1)))
+                                .clickEvent(ClickEvent.runCommand("/qtc del " + (position + 1)))
                                 .hoverEvent(HoverEvent.showText(Component.text("Delete the answer " + (position + 1)))))
                         .append(TextUtils.composedWithoutPrefix("", position + 1 + "] ", questionCreator.getAnswers().get(position))));
             }

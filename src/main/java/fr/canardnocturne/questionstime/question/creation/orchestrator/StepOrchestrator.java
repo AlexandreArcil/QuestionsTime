@@ -1,15 +1,20 @@
-package fr.canardnocturne.questionstime.question.creation;
+package fr.canardnocturne.questionstime.question.creation.orchestrator;
 
-import fr.canardnocturne.questionstime.question.creation.orchestrator.QuestionCreationOrchestrator;
+import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.question.creation.steps.CreationStep;
 import fr.canardnocturne.questionstime.question.creation.steps.Step;
 import fr.canardnocturne.questionstime.question.creation.steps.VerifyStep;
 import org.spongepowered.api.entity.living.player.Player;
 
-public class StepOrchestrator implements Visitor {
+public class StepOrchestrator implements StepVisitor {
 
-    private Player player;
-    private QuestionCreator questionCreator;
+    private final Player player;
+    private final QuestionCreator questionCreator;
+
+    public StepOrchestrator(final Player player, final QuestionCreator questionCreator) {
+        this.player = player;
+        this.questionCreator = questionCreator;
+    }
 
     @Override
     public Step visit(final CreationStep creationStep, final String answer) {
@@ -33,6 +38,7 @@ public class StepOrchestrator implements Visitor {
         if(correct) {
             return this.nextStep(verifyStep);
         } else {
+            this.player.sendMessage(verifyStep.mistake(this.questionCreator));
             final Step previousStep = verifyStep.returnTo();
             return previousStep.accept(this, null);
         }

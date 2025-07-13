@@ -31,6 +31,7 @@ public class Messages {
     public static final MessageFormat<AnswerFalseMessage.Format> ANSWER_FALSE = register(new AnswerFalseMessage("answer.false", "§e§l{answer} §cisn't the right answer :("));
     public static final MessageFormat<AnswerMalusMessage.Format> ANSWER_MALUS = register(new AnswerMalusMessage("answer.malus", "§cYou lose §4{money} §r{currency}"));
     public static final MessageFormat<AnswerCooldownMessage.Format> ANSWER_COOLDOWN = register(new AnswerCooldownMessage("answer.cooldown", "§cYou have to wait {timer} §cto suggest an another answer"));
+    public static final SimpleMessage FOUND_ANSWER = register(new SimpleMessage("answer.found", "§eYou found the answer !"));
     public static final SimpleMessage ANSWER_ALREADY_WINNER = register(new SimpleMessage("answer.already_winner", "§eYou already found the answer"));
     public static final SimpleMessage REWARD_ANNOUNCE = register(new SimpleMessage("reward.announce", "§e§lHere's your reward :"));
     public static final MessageFormat<RewardPrizeMessage.Format> REWARD_PRIZE = register(new RewardPrizeMessage("reward.prize", "§9• {quantity} * {modid}§f{item}"));

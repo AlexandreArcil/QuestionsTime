@@ -33,7 +33,10 @@ public class QuestionCreator {
     }
 
     public Question build() {
-        final Set<Prize> prizes = this.prizeBuilders.values().stream().map(Prize.Builder::build).collect(Collectors.toSet());
+        final Set<Prize> prizes = this.prizeBuilders.values().stream()
+                .filter(Prize.Builder::hasRewards)
+                .map(Prize.Builder::build)
+                .collect(Collectors.toSet());
         final Malus malus = this.moneyMalus > 0 ? new Malus(this.moneyMalus, this.announceMalus) : null;
         final Question.QuestionBuilder questionBuilder;
         if (this.questionType == Types.MULTI) {
@@ -65,8 +68,10 @@ public class QuestionCreator {
         prizeBuilder.addItem(is);
     }
 
-    public List<ItemStack> getItemsPrize() {
-        return this.prizeBuilders.values().stream().map(Prize.Builder::getItems).flatMap(Collection::stream).toList();
+    public Map<Integer, List<ItemStack>> getItemsPrize() {
+        return this.prizeBuilders.entrySet().stream()
+                .filter(entry -> !entry.getValue().getItems().isEmpty())
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getItems()));
     }
 
     public void addCommandPrize(final int position, final PrizeCommand prizeCommand) {
@@ -74,8 +79,10 @@ public class QuestionCreator {
         prizeBuilder.addCommand(prizeCommand);
     }
 
-    public List<PrizeCommand> getCommandsPrize() {
-        return this.prizeBuilders.values().stream().map(Prize.Builder::getCommands).flatMap(Collection::stream).toList();
+    public Map<Integer, List<PrizeCommand>> getCommandsPrize() {
+        return this.prizeBuilders.entrySet().stream()
+                .filter(entry -> !entry.getValue().getCommands().isEmpty())
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getCommands()));
     }
 
     public String getQuestion() {
@@ -110,8 +117,10 @@ public class QuestionCreator {
         this.announceMalus = announceMalus;
     }
 
-    public List<Integer> getMoneyPrize() {
-        return this.prizeBuilders.values().stream().map(Prize.Builder::getMoney).filter(money -> money > 0).toList();
+    public Map<Integer, Integer> getMoneyPrize() {
+        return this.prizeBuilders.entrySet().stream()
+                .filter(entry -> entry.getValue().getMoney() > 0)
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getMoney()));
     }
 
     public void setMoneyPrize(final int position, final int money) {
@@ -132,8 +141,6 @@ public class QuestionCreator {
         }
     }
 
-    public
-
     public List<String> getAnswers() {
         return answers;
     }
@@ -152,5 +159,23 @@ public class QuestionCreator {
 
     public boolean isStopped() {
         return stopped;
+    }
+
+    public boolean removeItemPrize(final Integer position, final ItemStack itemStack) {
+        final Prize.Builder builder = this.prizeBuilders.get(position);
+        if (builder != null) {
+            return builder.removeItem(itemStack);
+        } else {
+            return false;
+        }
+    }
+
+    public boolean removeCommandPrize(final Integer position, final PrizeCommand prizeCommand) {
+        final Prize.Builder builder = this.prizeBuilders.get(position);
+        if (builder != null) {
+            return builder.removeCommand(prizeCommand);
+        } else {
+            return false;
+        }
     }
 }

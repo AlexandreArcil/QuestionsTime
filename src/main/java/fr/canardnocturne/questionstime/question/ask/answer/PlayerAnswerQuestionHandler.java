@@ -47,10 +47,10 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
         if (!this.canAnswer(player, eligiblePlayers)) return false;
 
         if (this.question.getAnswers().contains(answer)) {
-            this.winners.add(player);//TODO put a message to tell the winner that he founds
+            this.winners.add(player);
+            player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.FOUND_ANSWER.getMessage())));
             if(this.winners.size() == this.winnersCount) {
-                this.announceWinners(eligiblePlayers);
-                this.givePrizes();
+                this.end(eligiblePlayers);
                 return true;
             } else {
                 return false;
@@ -60,6 +60,16 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
             this.giveCooldown(player);
             this.giveMalus(player);
             return false;
+        }
+    }
+
+    @Override
+    public void end(final List<ServerPlayer> eligiblePlayers) {
+        if(!this.winners.isEmpty()) {
+            this.announceWinners(eligiblePlayers);
+            this.givePrizes();
+        } else {
+            TextUtils.sendTextToEveryone(Component.text(Messages.QUESTION_TIMER_OUT.getMessage()), eligiblePlayers);
         }
     }
 
