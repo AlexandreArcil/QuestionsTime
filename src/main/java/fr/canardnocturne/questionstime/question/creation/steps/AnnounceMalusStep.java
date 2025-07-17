@@ -42,7 +42,7 @@ public class AnnounceMalusStep implements CreationStep {
 
     @Override
     public boolean shouldSkip(final QuestionCreator questionCreator) {
-        return questionCreator.getMoneyMalus() <= 0;
+        return questionCreator.getMoneyMalus() <= 0 && questionCreator.getCommandsMalus().isEmpty();
     }
 
     @Override

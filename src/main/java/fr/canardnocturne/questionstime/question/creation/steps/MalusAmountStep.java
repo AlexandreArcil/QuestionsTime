@@ -62,6 +62,6 @@ public class MalusAmountStep implements CreationStep {
 
     @Override
     public Step next(final QuestionCreator questionCreator) {
-        return AnnounceMalusStep.INSTANCE;
+        return MalusCommandsStep.INSTANCE;
     }
 }

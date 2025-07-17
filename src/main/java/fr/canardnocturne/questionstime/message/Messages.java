@@ -22,7 +22,7 @@ public class Messages {
     public static final MessageFormat<PrizeAnnouncePosition.Format> PRIZE_ANNOUNCE_POSITION = register(new PrizeAnnouncePosition("prize.announce.position", "§eThe §b{position} §ewin :"));
     public static final MessageFormat<PrizeMoneyMessage.Format> PRIZE_MONEY = register(new PrizeMoneyMessage("prize.money", "§9• {money} §r{currency}"));
     public static final MessageFormat<PrizeItemMessage.Format> PRIZE_ITEM = register(new PrizeItemMessage("prize.item", "§9• {quantity} * {modid}§f{item}"));
-    public static final MessageFormat<PrizeCommandMessage.Format> PRIZE_COMMAND = register(new PrizeCommandMessage("prize.command", "§9• {command}"));
+    public static final MessageFormat<OutcomeCommandMessage.Format> OUTCOME_COMMAND = register(new OutcomeCommandMessage("prize.command", "§9• {command}"));
     public static final SimpleMessage MALUS_ANNOUNCE = register(new SimpleMessage("malus.announce", "§cBut a wrong answer :"));
     public static final MessageFormat<MalusMoneyMessage.Format> MALUS_MONEY = register(new MalusMoneyMessage("malus.money", "§4• -{money} §r{currency}"));
     public static final SimpleMessage ANSWER_ANNOUNCE = register(new SimpleMessage("answer.announce", "§eAnswer with : \"§bqt>answer§e\""));

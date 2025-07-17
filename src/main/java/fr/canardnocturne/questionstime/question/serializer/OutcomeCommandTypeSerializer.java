@@ -1,6 +1,6 @@
 package fr.canardnocturne.questionstime.question.serializer;
 
-import fr.canardnocturne.questionstime.question.component.PrizeCommand;
+import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -8,14 +8,14 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
 
-public class PrizeCommandTypeSerializer implements TypeSerializer<PrizeCommand> {
+public class OutcomeCommandTypeSerializer implements TypeSerializer<OutcomeCommand> {
 
     @Override
-    public PrizeCommand deserialize(final Type type, final ConfigurationNode node) throws SerializationException {
+    public OutcomeCommand deserialize(final Type type, final ConfigurationNode node) throws SerializationException {
         final String command = node.getString();
         if(command != null) {
             try {
-                return PrizeCommandSerializer.deserialize(command);
+                return OutcomeCommandSerializer.deserialize(command);
             } catch (final IllegalArgumentException e) {
                 throw new SerializationException(e);
             }
@@ -25,9 +25,9 @@ public class PrizeCommandTypeSerializer implements TypeSerializer<PrizeCommand> 
     }
 
     @Override
-    public void serialize(final Type type, @Nullable final PrizeCommand prizeCommand, final ConfigurationNode node) throws SerializationException {
-        if(prizeCommand != null) {
-            node.set(PrizeCommandSerializer.serialize(prizeCommand));
+    public void serialize(final Type type, @Nullable final OutcomeCommand outcomeCommand, final ConfigurationNode node) throws SerializationException {
+        if(outcomeCommand != null) {
+            node.set(OutcomeCommandSerializer.serialize(outcomeCommand));
         }
     }
 }

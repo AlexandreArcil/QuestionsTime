@@ -32,14 +32,14 @@ import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import fr.canardnocturne.questionstime.question.ask.pool.WeightSortedQuestionPool;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.Prize;
-import fr.canardnocturne.questionstime.question.component.PrizeCommand;
+import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.creation.CreateQuestionCommand;
 import fr.canardnocturne.questionstime.question.creation.CreatorLeftServerEventHandler;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreationManager;
 import fr.canardnocturne.questionstime.question.save.HoconQuestionRegister;
 import fr.canardnocturne.questionstime.question.save.QuestionRegister;
 import fr.canardnocturne.questionstime.question.serializer.MalusTypeSerializer;
-import fr.canardnocturne.questionstime.question.serializer.PrizeCommandTypeSerializer;
+import fr.canardnocturne.questionstime.question.serializer.OutcomeCommandTypeSerializer;
 import fr.canardnocturne.questionstime.question.serializer.PrizeTypeSerializer;
 import fr.canardnocturne.questionstime.question.serializer.QuestionTypeSerializer;
 import fr.canardnocturne.questionstime.question.type.Question;
@@ -129,7 +129,7 @@ public class QuestionsTime {
                                 .register(Question.class, new QuestionTypeSerializer())
                                 .register(Prize.class, new PrizeTypeSerializer())
                                 .register(Malus.class, new MalusTypeSerializer())
-                                .register(PrizeCommand.class, new PrizeCommandTypeSerializer())
+                                .register(OutcomeCommand.class, new OutcomeCommandTypeSerializer())
                                 .register(QuestionTimeConfiguration.Mode.class, new ModeTypeSerializer())
                                 .build()))
                 .path(configFile)

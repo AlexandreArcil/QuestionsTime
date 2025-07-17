@@ -1,7 +1,7 @@
 package fr.canardnocturne.questionstime.question.serializer;
 
 import fr.canardnocturne.questionstime.question.component.Prize;
-import fr.canardnocturne.questionstime.question.component.PrizeCommand;
+import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -20,7 +20,7 @@ public class PrizeTypeSerializer implements TypeSerializer<Prize> {
     public Prize deserialize(final Type type, final ConfigurationNode node) throws SerializationException {
         final int money = node.node("money").getInt(-1);
         final boolean announce = node.node("announce").getBoolean(false);
-        final List<PrizeCommand> commandPrizes = node.node("commands").getList(PrizeCommand.class, new ArrayList<>());
+        final List<OutcomeCommand> commandPrizes = node.node("commands").getList(OutcomeCommand.class, new ArrayList<>());
 
         final int position = node.node("position").getInt(1);
         if(position <= 0) {
@@ -45,7 +45,7 @@ public class PrizeTypeSerializer implements TypeSerializer<Prize> {
             }
         }
 
-        return new Prize(money, announce, itemPrizes.toArray(new ItemStack[0]), commandPrizes.toArray(new PrizeCommand[0]), position);
+        return new Prize(money, announce, itemPrizes.toArray(new ItemStack[0]), commandPrizes.toArray(new OutcomeCommand[0]), position);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class PrizeTypeSerializer implements TypeSerializer<Prize> {
                 node.node("items").set(isList);
             }
             if(prize.getCommands().length > 0) {
-                node.node("commands").setList(PrizeCommand.class, Arrays.asList(prize.getCommands()));
+                node.node("commands").setList(OutcomeCommand.class, Arrays.asList(prize.getCommands()));
             }
         }
     }

@@ -2,6 +2,7 @@ package fr.canardnocturne.questionstime.question.ask.answer;
 
 import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.message.Messages;
+import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
@@ -29,7 +30,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     private final Map<UUID, Long> playersAnswerCooldown;
     private final Question question;
     private final Game game;
-    private final Set<Player> winners;
+    private final SequencedSet<Player> winners;
     private final int winnersCount;
 
     public PlayerAnswerQuestionHandler(final Logger logger, final Question question, final Game game, final PluginContainer plugin) {
@@ -39,7 +40,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
         this.question = question;
         this.game = game;
         this.winnersCount = question.getPrizes().map(Set::size).orElse(1);
-        this.winners = new HashSet<>(this.winnersCount);
+        this.winners = new LinkedHashSet<>(this.winnersCount);
     }
 
     @Override
@@ -91,7 +92,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     private void givePrizes() {
         final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class).orElse(null);
         this.question.getPrizes().ifPresent(prizes -> {
-            final Task givePrizeTask = Task.builder().execute(task -> {
+            final Task givePrizeTask = Task.builder().execute(() -> {
                         if (prizes.isEmpty()) {
                             return;
                         }
@@ -114,10 +115,8 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
                                 winner.inventory().offer(item.copy());
                             }
 
-                            final List<String> formattedCommands = Arrays.stream(prize.getCommands())
-                                    .map(command -> command.command().replace("@winner", winner.name()))
-                                    .toList();
-                            this.executePrizeCommands(formattedCommands, winner);
+                            final List<String> commands = Arrays.stream(prize.getCommands()).map(OutcomeCommand::command).toList();
+                            this.executeCommands(commands, winner, "@winner");
 
                             if (prize.getMoney() > 0 && economyService != null) {
                                 winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_MONEY.format()
@@ -140,15 +139,18 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
         });
     }
 
-    private void executePrizeCommands(final Collection<String> commands, final Player winner) {
+    private void executeCommands(final Collection<String> commands, final Player player, final String selector) {
+        final List<String> formattedCommands = commands.stream()
+                .map(command -> command.replace(selector, player.name()))
+                .toList();
         final Task commandExecutorTask = Task.builder().execute(() -> {
-            for (final String command : commands) {
+            for (final String command : formattedCommands) {
                 try {
-                    this.game.server().causeStackManager().pushCause(winner);
-                    this.game.server().commandManager().process(Sponge.systemSubject(), winner, command);
+                    this.game.server().causeStackManager().pushCause(player);
+                    this.game.server().commandManager().process(Sponge.systemSubject(), player, command);
                 } catch (final CommandException e) {
                     this.logger.error("An error occurred when executing the prize command '" + command + "'", e);
-                    winner.sendMessage(TextUtils.errorWithPrefix("A prize command had a problem when it was executed"));
+                    player.sendMessage(TextUtils.errorWithPrefix("A prize command had a problem when it was executed"));
                 }
             }
         }).plugin(this.plugin).build();
@@ -175,6 +177,8 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
                     this.logger.error("The economy account for {} ({}) can't be found or created.", loser.name(), loser.uniqueId());
                 }
             }
+            final List<String> commands = Arrays.stream(malus.getCommands()).map(OutcomeCommand::command).toList();
+            this.executeCommands(commands, loser, "@loser");
         });
     }
 

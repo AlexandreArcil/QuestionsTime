@@ -1,8 +1,8 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
-import fr.canardnocturne.questionstime.question.component.PrizeCommand;
+import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
-import fr.canardnocturne.questionstime.question.serializer.PrizeCommandSerializer;
+import fr.canardnocturne.questionstime.question.serializer.OutcomeCommandSerializer;
 import fr.canardnocturne.questionstime.util.NumberUtils;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.audience.Audience;
@@ -79,10 +79,10 @@ public class PrizeCommandsStep implements CreationStep {
                 return;
             }
 
-            final PrizeCommand prizeCommand = PrizeCommandSerializer.deserialize(answerPosition.answer());
+            final OutcomeCommand prizeCommand = OutcomeCommandSerializer.deserialize(answerPosition.answer());
             questionCreator.addCommandPrize(position, prizeCommand);
             sender.sendMessage(TextUtils.normalWithPrefix("Added ")
-                    .append(this.formatPrizeCommand(prizeCommand))
+                    .append(prizeCommand.format())
                     .append(TextUtils.composedWithoutPrefix(" command as prize for the ", NumberUtils.toOrdinal(position), " winner")));
         } catch (final IllegalArgumentException e) {
             sender.sendMessage(TextUtils.composed("The command prize ", answer, " doesn't follow the syntax ", COMMAND_FORMAT));
@@ -90,7 +90,7 @@ public class PrizeCommandsStep implements CreationStep {
     }
 
     private void listCommandPrizes(final QuestionCreator questionCreator, final Audience sender) {
-        final Map<Integer, List<PrizeCommand>> commandsPrize = questionCreator.getCommandsPrize();
+        final Map<Integer, List<OutcomeCommand>> commandsPrize = questionCreator.getCommandsPrize();
         if (commandsPrize.isEmpty()) {
             sender.sendMessage(TextUtils.normalWithPrefix("No command prizes added yet."));
             return;
@@ -98,7 +98,7 @@ public class PrizeCommandsStep implements CreationStep {
         final TextComponent.Builder listCommandPrizesBuilder = Component.text().append(TextUtils.normalWithPrefix("Command prizes:")).appendNewline();
         listCommandPrizesBuilder.append(Component.join(JoinConfiguration.newlines(), commandsPrize.entrySet().stream().map(entry -> {
             final int position = entry.getKey();
-            final List<PrizeCommand> commands = entry.getValue();
+            final List<OutcomeCommand> commands = entry.getValue();
             return Component.text()
                     .append(TextUtils.specialWithPrefix(NumberUtils.toOrdinal(position)))
                     .append(TextUtils.normal(": "))
@@ -106,11 +106,11 @@ public class PrizeCommandsStep implements CreationStep {
                     .append(Component.join(JoinConfiguration.newlines(),
                             commands.stream().map(prizeCommand ->
                                 TextUtils.normalWithPrefix("- ")
-                                    .append(this.formatPrizeCommand(prizeCommand))
+                                    .append(prizeCommand.format())
                                     .appendSpace()
                                     .append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
                                             .hoverEvent(HoverEvent.showText(TextUtils.normal("Click to remove this command prize")))
-                                            .clickEvent(ClickEvent.runCommand("/qtc del " + PrizeCommandSerializer.serialize(prizeCommand) + ";" + position))))
+                                            .clickEvent(ClickEvent.runCommand("/qtc del " + OutcomeCommandSerializer.serialize(prizeCommand) + ";" + position))))
                                     .toList()))
                     .build();
         }).toList()));
@@ -127,26 +127,21 @@ public class PrizeCommandsStep implements CreationStep {
                 return;
             }
 
-            final PrizeCommand prizeCommand = PrizeCommandSerializer.deserialize(answerPosition.answer());
+            final OutcomeCommand prizeCommand = OutcomeCommandSerializer.deserialize(answerPosition.answer());
             final boolean removed = questionCreator.removeCommandPrize(position, prizeCommand);
             if (!removed) {
                 sender.sendMessage(TextUtils.normalWithPrefix("No command prize ")
-                        .append(this.formatPrizeCommand(prizeCommand))
+                        .append(prizeCommand.format())
                         .append(TextUtils.normal(" found for the position "))
                         .append(TextUtils.special(String.valueOf(position))));
             } else {
                 sender.sendMessage(TextUtils.normalWithPrefix("Removed command prize ")
-                        .append(this.formatPrizeCommand(prizeCommand))
+                        .append(prizeCommand.format())
                         .append(TextUtils.composedWithoutPrefix(" for the ", NumberUtils.toOrdinal(position), " winner.")));
             }
         } catch (final IllegalArgumentException e) {
             sender.sendMessage(TextUtils.composed("The command prize ", answer, " doesn't follow the syntax ", COMMAND_FORMAT));
         }
-    }
-
-    private Component formatPrizeCommand(final PrizeCommand prizeCommand) {
-        return Component.text(prizeCommand.message(), NamedTextColor.BLUE, TextDecoration.UNDERLINED)
-                .hoverEvent(HoverEvent.showText(Component.text(prizeCommand.command())));
     }
 
     @Override

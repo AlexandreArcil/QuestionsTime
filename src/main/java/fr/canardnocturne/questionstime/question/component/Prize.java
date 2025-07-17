@@ -13,14 +13,14 @@ public class Prize {
     private final int money;
     private final boolean announce;
     private final ItemStack[] items;
-    private final PrizeCommand[] commands;
+    private final OutcomeCommand[] commands;
     private final int position;
 
-    public Prize(final int money, final boolean announce, final ItemStack[] is, final PrizeCommand[] commands, final int position) {
+    public Prize(final int money, final boolean announce, final ItemStack[] is, final OutcomeCommand[] commands, final int position) {
         this.money = Math.max(money, 0);
         this.announce = announce;
         this.items = is != null ? is : new ItemStack[0];
-        this.commands = commands != null ? commands : new PrizeCommand[0];
+        this.commands = commands != null ? commands : new OutcomeCommand[0];
         this.position = position;
     }
 
@@ -28,7 +28,7 @@ public class Prize {
         this.money = builder.money;
         this.announce = builder.announce;
         this.items = builder.items.toArray(new ItemStack[0]);
-        this.commands = builder.commands.toArray(new PrizeCommand[0]);
+        this.commands = builder.commands.toArray(new OutcomeCommand[0]);
         this.position = builder.position;
     }
 
@@ -40,7 +40,7 @@ public class Prize {
         return this.items;
     }
 
-    public PrizeCommand[] getCommands() {
+    public OutcomeCommand[] getCommands() {
         return commands;
     }
 
@@ -84,7 +84,7 @@ public class Prize {
         private int money;
         private boolean announce;
         private final List<ItemStack> items;
-        private final List<PrizeCommand> commands;
+        private final List<OutcomeCommand> commands;
         private final int position;
 
         private Builder(final int position) {
@@ -119,11 +119,12 @@ public class Prize {
             return new Prize(this);
         }
 
-        public void addCommand(final PrizeCommand prizeCommand) {
-            this.commands.add(prizeCommand);
+        public Builder addCommand(final OutcomeCommand outcomeCommand) {
+            this.commands.add(outcomeCommand);
+            return this;
         }
 
-        public List<PrizeCommand> getCommands() {
+        public List<OutcomeCommand> getCommands() {
             return commands;
         }
 
@@ -131,8 +132,9 @@ public class Prize {
             return items;
         }
 
-        public void addItem(final ItemStack is) {
+        public Builder addItem(final ItemStack is) {
             this.items.add(is);
+            return this;
         }
 
         public boolean removeItem(final ItemStack is) {
@@ -152,8 +154,8 @@ public class Prize {
             return valueIs.get().get().equals(valueIss.get().get());
         }
 
-        public boolean removeCommand(final PrizeCommand prizeCommand) {
-            return this.commands.remove(prizeCommand);
+        public boolean removeCommand(final OutcomeCommand outcomeCommand) {
+            return this.commands.remove(outcomeCommand);
         }
 
         public boolean hasRewards() {

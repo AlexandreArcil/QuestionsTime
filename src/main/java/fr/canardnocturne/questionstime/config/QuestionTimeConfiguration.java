@@ -2,7 +2,7 @@ package fr.canardnocturne.questionstime.config;
 
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.Prize;
-import fr.canardnocturne.questionstime.question.component.PrizeCommand;
+import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.question.type.QuestionMulti;
 import net.kyori.adventure.text.Component;
@@ -52,14 +52,14 @@ public class QuestionTimeConfiguration {
                             .add(Keys.CUSTOM_NAME, Component.text("Sandy", NamedTextColor.YELLOW))
                             .add(Keys.LORE, Arrays.asList(Component.text("It's just a sand block with a cool name"), Component.text("What did you expect")))
                             .build()}, null, 1)))
-                    .setMalus(new Malus(100, true))
+                    .setMalus(new Malus(100, true, new OutcomeCommand[]{new OutcomeCommand("Teleport to Hell", "tp @loser 0 -64 0")}))
                     .build(),
             QuestionMulti.builder()
                     .setQuestion("Among these propositions, who created the QuestionsTime plugin ?")
                     .setPropositions(new LinkedHashSet<>(Arrays.asList("CanardNocturne", "Notch", "Pewdiepie", "Donald Trump", "Chicky the chicken")))
                     .setAnswers(Set.of("1"))
                     .setPrizes(Set.of(new Prize(500, true, null,
-                            new PrizeCommand[]{new PrizeCommand("A secret about the plugin's creator",
+                            new OutcomeCommand[]{new OutcomeCommand("A secret about the plugin's creator",
                                     "msg @winner Here is the secret about the plugin's creator: he's not a real duck")},
                             1)))
                     .setTimer(1800)

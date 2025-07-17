@@ -2,15 +2,15 @@ package fr.canardnocturne.questionstime.message.format;
 
 import fr.canardnocturne.questionstime.message.component.set.SetCommand;
 
-public class PrizeCommandMessage extends MessageFormat<PrizeCommandMessage.Format> {
+public class OutcomeCommandMessage extends MessageFormat<OutcomeCommandMessage.Format> {
 
-    public PrizeCommandMessage(final String section, final String message) {
+    public OutcomeCommandMessage(final String section, final String message) {
         super(section, message);
     }
 
     @Override
-    public PrizeCommandMessage.Format format() {
-        return new PrizeCommandMessage.Format();
+    public OutcomeCommandMessage.Format format() {
+        return new OutcomeCommandMessage.Format();
     }
 
     public class Format extends MessageFormat.Format implements SetCommand<Format> {
