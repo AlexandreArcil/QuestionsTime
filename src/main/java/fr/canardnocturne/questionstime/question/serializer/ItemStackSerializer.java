@@ -1,6 +1,7 @@
 package fr.canardnocturne.questionstime.question.serializer;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.ResourceKey;
@@ -12,7 +13,6 @@ import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryTypes;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class ItemStackSerializer {
@@ -56,7 +56,7 @@ public class ItemStackSerializer {
         }
         //Convert the lore
         if (itemSplit.length >= 4) {
-            final String[] itemLore = itemSplit[3].split("\n");
+            final String[] itemLore = itemSplit[3].split("<br>");
             for (final String line : itemLore) {
                 lore.add(MiniMessage.miniMessage().deserialize(line));
             }
@@ -102,8 +102,8 @@ public class ItemStackSerializer {
                 isSer.append(";");
             }
             isSer.append(";");
-            final List<String> loreStr = lore.stream().map(line -> MiniMessage.miniMessage().serialize(line)).toList();
-            isSer.append(String.join("\n", loreStr));
+            final String loreStr = MiniMessage.miniMessage().serialize(Component.join(JoinConfiguration.newlines(), lore));
+            isSer.append(loreStr);
         });
         return isSer.toString();
     }

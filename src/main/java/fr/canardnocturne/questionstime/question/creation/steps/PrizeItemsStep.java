@@ -29,9 +29,12 @@ public class PrizeItemsStep implements CreationStep {
                 .appendNewline().append(TextUtils.composed("List prizes with ")).append(TextUtils.commandShortcut("list"))
                 .appendNewline().append(TextUtils.normalWithPrefix("Remove prizes with ")).append(TextUtils.commandShortcut("list"))
                     .append(TextUtils.composedWithoutPrefix(" then clicking on the ", "[X]", " icon"))
-                .appendNewline().append(TextUtils.composed("The ", "Lore", " can have multiple lines by separating them with ", "\\n"))
+                .appendNewline().append(TextUtils.normalWithPrefix("You can format the messages by following the "))
+                    .append(Component.text("MiniMessage formatting", NamedTextColor.YELLOW, TextDecoration.UNDERLINED)
+                            .clickEvent(ClickEvent.openUrl("https://docs.advntr.dev/minimessage/format.html")))
+                .appendNewline().append(TextUtils.composed("The ", "Lore", " can have multiple lines by separating them with ", "<br>"))
                 .appendNewline().append(TextUtils.composed("The ", "Position", " is the winner position, default is the first"))
-                .appendNewline().append(TextUtils.example("/qtc minecraft:stone;5;Old Stone;Emits a low light"))
+                .appendNewline().append(TextUtils.example("/qtc minecraft:stone;5;<yellow><bold>Old Stone;Emits a low light"))
                 .appendNewline().append(TextUtils.normalWithPrefix("To go to the next step or skip this step, type "))
                 .append(TextUtils.commandShortcut("confirm"));
     }
