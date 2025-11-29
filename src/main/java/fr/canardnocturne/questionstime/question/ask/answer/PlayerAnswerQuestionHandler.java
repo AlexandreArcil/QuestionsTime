@@ -77,12 +77,10 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     private void announceWinners(final List<ServerPlayer> eligiblePlayers) {
 //      Task.builder().execute(wait -> TODO why a delay has been set ?
         eligiblePlayers.forEach(player -> {
-            for (final Player winner : this.winners) {
-                if (player.uniqueId().equals(winner.uniqueId())) {
-                    player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.ANSWER_WIN.getMessage())));
-                } else {
-                    player.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWER_WIN_ANNOUNCE.format().setPlayerNames(this.winners).message()));
-                }
+            if (this.winners.stream().anyMatch(player::equals)) {
+                player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.ANSWER_WIN.getMessage())));
+            } else {
+                player.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWER_WIN_ANNOUNCE.format().setPlayerNames(this.winners).message()));
             }
         });
 //      })).async().delay(500, TimeUnit.MILLISECONDS)
@@ -187,12 +185,12 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
             return false;
         }
         if (this.playersAnswerCooldown.containsKey(player.uniqueId())) {
-            final long time = this.playersAnswerCooldown.get(player.uniqueId());
-            if (System.currentTimeMillis() > time)
+            final long cooldownFinish = this.playersAnswerCooldown.get(player.uniqueId());
+            if (System.currentTimeMillis() > cooldownFinish)
                 this.playersAnswerCooldown.remove(player.uniqueId());
             else {
-                player.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWER_COOLDOWN.format()//
-                        .setTimer((int) (this.playersAnswerCooldown.get(player.uniqueId()) - System.currentTimeMillis()) / 1000)
+                player.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWER_COOLDOWN.format()
+                        .setTimer((int) (cooldownFinish - System.currentTimeMillis()) / 1000)
                         .message()));
                 return false;
             }
