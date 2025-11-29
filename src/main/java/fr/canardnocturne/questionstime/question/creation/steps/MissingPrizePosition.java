@@ -64,7 +64,8 @@ public class MissingPrizePosition implements VerifyStep {
                 sb.append(", ");
             }
         }
-        sb.insert(sb.lastIndexOf(","), " and");
+        final int lastPositionComma = sb.lastIndexOf(",");
+        sb.replace(lastPositionComma, lastPositionComma+ 1, " and");
         return sb.toString();
     }
 
