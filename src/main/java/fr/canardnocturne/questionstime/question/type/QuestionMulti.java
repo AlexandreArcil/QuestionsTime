@@ -60,9 +60,12 @@ public class QuestionMulti extends Question {
                 throw new QuestionException("The question need at most 128 propositions");
             }
             for (final String answer : this.answers) {
+                if (!StringUtils.isNumeric(answer)) {
+                    throw new QuestionException("The question answer '" + answer + "' needs to be a number between 1 and " + this.propositions.size());
+                }
                 final byte propositionAnswer = Byte.parseByte(answer);
-                if (!StringUtils.isNumeric(answer) || propositionAnswer < 1) {
-                    throw new QuestionException("The question answer '" + answer + "' need to be a number between 1 and " + this.propositions.size());
+                if (propositionAnswer < 1 || propositionAnswer > this.propositions.size()) {
+                    throw new QuestionException("The question answer '" + answer + "' needs to be a number between 1 and " + this.propositions.size());
                 }
             }
             return new QuestionMulti(this);
