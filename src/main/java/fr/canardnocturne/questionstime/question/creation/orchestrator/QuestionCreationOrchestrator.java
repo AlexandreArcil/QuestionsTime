@@ -10,12 +10,10 @@ public interface QuestionCreationOrchestrator {
 
     boolean isFinished();
 
-    Status getStatus();
+    boolean isSuccessful();
+
+    void handleFailure();
 
     QuestionCreator getQuestionCreator();
-
-    enum Status {
-        NOT_STARTED, RUNNING, STOPPING, FINISHED_STOPPED, FINISHED_SUCCESS
-    }
 
 }

@@ -38,6 +38,7 @@ import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.creation.CreateQuestionCommand;
 import fr.canardnocturne.questionstime.question.creation.CreatorLeftServerEventHandler;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreationManager;
+import fr.canardnocturne.questionstime.question.creation.orchestrator.StoppableQuestionCreationOrchestrator;
 import fr.canardnocturne.questionstime.question.save.HoconQuestionRegister;
 import fr.canardnocturne.questionstime.question.save.QuestionRegister;
 import fr.canardnocturne.questionstime.question.serializer.MalusTypeSerializer;
@@ -152,7 +153,8 @@ public class QuestionsTime {
         }
 
         this.questionPool = new WeightSortedQuestionPool(this.pluginConfig.getQuestions());
-        this.questionCreationManager = new QuestionCreationManager(this.questionPool, questionRegister, this.logger);
+        this.questionCreationManager = new QuestionCreationManager(new StoppableQuestionCreationOrchestrator.StoppableQuestionCreationOrchestratorFactory(),
+                this.questionPool, questionRegister, this.logger);
 
         final QuestionPicker questionPicker = new WeightedRandomnessQuestionPicker(this.questionPool, this.logger);
         final QuestionAnnouncer questionAnnouncer = new SimpleQuestionAnnouncer(this.game, this.plugin);

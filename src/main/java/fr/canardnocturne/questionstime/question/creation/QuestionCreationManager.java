@@ -3,7 +3,7 @@ package fr.canardnocturne.questionstime.question.creation;
 import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import fr.canardnocturne.questionstime.question.creation.orchestrator.QuestionCreationOrchestrator;
-import fr.canardnocturne.questionstime.question.creation.orchestrator.StoppableQuestionCreationOrchestrator;
+import fr.canardnocturne.questionstime.question.creation.orchestrator.QuestionCreationOrchestratorFactory;
 import fr.canardnocturne.questionstime.question.save.QuestionRegister;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
@@ -22,11 +22,13 @@ import java.util.UUID;
 public class QuestionCreationManager {
 
     private final Map<UUID, QuestionCreationOrchestrator> questionCreators;
+    private final QuestionCreationOrchestratorFactory orchestratorFactory;
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
     private final Logger logger;
 
-    public QuestionCreationManager(final QuestionPool questionPool, final QuestionRegister questionRegister, final Logger logger) {
+    public QuestionCreationManager(final QuestionCreationOrchestratorFactory orchestratorFactory, final QuestionPool questionPool, final QuestionRegister questionRegister, final Logger logger) {
+        this.orchestratorFactory = orchestratorFactory;
         this.questionPool = questionPool;
         this.questionRegister = questionRegister;
         this.logger = logger;
@@ -42,12 +44,10 @@ public class QuestionCreationManager {
             final QuestionCreationOrchestrator orchestrator = this.questionCreators.get(uuid);
             orchestrator.handle(args);
             if (orchestrator.isFinished()) {
-                if (orchestrator.getStatus() == QuestionCreationOrchestrator.Status.FINISHED_SUCCESS) {
+                if (orchestrator.isSuccessful()) {
                     this.onQuestionCreatedSuccessfully(player);
-                } else if (orchestrator.getStatus() == QuestionCreationOrchestrator.Status.FINISHED_STOPPED) {
-                    this.onQuestionCreationStopped(player);
                 } else {
-                    throw new IllegalArgumentException("Status " + orchestrator.getStatus() + " not handled");
+                    orchestrator.handleFailure();
                 }
                 this.questionCreators.remove(uuid);
             }
@@ -57,7 +57,7 @@ public class QuestionCreationManager {
     }
 
     private void startQuestionCreation(final Player player) {
-        final QuestionCreationOrchestrator orchestrator = new StoppableQuestionCreationOrchestrator(player);
+        final QuestionCreationOrchestrator orchestrator = this.orchestratorFactory.create(player);
         this.questionCreators.put(player.uniqueId(), orchestrator);
         orchestrator.start();
     }
@@ -72,10 +72,6 @@ public class QuestionCreationManager {
         } catch (final IOException e) {
             player.sendMessage(TextUtils.errorWithPrefix("An error occurred when saving the question, see the latest.log. The question has been logged in debug.log"));
         }
-    }
-
-    private void onQuestionCreationStopped(final Player player) {
-        player.sendMessage(TextUtils.normalWithPrefix("Question creation stopped"));
     }
 
     public void onPlayerDisconnect(final UUID uuid, final String name) {

@@ -4,6 +4,7 @@ import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.question.creation.steps.QuestionStep;
 import fr.canardnocturne.questionstime.question.creation.steps.Step;
 import fr.canardnocturne.questionstime.question.creation.steps.StopQuestionCreationStep;
+import fr.canardnocturne.questionstime.util.TextUtils;
 import org.spongepowered.api.entity.living.player.Player;
 
 public class StoppableQuestionCreationOrchestrator implements QuestionCreationOrchestrator {
@@ -62,13 +63,31 @@ public class StoppableQuestionCreationOrchestrator implements QuestionCreationOr
     }
 
     @Override
-    public Status getStatus() {
-        return status;
+    public boolean isSuccessful() {
+        return status == Status.FINISHED_SUCCESS;
+    }
+
+    @Override
+    public void handleFailure() {
+        player.sendMessage(TextUtils.normalWithPrefix("Question creation stopped"));
     }
 
     @Override
     public QuestionCreator getQuestionCreator() {
         return questionCreator;
+    }
+
+    enum Status {
+        NOT_STARTED, RUNNING, STOPPING, FINISHED_STOPPED, FINISHED_SUCCESS
+    }
+
+    public static class StoppableQuestionCreationOrchestratorFactory implements QuestionCreationOrchestratorFactory {
+
+        @Override
+        public QuestionCreationOrchestrator create(final Player player) {
+            return new StoppableQuestionCreationOrchestrator(player);
+        }
+
     }
 
 }
