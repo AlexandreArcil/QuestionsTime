@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.config.update;
+package fr.canardnocturne.questionstime.config.upgrade.update;
 
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;

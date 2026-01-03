@@ -6,9 +6,11 @@ import fr.canardnocturne.questionstime.config.QuestionTimeConfiguration;
 import fr.canardnocturne.questionstime.config.loader.PluginConfigurationLoader;
 import fr.canardnocturne.questionstime.config.loader.SafePluginConfigurationLoader;
 import fr.canardnocturne.questionstime.config.serializer.ModeTypeSerializer;
-import fr.canardnocturne.questionstime.config.update.ConfigurationUpgradeOrchestrator;
-import fr.canardnocturne.questionstime.config.update.FirstVersionConfigurationUpdate;
-import fr.canardnocturne.questionstime.config.update.NoVersionConfigurationUpdate;
+import fr.canardnocturne.questionstime.config.upgrade.ConfigurationUpgrade;
+import fr.canardnocturne.questionstime.config.upgrade.ConfigurationUpgradeException;
+import fr.canardnocturne.questionstime.config.upgrade.ConfigurationUpgradeOrchestrator;
+import fr.canardnocturne.questionstime.config.upgrade.update.FirstVersionConfigurationUpdate;
+import fr.canardnocturne.questionstime.config.upgrade.update.NoVersionConfigurationUpdate;
 import fr.canardnocturne.questionstime.config.verificator.SetDefaultWrongConfigurationValues;
 import fr.canardnocturne.questionstime.config.verificator.VerifyConfigurationValues;
 import fr.canardnocturne.questionstime.message.Messages;
@@ -88,7 +90,7 @@ public class QuestionsTime {
     private final MessageUpdater messageUpdater;
     private final MessageConfigurationUpdater messageConfigurationUpdater;
     private final PluginConfigurationLoader pluginConfigurationLoader;
-    private final ConfigurationUpgradeOrchestrator configurationUpgradeOrchestrator;
+    private final ConfigurationUpgrade configurationUpgrade;
     private final VerifyConfigurationValues verifyConfigurationValues;
 
     private QuestionTimeConfiguration pluginConfig;
@@ -107,7 +109,7 @@ public class QuestionsTime {
         this.messageUpdater = new SafeMessageUpdater(logger);
         this.messageConfigurationUpdater = new AddMissingMessageConfiguration(logger);
         this.pluginConfigurationLoader = new SafePluginConfigurationLoader(logger);
-        this.configurationUpgradeOrchestrator = new ConfigurationUpgradeOrchestrator(List.of(new NoVersionConfigurationUpdate(), new FirstVersionConfigurationUpdate()), logger);
+        this.configurationUpgrade = new ConfigurationUpgradeOrchestrator(List.of(new NoVersionConfigurationUpdate(), new FirstVersionConfigurationUpdate()), logger);
         this.verifyConfigurationValues = new SetDefaultWrongConfigurationValues(logger);
     }
 
@@ -218,11 +220,16 @@ public class QuestionsTime {
 
     private void loadConfig(final ConfigurationLoader<CommentedConfigurationNode> configLoader) {
         this.logger.info("Loading configurations from config.conf...");
-        this.configurationUpgradeOrchestrator.upgradeConfiguration(configLoader);
-        final QuestionTimeConfiguration questionTimeConfiguration = this.pluginConfigurationLoader.load(configLoader);
-        this.verifyConfigurationValues.verify(questionTimeConfiguration);
-        this.pluginConfig = questionTimeConfiguration;
-        this.logger.info("Configuration loaded with {} questions", String.valueOf(questionTimeConfiguration.getQuestions().size()));
+        try {
+            this.configurationUpgrade.upgrade(configLoader);
+            final QuestionTimeConfiguration questionTimeConfiguration = this.pluginConfigurationLoader.load(configLoader);
+            this.verifyConfigurationValues.verify(questionTimeConfiguration);
+            this.pluginConfig = questionTimeConfiguration;
+            this.logger.info("Configuration loaded with {} questions", String.valueOf(questionTimeConfiguration.getQuestions().size()));
+        } catch (final ConfigurationUpgradeException e) {
+            this.logger.error("A problem occurred when upgrading the config.conf file, default configuration will be used", e);
+            this.pluginConfig = new QuestionTimeConfiguration();
+        }
     }
 
     private void createMessagesFile(final Path messagesFile) {

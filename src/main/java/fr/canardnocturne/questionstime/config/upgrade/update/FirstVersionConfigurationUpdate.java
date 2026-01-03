@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.config.update;
+package fr.canardnocturne.questionstime.config.upgrade.update;
 
 import fr.canardnocturne.questionstime.question.component.Prize;
 import org.spongepowered.configurate.CommentedConfigurationNode;
