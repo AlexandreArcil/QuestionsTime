@@ -5,6 +5,7 @@ import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -62,17 +63,18 @@ public class SimpleQuestionAnswerStep implements CreationStep {
                 sender.sendMessage(TextUtils.composed("Answer ", answer, " added"));
             }
         } else {
-            sender.sendMessage(TextUtils.normalWithPrefix("Answers added:"));
+            final TextComponent.Builder message = Component.text().append(TextUtils.normalWithPrefix("Answers added:")).appendNewline();
             int position = 1;
             for (final String questionAnswer : answers) {
                 if(questionCreator.getAnswers().contains(questionAnswer)) {
-                    sender.sendMessage(TextUtils.composed("Answer ", questionAnswer, " already exists"));
+                    message.append(TextUtils.composed("Answer ", questionAnswer, " already exists")).appendNewline();
                 } else {
                     questionCreator.getAnswers().add(questionAnswer);
-                    sender.sendMessage(TextUtils.composed("", "[" + (position) + "] ", questionAnswer));
+                    message.append(TextUtils.composed("", "[" + (position) + "] ", questionAnswer)).appendNewline();
                     position++;
                 }
             }
+            sender.sendMessage(message.build());
         }
     }
 
@@ -94,13 +96,15 @@ public class SimpleQuestionAnswerStep implements CreationStep {
         if(questionCreator.getAnswers().isEmpty()) {
             sender.sendMessage(TextUtils.normalWithPrefix("No answer has been added yet"));
         } else {
-            sender.sendMessage(TextUtils.normalWithPrefix("Answers: "));
+            final TextComponent.Builder message = Component.text().append(TextUtils.normalWithPrefix("Answers: ")).appendNewline();
             for (int position = 0; position < questionCreator.getAnswers().size(); position++) {
-                sender.sendMessage(QuestionsTime.PREFIX.append(Component.text("[X] ", NamedTextColor.RED, TextDecoration.BOLD)
+                message.append(QuestionsTime.PREFIX.append(Component.text("[X] ", NamedTextColor.RED, TextDecoration.BOLD)
                                 .clickEvent(ClickEvent.runCommand("/qtc del " + (position + 1)))
                                 .hoverEvent(HoverEvent.showText(Component.text("Delete the answer " + (position + 1)))))
-                        .append(TextUtils.composedWithoutPrefix("", position + 1 + "] ", questionCreator.getAnswers().get(position))));
+                        .append(TextUtils.composedWithoutPrefix("", position + 1 + "] ", questionCreator.getAnswers().get(position))))
+                        .appendNewline();
             }
+            sender.sendMessage(message.build());
         }
     }
 

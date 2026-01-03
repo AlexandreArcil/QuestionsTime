@@ -19,8 +19,8 @@ public class QuestionTypeSerializer implements TypeSerializer<Question> {
     public Question deserialize(final Type type, final ConfigurationNode node) throws SerializationException {
         final Types questionType = Question.getType(node);
         if (questionType == Types.ERROR) {
-            throw new SerializationException("The question " + node.key() + " contain one or several errors. " +
-                    "Check if he contain the sections \"question\" and \"answer\" at least. ");
+            throw new SerializationException(node, Question.class, "The question " + node.key() + " contain one or several errors. " +
+                    "Check if he contain the sections \"question\" and \"answer\" at least.");
         }
 
         final String askedQuestion = node.node("question").getString();

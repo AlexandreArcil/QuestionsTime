@@ -50,8 +50,7 @@ public class HoconQuestionRegister implements QuestionRegister {
         if (this.questionsNode == null) {
             try {
                 this.questionsNode = this.configLoader.load();
-                return this.configLoader.load();
-            } catch (final IOException e) {
+            } catch (final ConfigurateException e) {
                 logger.error("Unable to load the config file ", e);
                 throw new IllegalStateException(e);
             }

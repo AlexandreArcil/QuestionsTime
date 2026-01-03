@@ -5,10 +5,10 @@ public class NumberUtils {
     private NumberUtils() {}
 
     /**
-     * Convert a number to ordinal (first, second...).
+     * Convert a number to ordinal (1st, 2nd...).
      * Code nearly copy/paste from (<a href="https://stackoverflow.com/a/27204037">klamann</a>)
-     * @param position
-     * @return
+     * @param position the number to convert
+     * @return the ordinal representation of the number
      */
     public static String toOrdinal(final int position) {
         final int mod100 = position % 100;

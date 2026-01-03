@@ -5,11 +5,13 @@ import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class QuestionPropositionStep implements CreationStep {
@@ -45,19 +47,19 @@ public class QuestionPropositionStep implements CreationStep {
             case "list" -> this.listPropositions(sender, questionCreator);
             case "confirm" -> this.confirmPropositions(sender, questionCreator);
             case "add" -> {
-                sender.sendMessage(TextUtils.composed("Command ", "add", " need to be followed by a proposition"));
+                sender.sendMessage(TextUtils.composed("Command ", "add", " needs to be followed by a proposition"));
                 yield false;
             }
             case "set" -> {
-                sender.sendMessage(TextUtils.composed("Command ", "set", " need to be followed by a position then a proposition"));
+                sender.sendMessage(TextUtils.composed("Command ", "set", " needs to be followed by a position then a proposition"));
                 yield false;
             }
             case "del" -> {
-                sender.sendMessage(TextUtils.composed("Command ", "del", " need to be followed by a position"));
+                sender.sendMessage(TextUtils.composed("Command ", "del", " needs to be followed by a position"));
                 yield false;
             }
             case "answers" -> {
-                sender.sendMessage(TextUtils.composed("Command ", "answers", " need to be followed by a position"));
+                sender.sendMessage(TextUtils.composed("Command ", "answers", " needs to be followed by a position"));
                 yield false;
             }
             case null, default -> {
@@ -71,16 +73,17 @@ public class QuestionPropositionStep implements CreationStep {
         if (questionCreator.getPropositions().isEmpty()) {
             sender.sendMessage(TextUtils.normalWithPrefix("No propositions have been made"));
         } else {
+            final TextComponent.Builder message = Component.text();
             for (int position = 0; position < questionCreator.getPropositions().size(); position++) {
                 final String proposition = questionCreator.getPropositions().get(position);
                 if (questionCreator.getAnswers().contains(proposition)) {
-                    sender.sendMessage(QuestionsTime.PREFIX.append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
+                    message.append(QuestionsTime.PREFIX.append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
                                     .clickEvent(ClickEvent.runCommand( "/qtc del " + (position + 1)))
                                     .hoverEvent(HoverEvent.showText(Component.text("Delete the proposition " + (position + 1)))))
                             .append(Component.text("     "))
                             .append(Component.text(" " + (position + 1) + "] " + proposition + " (an answer)", NamedTextColor.BLUE)));
                 } else {
-                    sender.sendMessage(QuestionsTime.PREFIX.append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
+                    message.append(QuestionsTime.PREFIX.append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
                                     .clickEvent(ClickEvent.runCommand("/qtc del " + (position + 1)))
                                     .hoverEvent(HoverEvent.showText(Component.text("Delete the proposition " + (position + 1)))))
                             .append(Component.text("[A]", NamedTextColor.BLUE, TextDecoration.BOLD)
@@ -89,6 +92,7 @@ public class QuestionPropositionStep implements CreationStep {
                             .append(TextUtils.composedWithoutPrefix(" ", (position + 1) + "] ", proposition)));
                 }
             }
+            sender.sendMessage(message.build());
         }
         return false;
     }
@@ -121,19 +125,21 @@ public class QuestionPropositionStep implements CreationStep {
 
     private void addProposition(final Audience sender, final String argument, final QuestionCreator questionCreator) {
         final String[] propositions = argument.split(";");
-        if (propositions.length + questionCreator.getPropositions().size() > 128) {
+        final List<String> savedPropositions = questionCreator.getPropositions();
+        if (propositions.length + savedPropositions.size() > 128) {
             sender.sendMessage(TextUtils.composed("You cannot add more than ", String.valueOf(128), " propositions. Please remove some propositions before adding new ones"));
         } else {
-            sender.sendMessage(TextUtils.normalWithPrefix("Propositions added: "));
+            final TextComponent.Builder message = Component.text().append(TextUtils.normalWithPrefix("Propositions added: ")).appendNewline();
             for (int i = 0; i < propositions.length; i++) {
                 final String proposition = propositions[i];
-                if(questionCreator.getPropositions().contains(proposition)) {
-                    sender.sendMessage(TextUtils.composed("Proposition ", proposition, " already exists"));
+                if(savedPropositions.contains(proposition)) {
+                    message.append(TextUtils.composed("Proposition ", proposition, " already exists"));
                 } else {
-                    questionCreator.getPropositions().add(proposition);
-                    sender.sendMessage(TextUtils.composed("", "[" + (i + 1) + "] ", proposition));
+                    savedPropositions.add(proposition);
+                    message.append(TextUtils.composed("", "[" + (i + 1) + "] ", proposition));
                 }
             }
+            sender.sendMessage(message.build());
         }
     }
 

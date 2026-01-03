@@ -50,22 +50,4 @@ public class ManualAskQuestionCommand implements CommandExecutor {
         return CommandResult.success();
     }
 
-    // Aim to avoid the system to ask a new question after the previous one finished
-    //private boolean asked;
-
-    //protected ManualLauncher(PluginContainer pluginContainer, Game game, QuestionAskManager questionAskManager) {
-    //    super(pluginContainer, game, questionAskManager);
-    //}
-
-    //@Override
-    //public void start() {
-        /*if(!this.questionAskManager.isQuestionHasBeenAsked()) {
-            if(this.asked) {
-                this.asked = false;
-            } else {
-                this.questionAskManager.askQuestion();
-                this.asked = true;
-            }
-        }*/
-    //}
 }

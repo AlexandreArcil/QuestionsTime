@@ -43,7 +43,7 @@ public class QuestionCreator {
                 new Malus(this.moneyMalus, this.announceMalus, this.commandsMalus.toArray(new OutcomeCommand[0])) : null;
         final Question.QuestionBuilder questionBuilder;
         if (this.questionType == Types.MULTI) {
-            this.answers.replaceAll(proposition -> String.valueOf(this.propositions.indexOf(proposition) + 1));
+            this.answers.replaceAll(answer -> String.valueOf(this.propositions.indexOf(answer) + 1));
             questionBuilder = QuestionMulti.builder().setPropositions(new LinkedHashSet<>(this.propositions));
         } else {
             questionBuilder = Question.builder();

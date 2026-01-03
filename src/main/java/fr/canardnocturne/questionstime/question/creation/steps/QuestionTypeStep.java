@@ -49,7 +49,7 @@ public class QuestionTypeStep implements CreationStep {
         return switch (questionCreator.getQuestionType()) {
             case SIMPLE -> SimpleQuestionAnswerStep.INSTANCE;
             case MULTI -> QuestionPropositionStep.INSTANCE;
-            default -> throw new IllegalArgumentException("Question's type should be defined");
+            case null, default -> throw new IllegalArgumentException("Question's type should be defined");
         };
     }
 }

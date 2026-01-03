@@ -40,13 +40,9 @@ public class ItemStackSerializer {
             final String itemCount = itemSplit[1];
             if (!itemCount.isEmpty()) {
                 if (StringUtils.isNumeric(itemCount)) {
-                    if (Integer.parseInt(itemCount) >= 0) {
-                        count = Integer.parseInt(itemCount);
-                    } else {
-                        throw new IllegalArgumentException("The item count is negative");
-                    }
+                    count = Integer.parseInt(itemCount);
                 } else {
-                    throw new IllegalArgumentException("The item count isn't an number");
+                    throw new IllegalArgumentException("The item count isn't an number or is negative: '" + itemCount + "'");
                 }
             }
         }
@@ -95,11 +91,11 @@ public class ItemStackSerializer {
             isSer.append(MiniMessage.miniMessage().serialize(customName));
         });
         is.get(Keys.LORE).ifPresent(lore -> {
-            if (!hasMultiple) {
-                isSer.append(";");
-            }
             if (customNameOpt.isEmpty()) {
                 isSer.append(";");
+                if (!hasMultiple) {
+                    isSer.append(";");
+                }
             }
             isSer.append(";");
             final String loreStr = MiniMessage.miniMessage().serialize(Component.join(JoinConfiguration.newlines(), lore));

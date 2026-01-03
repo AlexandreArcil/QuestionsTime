@@ -38,8 +38,9 @@ public class Question {
 
     public static Types getType(final ConfigurationNode questionNode) {
         if (!questionNode.node("question").empty() && !questionNode.node("answer").empty()) {
-            if (!questionNode.node("proposition").empty())
+            if (!questionNode.node("proposition").empty()) {
                 return Types.MULTI;
+            }
             return Types.SIMPLE;
         }
         return Types.ERROR;
@@ -164,13 +165,14 @@ public class Question {
                 throw new QuestionException("The answer is not defined");
             }
             if (this.weight <= 0) {
-                throw new QuestionException("weight must be greater or equal than 1");
+                throw new QuestionException("Weight must be greater or equal than 1");
             }
             //check that the positions of the prizes doesn't have "hole"
             if(this.prizes != null) {
                 this.prizes.stream().map(Prize::getPosition).reduce((previous, current) -> {
-                    if (previous + 1 != current) {
-                        throw new QuestionException("The position prize " + current + " is missing");
+                    final int next = previous + 1;
+                    if (next != current) {
+                        throw new QuestionException("The position prize " + next + " is missing");
                     }
                     return current;
                 });
