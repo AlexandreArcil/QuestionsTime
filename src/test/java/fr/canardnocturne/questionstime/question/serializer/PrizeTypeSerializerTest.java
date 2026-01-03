@@ -11,7 +11,11 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PrizeTypeSerializerTest {
 
@@ -125,6 +129,20 @@ class PrizeTypeSerializerTest {
         prizeTypeSerializer.serialize(Prize.class, prize, root);
 
         Mockito.verifyNoInteractions(root);
+    }
+
+    @Test
+    void serializeWithOnlyMoneyPrize() throws SerializationException {
+        final Prize prize = new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1);
+        final ConfigurationNode root = Mockito.mock(ConfigurationNode.class);
+        final ConfigurationNode node = Mockito.mock(ConfigurationNode.class);
+        Mockito.when(root.node(Mockito.anyString())).thenReturn(node);
+
+        final PrizeTypeSerializer prizeTypeSerializer = new PrizeTypeSerializer();
+        prizeTypeSerializer.serialize(Prize.class, prize, root);
+
+        Mockito.verify(root).node("money");
+        Mockito.verify(node).set(50);
     }
 
 }

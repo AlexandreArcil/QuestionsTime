@@ -1,11 +1,12 @@
 package fr.canardnocturne.questionstime.message.component;
 
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
+import fr.canardnocturne.questionstime.util.MiniMessageTest;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ComponentCommandTest {
 
@@ -18,7 +19,7 @@ class ComponentCommandTest {
         final Component result = componentCommand.process(command);
 
         assertNotNull(result);
-        assertTrue(MiniMessage.miniMessage().serialize(result).contains(message));
+        assertEquals(message, MiniMessageTest.NO_STYLE_COMPONENT.serialize(result));
     }
 
 }

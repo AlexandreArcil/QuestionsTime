@@ -7,9 +7,9 @@ import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.type.Question;
 import fr.canardnocturne.questionstime.question.type.QuestionMulti;
+import fr.canardnocturne.questionstime.util.MiniMessageTest;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
@@ -338,8 +338,8 @@ class SimpleQuestionAnnouncerTest {
             final List<Component> messages = componentCaptor.getAllValues();
             assertEquals(expectedContainsMessages.size(), messages.size());
             for (int i = 0; i < expectedContainsMessages.size(); i++) {
-                final String message = MiniMessage.miniMessage().serialize(messages.get(i));
-                final String expectedMesssage = MiniMessage.miniMessage().serialize(expectedContainsMessages.get(i));
+                final String message = MiniMessageTest.NO_STYLE_COMPONENT.serialize(messages.get(i));
+                final String expectedMesssage = MiniMessageTest.NO_STYLE_COMPONENT.serialize(expectedContainsMessages.get(i));
                 assertTrue(message.contains(expectedMesssage),
                         "Expected message '" + message + "' contains '" + expectedMesssage + "'");
             }

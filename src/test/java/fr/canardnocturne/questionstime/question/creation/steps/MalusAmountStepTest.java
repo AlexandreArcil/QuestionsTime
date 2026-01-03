@@ -1,12 +1,15 @@
 package fr.canardnocturne.questionstime.question.creation.steps;
 
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
+import fr.canardnocturne.questionstime.util.MiniMessageTest;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -16,16 +19,16 @@ import org.spongepowered.api.service.economy.EconomyService;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class MalusAmountStepTest {
 
     @Mock
     Audience sender;
-
-    @Captor
-    ArgumentCaptor<Component> message;
 
     QuestionCreator questionCreator;
 
@@ -48,6 +51,7 @@ class MalusAmountStepTest {
             Mockito.when(serviceProviderMock.provide(EconomyService.class)).thenReturn(Optional.of(economyServiceMock));
             Mockito.when(serverMock.serviceProvider()).thenReturn(serviceProviderMock);
             spongeMock.when(Sponge::server).thenReturn(serverMock);
+
             assertNotNull(MalusAmountStep.INSTANCE.question());
         }
     }
@@ -55,51 +59,62 @@ class MalusAmountStepTest {
     @Test
     void handleValidMalusAmount() {
         final String answer = "100";
-        assertFalse(MalusAmountStep.INSTANCE.handle(sender, answer, questionCreator));
 
+        final boolean stepCompleted = MalusAmountStep.INSTANCE.handle(sender, answer, questionCreator);
+
+        assertFalse(stepCompleted);
         assertEquals(100, questionCreator.getMoneyMalus());
-        Mockito.verify(sender).sendMessage(message.capture());
-        assertNotNull(message.getValue());
+        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
+                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("Is 100 correct ? If yes, answer with [/qtc yes] or just re-answer to change the value")));
     }
 
     @Test
     void handleZeroMalusAmount() {
         questionCreator.setMoneyMalus(50);
         final String answer = "0";
-        assertFalse(MalusAmountStep.INSTANCE.handle(sender, answer, questionCreator));
 
+        final boolean stepCompleted = MalusAmountStep.INSTANCE.handle(sender, answer, questionCreator);
+
+        assertFalse(stepCompleted);
         assertEquals(0, questionCreator.getMoneyMalus());
-        Mockito.verify(sender).sendMessage(message.capture());
-        assertNotNull(message.getValue());
+        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
+                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("You really don't want to add money as a malus ? If yes, answer with [/qtc yes] or just re-answer to change the value")));
     }
 
     @Test
     void handleNegativeMalusAmount() {
         questionCreator.setMoneyMalus(50);
         final String answer = "-50";
-        assertFalse(MalusAmountStep.INSTANCE.handle(sender, answer, questionCreator));
 
+        final boolean stepCompleted = MalusAmountStep.INSTANCE.handle(sender, answer, questionCreator);
+
+        assertFalse(stepCompleted);
         assertEquals(50, questionCreator.getMoneyMalus());
-        Mockito.verify(sender).sendMessage(message.capture());
-        assertNotNull(message.getValue());
+        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
+                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("-50 is not a positive amount")));
     }
 
     @Test
     void handleInvalidNumber() {
         questionCreator.setMoneyMalus(50);
         final String answer = "invalid";
-        assertFalse(MalusAmountStep.INSTANCE.handle(sender, answer, questionCreator));
 
+        final boolean stepCompleted = MalusAmountStep.INSTANCE.handle(sender, answer, questionCreator);
+
+        assertFalse(stepCompleted);
         assertEquals(50, questionCreator.getMoneyMalus());
-        Mockito.verify(sender).sendMessage(message.capture());
-        assertNotNull(message.getValue());
+        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
+                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("invalid is not a number")));
     }
 
     @Test
     void handleYesAnswer() {
         questionCreator.setMoneyMalus(50);
         final String answer = "yes";
-        assertTrue(MalusAmountStep.INSTANCE.handle(sender, answer, questionCreator));
+
+        final boolean stepCompleted = MalusAmountStep.INSTANCE.handle(sender, answer, questionCreator);
+
+        assertTrue(stepCompleted);
     }
 
     @Test
@@ -111,7 +126,9 @@ class MalusAmountStepTest {
             Mockito.when(serverMock.serviceProvider()).thenReturn(serviceProviderMock);
             spongeMock.when(Sponge::server).thenReturn(serverMock);
 
-            assertTrue(MalusAmountStep.INSTANCE.shouldSkip(questionCreator));
+            final boolean shouldSkip = MalusAmountStep.INSTANCE.shouldSkip(questionCreator);
+
+            assertTrue(shouldSkip);
         }
     }
 
@@ -125,7 +142,9 @@ class MalusAmountStepTest {
             Mockito.when(serverMock.serviceProvider()).thenReturn(serviceProviderMock);
             spongeMock.when(Sponge::server).thenReturn(serverMock);
 
-            assertFalse(MalusAmountStep.INSTANCE.shouldSkip(questionCreator));
+            final boolean shouldSkip = MalusAmountStep.INSTANCE.shouldSkip(questionCreator);
+
+            assertFalse(shouldSkip);
         }
     }
 

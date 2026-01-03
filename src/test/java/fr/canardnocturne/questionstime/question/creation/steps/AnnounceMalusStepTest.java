@@ -3,27 +3,24 @@ package fr.canardnocturne.questionstime.question.creation.steps;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreator;
+import fr.canardnocturne.questionstime.util.MiniMessageTest;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class AnnounceMalusStepTest {
 
     @Mock
     Audience sender;
-
-    @Captor
-    ArgumentCaptor<Component> message;
 
     QuestionCreator questionCreator;
 
@@ -54,8 +51,8 @@ class AnnounceMalusStepTest {
     @Test
     void invalidAnswer() {
         assertFalse(AnnounceMalusStep.INSTANCE.handle(sender, "invalid", questionCreator));
-        Mockito.verify(sender).sendMessage(message.capture());
-        assertNotNull(message.getValue());
+        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
+                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("The answer can only be yes or no, not invalid")));
     }
 
     @Test
