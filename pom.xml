@@ -4,7 +4,7 @@
 
     <groupId>fr.cananocturne</groupId>
     <artifactId>questionstime</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3.0</version>
 
     <name>QuestionsTime</name>
     <description>Ask questions and gain prize for the winner !</description>
