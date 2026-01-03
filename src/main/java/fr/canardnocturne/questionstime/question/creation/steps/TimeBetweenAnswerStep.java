@@ -20,7 +20,7 @@ public class TimeBetweenAnswerStep implements CreationStep {
         return TextUtils.composed("What is the time between two answers ? Answer with this time format ", "/qtc xhxmxs", ", where ")
                 .append(TextUtils.special("x")).append(TextUtils.normal(" is a number"))
                 .appendNewline()
-                .append(TextUtils.normal("Answer with ").append(TextUtils.commandShortcut("0h0m0s")).append(TextUtils.normal(" if you don't want to add any.")));
+                .append(TextUtils.normalWithPrefix("Answer with ").append(TextUtils.commandShortcut("0h0m0s")).append(TextUtils.normal(" if you don't want to add any.")));
     }
 
     @Override

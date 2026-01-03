@@ -34,7 +34,7 @@ public class PrizeItemsStep implements CreationStep {
                             .clickEvent(ClickEvent.openUrl("https://docs.advntr.dev/minimessage/format.html")))
                 .appendNewline().append(TextUtils.composed("The ", "Lore", " can have multiple lines by separating them with ", "<br>"))
                 .appendNewline().append(TextUtils.composed("The ", "Position", " is the winner position, default is the first"))
-                .appendNewline().append(TextUtils.example("/qtc minecraft:stone;5;<yellow><bold>Old Stone;Emits a low light"))
+                .appendNewline().append(TextUtils.example("/qtc add minecraft:stone;5;<yellow><bold>Old Stone;Emits a low light"))
                 .appendNewline().append(TextUtils.normalWithPrefix("To go to the next step or skip this step, type "))
                 .append(TextUtils.commandShortcut("confirm"));
     }
