@@ -155,9 +155,7 @@ class QuestionPropositionStepTest {
     void removesProposition() {
         final String answer = "del 1";
         final List<String> propositions = new ArrayList<>(List.of("Coin", "Other"));
-        final List<String> answers = new ArrayList<>();
         Mockito.when(questionCreator.getPropositions()).thenReturn(propositions);
-        Mockito.when(questionCreator.getAnswers()).thenReturn(answers);
 
         final boolean finished = QuestionPropositionStep.INSTANCE.handle(sender, answer, questionCreator);
 
@@ -166,9 +164,6 @@ class QuestionPropositionStepTest {
         assertEquals("Other", propositions.getFirst());
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
                 MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("Proposition [1] Coin deleted !")
-        ));
-        Mockito.verify(sender, Mockito.never()).sendMessage(Mockito.argThat(component ->
-                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("The proposition was automatically removed from the answers")
         ));
     }
 
@@ -176,9 +171,7 @@ class QuestionPropositionStepTest {
     void removesPropositionAndAnswer() {
         final String answer = "del 1";
         final List<String> propositions = new ArrayList<>(List.of("Coin", "Other"));
-        final List<String> answers = new ArrayList<>(List.of("Coin"));
         Mockito.when(questionCreator.getPropositions()).thenReturn(propositions);
-        Mockito.when(questionCreator.getAnswers()).thenReturn(answers);
 
         final boolean finished = QuestionPropositionStep.INSTANCE.handle(sender, answer, questionCreator);
 
@@ -188,74 +181,19 @@ class QuestionPropositionStepTest {
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
                 MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("Proposition [1] Coin deleted !")
         ));
-        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
-                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("The proposition was automatically removed from the answers")
-        ));
-        assertFalse(answers.contains("Coin"));
-    }
-
-    @Test
-    void addPropositionAsAnswer() {
-        final String answer = "answers 1";
-        final List<String> propositions = List.of("Coin", "Other");
-        final List<String> answers = new ArrayList<>();
-        Mockito.when(questionCreator.getPropositions()).thenReturn(propositions);
-        Mockito.when(questionCreator.getAnswers()).thenReturn(answers);
-
-        final boolean finished = QuestionPropositionStep.INSTANCE.handle(sender, answer, questionCreator);
-
-        assertFalse(finished);
-        assertEquals(1, answers.size());
-        assertEquals("Coin", answers.getFirst());
-        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
-                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("Proposition [1] Coin added as an answer")
-        ));
-    }
-
-    @Test
-    void propositionAlreadyAnAnswer() {
-        final String answer = "answers 1";
-        final List<String> propositions = List.of("Coin", "Other");
-        final List<String> answers = new ArrayList<>(List.of("Coin"));
-        Mockito.when(questionCreator.getPropositions()).thenReturn(propositions);
-        Mockito.when(questionCreator.getAnswers()).thenReturn(answers);
-
-        final boolean finished = QuestionPropositionStep.INSTANCE.handle(sender, answer, questionCreator);
-
-        assertFalse(finished);
-        assertEquals(1, answers.size());
-        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
-                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("Proposition [1] Coin is already an answer")
-        ));
-    }
-
-    @Test
-    void addAnswerOutOfBounds() {
-        final String answer = "answers 2";
-        final List<String> propositions = List.of("Coin");
-        Mockito.when(questionCreator.getPropositions()).thenReturn(propositions);
-
-        final boolean finished = QuestionPropositionStep.INSTANCE.handle(sender, answer, questionCreator);
-
-        assertFalse(finished);
-        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
-                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("There is no proposition at position 2. Type [/qtc list] to see them")
-        ));
     }
 
     @Test
     void listPropositions() {
         final String answer = "list";
         final List<String> propositions = List.of("Coin", "Duck");
-        final List<String> answers = List.of("Coin");
         Mockito.when(questionCreator.getPropositions()).thenReturn(propositions);
-        Mockito.when(questionCreator.getAnswers()).thenReturn(answers);
 
         final boolean finished = QuestionPropositionStep.INSTANCE.handle(sender, answer, questionCreator);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
-            MiniMessageTest.containsAll(component, "1] Coin (an answer)", "2] Duck")
+            MiniMessageTest.containsAll(component, "1] Coin", "2] Duck")
         ));
     }
 
@@ -277,29 +215,11 @@ class QuestionPropositionStepTest {
     void confirmPropositions() {
         final String answer = "confirm";
         final List<String> propositions = List.of("Coin", "Duck");
-        final List<String> answers = List.of("Coin");
         Mockito.when(questionCreator.getPropositions()).thenReturn(propositions);
-        Mockito.when(questionCreator.getAnswers()).thenReturn(answers);
 
         final boolean finished = QuestionPropositionStep.INSTANCE.handle(sender, answer, questionCreator);
 
         assertTrue(finished);
-    }
-
-    @Test
-    void confirmPropositionsNotEnoughAnswers() {
-        final String answer = "confirm";
-        final List<String> propositions = List.of("Coin", "Duck");
-        final List<String> answers = new ArrayList<>();
-        Mockito.when(questionCreator.getPropositions()).thenReturn(propositions);
-        Mockito.when(questionCreator.getAnswers()).thenReturn(answers);
-
-        final boolean finished = QuestionPropositionStep.INSTANCE.handle(sender, answer, questionCreator);
-
-        assertFalse(finished);
-        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
-                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("You need to choose at least one answer with /qtc answers [proposition] before confirming")
-        ));
     }
 
     @Test
@@ -348,15 +268,14 @@ class QuestionPropositionStepTest {
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
-                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("Answer unknown command not recognized between add, set, del, list, answers or confirm")
+                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("Answer unknown command not recognized between add, set, del, list or confirm")
         ));
     }
 
     static Stream<Arguments> oneArgumentCommandsWithMissingArgument() {
         return Stream.of(Arguments.of("add", "Command add needs to be followed by a proposition"),
                 Arguments.of("set", "Command set needs to be followed by a position then a proposition"),
-                Arguments.of("del", "Command del needs to be followed by a position"),
-                Arguments.of("answers", "Command answers needs to be followed by a position")
+                Arguments.of("del", "Command del needs to be followed by a position")
         );
     }
 
@@ -379,8 +298,17 @@ class QuestionPropositionStepTest {
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
-                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("Answer foobar not recognized between add, set, del, list, answers or confirm")
+                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("Answer foobar not recognized between add, set, del, list or confirm")
         ));
+    }
+
+    @Test
+    void canSkip() {
+        final String answer = "confirm";
+
+        final boolean finished = QuestionPropositionStep.INSTANCE.handle(sender, answer, questionCreator);
+
+        assertTrue(finished);
     }
 
     @Test

@@ -1,24 +1,27 @@
 package fr.canardnocturne.questionstime.question.serializer;
 
-import com.sun.source.tree.Tree;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.Prize;
-import fr.canardnocturne.questionstime.question.type.Question;
-import fr.canardnocturne.questionstime.question.type.Question.Types;
-import fr.canardnocturne.questionstime.question.type.QuestionMulti;
+import fr.canardnocturne.questionstime.question.Question;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.SequencedSet;
+import java.util.Set;
+import java.util.SortedSet;
 
-public class QuestionTypeSerializer implements TypeSerializer<Question> {
+public class QuestionSerializer implements TypeSerializer<Question> {
 
     @Override
     public Question deserialize(final Type type, final ConfigurationNode node) throws SerializationException {
-        final Types questionType = Question.getType(node);
-        if (questionType == Types.ERROR) {
+        if (this.isInvalid(node)) {
             throw new SerializationException(node, Question.class, "The question " + node.key() + " contain one or several errors. " +
                     "Check if he contain the sections \"question\" and \"answer\" at least.");
         }
@@ -32,16 +35,11 @@ public class QuestionTypeSerializer implements TypeSerializer<Question> {
         final Set<Prize> prizes = new HashSet<>(prizeNode.getList(Prize.class, Collections.emptyList()));
         final ConfigurationNode malusNode = node.node("malus");
         final Malus malus = malusNode.get(Malus.class);
+        final SequencedSet<String> propositions = new LinkedHashSet<>(node.node("proposition").getList(String.class, Collections.emptyList()));
 
-        final Question.QuestionBuilder questionBuilder;
-        if (questionType == Types.MULTI) {
-            final LinkedHashSet<String> propositions = new LinkedHashSet<>(node.node("proposition").getList(String.class, Collections.emptyList()));
-            questionBuilder = QuestionMulti.builder().setPropositions(propositions);
-        } else {
-            questionBuilder = Question.builder();
-        }
+        final Question.QuestionBuilder questionBuilder = Question.builder();
         try {
-            return questionBuilder.setAnswers(answers).setQuestion(askedQuestion).setPrizes(prizes)
+            return questionBuilder.setAnswers(answers).setPropositions(propositions).setQuestion(askedQuestion).setPrizes(prizes)
                     .setMalus(malus).setTimer(timer).setTimeBetweenAnswer(timeBetweenAnswer)
                     .setWeight(weight).build();
         } catch (final Exception e) {
@@ -57,14 +55,13 @@ public class QuestionTypeSerializer implements TypeSerializer<Question> {
             node.node("timer").set(question.getTimer());
             node.node("time-between-answer").set(question.getTimeBetweenAnswer());
             node.node("weight").set(question.getWeight());
-            if (question instanceof QuestionMulti) {
-                node.node("proposition").set(((QuestionMulti) question).getPropositions());
+            if(!question.getPropositions().isEmpty()) {
+                node.node("proposition").setList(String.class, new ArrayList<>(question.getPropositions()));
             }
 
             final ConfigurationNode prizeNode = node.node("prizes");
-            final Optional<SortedSet<Prize>> prizesOptional = question.getPrizes();
-            if (prizesOptional.isPresent()) {
-                prizeNode.setList(Prize.class, new ArrayList<>(prizesOptional.get()));
+            if (!question.getPrizes().isEmpty()) {
+                prizeNode.setList(Prize.class, new ArrayList<>(question.getPrizes()));
             }
             final ConfigurationNode malusNode = node.node("malus");
             final Optional<Malus> malusOptional = question.getMalus();
@@ -72,6 +69,10 @@ public class QuestionTypeSerializer implements TypeSerializer<Question> {
                 malusNode.set(Malus.class, malusOptional.get());
             }
         }
+    }
+
+    private boolean isInvalid(final ConfigurationNode node) {
+        return node.node("question").empty() || node.node("answer").empty();
     }
 
 }

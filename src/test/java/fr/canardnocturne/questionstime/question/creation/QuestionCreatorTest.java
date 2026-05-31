@@ -1,7 +1,6 @@
 package fr.canardnocturne.questionstime.question.creation;
 
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
-import fr.canardnocturne.questionstime.question.type.Question;
 import io.leangen.geantyref.TypeToken;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -217,7 +216,6 @@ class QuestionCreatorTest {
     void buildSimpleQuestion() {
         final String questionAsked = "What sound does a duck make?";
         final QuestionCreator creator = new QuestionCreator();
-        creator.setQuestionType(Question.Types.SIMPLE);
         creator.setQuestion(questionAsked);
         creator.getAnswers().add("Y");
         creator.getAnswers().add("Z");
@@ -236,9 +234,8 @@ class QuestionCreatorTest {
         final var question = creator.build();
 
         assertEquals(questionAsked, question.getQuestion());
-        assertEquals(Question.Types.SIMPLE, question.getType());
         assertEquals(2, question.getAnswers().size());
-        assertEquals(3, question.getPrizes().get().size());
+        assertEquals(3, question.getPrizes().size());
         assertEquals(2, question.getMalus().get().getCommands().length);
         assertEquals(50, question.getMalus().get().getMoney());
         assertTrue(question.getMalus().get().isAnnounce());
@@ -251,7 +248,6 @@ class QuestionCreatorTest {
     void buildPropositionQuestion() {
         final String questionAsked = "What sound does a duck make?";
         final QuestionCreator creator = new QuestionCreator();
-        creator.setQuestionType(Question.Types.MULTI);
         creator.setQuestion(questionAsked);
         creator.getPropositions().add("Y");
         creator.getPropositions().add("Z");
@@ -271,9 +267,8 @@ class QuestionCreatorTest {
         final var question = creator.build();
 
         assertEquals(questionAsked, question.getQuestion());
-        assertEquals(Question.Types.MULTI, question.getType());
         assertEquals(1, question.getAnswers().size());
-        assertEquals(3, question.getPrizes().get().size());
+        assertEquals(3, question.getPrizes().size());
         assertEquals(2, question.getMalus().get().getCommands().length);
         assertEquals(50, question.getMalus().get().getMoney());
         assertTrue(question.getMalus().get().isAnnounce());

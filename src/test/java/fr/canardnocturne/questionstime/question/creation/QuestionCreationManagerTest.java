@@ -4,7 +4,7 @@ import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import fr.canardnocturne.questionstime.question.creation.orchestrator.QuestionCreationOrchestrator;
 import fr.canardnocturne.questionstime.question.creation.orchestrator.QuestionCreationOrchestratorFactory;
 import fr.canardnocturne.questionstime.question.save.QuestionRegister;
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.util.MiniMessageTest;
 import net.kyori.adventure.text.Component;
 import org.apache.logging.log4j.Logger;

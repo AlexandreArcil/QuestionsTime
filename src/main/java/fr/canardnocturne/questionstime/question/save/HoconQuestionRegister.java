@@ -1,6 +1,6 @@
 package fr.canardnocturne.questionstime.question.save;
 
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;

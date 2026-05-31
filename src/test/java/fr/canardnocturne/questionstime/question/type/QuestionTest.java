@@ -1,12 +1,17 @@
 package fr.canardnocturne.questionstime.question.type;
 
 import fr.canardnocturne.questionstime.QuestionException;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.question.component.Prize;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.SequencedSet;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class QuestionTest {
@@ -39,6 +44,43 @@ class QuestionTest {
                         new Prize(50, false, null, null, 5)))
                 .build());
         Assertions.assertEquals("The position prize 2 is missing", exception.getMessage());
+    }
+
+    @Test
+    void oneProposition() {
+        final Question.QuestionBuilder builder = Question.builder()
+                .setQuestion("What sound a duck does?")
+                .setAnswers(new LinkedHashSet<>(List.of("Quack")))
+                .setWeight(1)
+                .setPropositions(new LinkedHashSet<>(List.of("Quack")));
+        final Exception exception = assertThrows(QuestionException.class, builder::build);
+        assertEquals("The question need at least 2 propositions", exception.getMessage());
+    }
+
+    @Test
+    void tooManyPropositions() {
+        final SequencedSet<String> propositions = new LinkedHashSet<>();
+        for (int i = 0; i < 129; i++) {
+            propositions.add("Quack " + i);
+        }
+        final Question.QuestionBuilder builder = Question.builder()
+                .setQuestion("What sound a duck does?")
+                .setAnswers(new LinkedHashSet<>(List.of("Quack 1")))
+                .setWeight(1)
+                .setPropositions(propositions);
+        final Exception exception = assertThrows(QuestionException.class, builder::build);
+        assertEquals("The question need at most 128 propositions", exception.getMessage());
+    }
+
+    @Test
+    void answerOutOfBounds() {
+        final Question.QuestionBuilder builder = Question.builder()
+                .setQuestion("What sound a duck does?")
+                .setAnswers(new LinkedHashSet<>(List.of("Beeee")))
+                .setWeight(1)
+                .setPropositions(new LinkedHashSet<>(List.of("Quack", "Meow", "Woof")));
+        final Exception exception = assertThrows(QuestionException.class, builder::build);
+        assertEquals("The question answers '[Beeee]' need to be a proposition", exception.getMessage());
     }
 
 }

@@ -1,20 +1,23 @@
 package fr.canardnocturne.questionstime.question.creation;
 
 import fr.canardnocturne.questionstime.question.component.Malus;
-import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
-import fr.canardnocturne.questionstime.question.type.Question;
-import fr.canardnocturne.questionstime.question.type.Question.Types;
-import fr.canardnocturne.questionstime.question.type.QuestionMulti;
+import fr.canardnocturne.questionstime.question.component.Prize;
+import fr.canardnocturne.questionstime.question.Question;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class QuestionCreator {
 
-    private Types questionType;
     private String question;
     private final List<String> answers;
     private final List<String> propositions;
@@ -41,19 +44,9 @@ public class QuestionCreator {
                 .collect(Collectors.toSet());
         final Malus malus = this.moneyMalus > 0 || !this.commandsMalus.isEmpty() ?
                 new Malus(this.moneyMalus, this.announceMalus, this.commandsMalus.toArray(new OutcomeCommand[0])) : null;
-        final Question.QuestionBuilder questionBuilder;
-        if (this.questionType == Types.MULTI) {
-            this.answers.replaceAll(answer -> String.valueOf(this.propositions.indexOf(answer) + 1));
-            questionBuilder = QuestionMulti.builder().setPropositions(new LinkedHashSet<>(this.propositions));
-        } else {
-            questionBuilder = Question.builder();
-        }
-        return questionBuilder.setQuestion(this.question).setAnswers(new HashSet<>(this.answers))
+        final Question.QuestionBuilder questionBuilder = Question.builder();
+        return questionBuilder.setQuestion(this.question).setPropositions(new LinkedHashSet<>(this.propositions)).setAnswers(new HashSet<>(this.answers))
                 .setPrizes(prizes).setMalus(malus).setTimer(this.duration).setTimeBetweenAnswer(this.timeBetweenAnswer).setWeight(this.weight).build();
-    }
-
-    public Types getQuestionType() {
-        return questionType;
     }
 
     public List<String> getPropositions() {
@@ -150,10 +143,6 @@ public class QuestionCreator {
 
     public List<String> getAnswers() {
         return answers;
-    }
-
-    public void setQuestionType(final Types questionType) {
-        this.questionType = questionType;
     }
 
     public void setWeight(final int weight) {

@@ -3,8 +3,7 @@ package fr.canardnocturne.questionstime.config;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
-import fr.canardnocturne.questionstime.question.type.Question;
-import fr.canardnocturne.questionstime.question.type.QuestionMulti;
+import fr.canardnocturne.questionstime.question.Question;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.data.Keys;
@@ -54,10 +53,10 @@ public class QuestionTimeConfiguration {
                             .build()}, null, 1)))
                     .setMalus(new Malus(100, true, new OutcomeCommand[]{new OutcomeCommand("Teleport to Hell", "tp @loser 0 -64 0")}))
                     .build(),
-            QuestionMulti.builder()
+            Question.builder()
                     .setQuestion("Among these propositions, who created the QuestionsTime plugin ?")
                     .setPropositions(new LinkedHashSet<>(Arrays.asList("CanardNocturne", "Notch", "Pewdiepie", "Donald Trump", "Chicky the chicken")))
-                    .setAnswers(Set.of("1"))
+                    .setAnswers(Set.of("CanardNocturne"))
                     .setPrizes(Set.of(new Prize(500, true, null,
                             new OutcomeCommand[]{new OutcomeCommand("A secret about the plugin's creator",
                                     "msg @winner Here is the secret about the plugin's creator: he's not a real duck")},

@@ -7,7 +7,7 @@ import fr.canardnocturne.questionstime.question.ask.answer.PlayerAnswerQuestionH
 import fr.canardnocturne.questionstime.question.ask.launcher.QuestionLauncher;
 import fr.canardnocturne.questionstime.question.ask.picker.QuestionPicker;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreationManager;
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;

@@ -4,7 +4,7 @@ import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.message.Messages;
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.component.Prize;
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.text.Component;
 import org.apache.logging.log4j.Logger;
@@ -39,7 +39,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
         this.playersAnswerCooldown = new HashMap<>();
         this.question = question;
         this.game = game;
-        this.winnersCount = question.getPrizes().map(Set::size).orElse(1);
+        this.winnersCount = question.getPrizes().isEmpty() ? 1 : question.getPrizes().size();
         this.winners = new LinkedHashSet<>(this.winnersCount);
     }
 
@@ -89,52 +89,51 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
 
     private void givePrizes() {
         final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class).orElse(null);
-        this.question.getPrizes().ifPresent(prizes -> {
-            final Task givePrizeTask = Task.builder().execute(() -> {
-                        if (prizes.isEmpty()) {
-                            return;
+        final SortedSet<Prize> prizes = this.question.getPrizes();
+        if (prizes.isEmpty()) {
+            return;
+        }
+        final Task givePrizeTask = Task.builder().execute(() -> {
+                    int position = 1;
+                    for (final Player winner : this.winners) {
+                        final int finalPosition = position;
+                        final Prize prize = prizes.stream()
+                                .filter(p -> p.getPosition() == finalPosition)
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalStateException("The prize for the winner at position " + finalPosition + " can't be found"));
+
+                        winner.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.REWARD_ANNOUNCE.getMessage())));
+
+                        for (final ItemStack item : prize.getItemStacks()) {
+                            winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_PRIZE.format()
+                                    .setQuantity(item.quantity())
+                                    .setModId(item)
+                                    .setItem(item)
+                                    .message()));
+                            winner.inventory().offer(item.copy());
                         }
-                        int position = 1;
-                        for (final Player winner : this.winners) {
-                            final int finalPosition = position;
-                            final Prize prize = prizes.stream()
-                                    .filter(p -> p.getPosition() == finalPosition)
-                                    .findFirst()
-                                    .orElseThrow(() -> new IllegalStateException("The prize for the winner at position " + finalPosition + " can't be found"));
 
-                            winner.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.REWARD_ANNOUNCE.getMessage())));
+                        final List<String> commands = Arrays.stream(prize.getCommands()).map(OutcomeCommand::command).toList();
+                        this.executeCommands(commands, winner, "@winner");
 
-                            for (final ItemStack item : prize.getItemStacks()) {
-                                winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_PRIZE.format()
-                                        .setQuantity(item.quantity())
-                                        .setModId(item)
-                                        .setItem(item)
-                                        .message()));
-                                winner.inventory().offer(item.copy());
+                        if (prize.getMoney() > 0 && economyService != null) {
+                            winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_MONEY.format()
+                                    .setMoney(prize.getMoney())
+                                    .setCurrency(economyService)
+                                    .message()));
+                            final Optional<UniqueAccount> account = economyService.findOrCreateAccount(winner.uniqueId());
+                            if (account.isPresent()) {
+                                account.get().deposit(economyService.defaultCurrency(), BigDecimal.valueOf(prize.getMoney()));
+                            } else {
+                                this.logger.error("The economy account for {} ({}) can't be found or created.", winner.name(), winner.uniqueId());
                             }
-
-                            final List<String> commands = Arrays.stream(prize.getCommands()).map(OutcomeCommand::command).toList();
-                            this.executeCommands(commands, winner, "@winner");
-
-                            if (prize.getMoney() > 0 && economyService != null) {
-                                winner.sendMessage(QuestionsTime.PREFIX.append(Messages.REWARD_MONEY.format()
-                                        .setMoney(prize.getMoney())
-                                        .setCurrency(economyService)
-                                        .message()));
-                                final Optional<UniqueAccount> account = economyService.findOrCreateAccount(winner.uniqueId());
-                                if (account.isPresent()) {
-                                    account.get().deposit(economyService.defaultCurrency(), BigDecimal.valueOf(prize.getMoney()));
-                                } else {
-                                    this.logger.error("The economy account for {} ({}) can't be found or created.", winner.name(), winner.uniqueId());
-                                }
-                            }
-                            position++;
                         }
-                    }).delay(3, TimeUnit.SECONDS)
-                    .plugin(this.plugin)
-                    .build();
-            this.game.asyncScheduler().submit(givePrizeTask, "[QT]GiveWinnerPrize");
-        });
+                        position++;
+                    }
+        }).delay(3, TimeUnit.SECONDS)
+                .plugin(this.plugin)
+                .build();
+        this.game.asyncScheduler().submit(givePrizeTask, "[QT]GiveWinnerPrize");
     }
 
     private void executeCommands(final Collection<String> commands, final Player player, final String selector) {

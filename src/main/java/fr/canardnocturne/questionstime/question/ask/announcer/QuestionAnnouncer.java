@@ -1,6 +1,6 @@
 package fr.canardnocturne.questionstime.question.ask.announcer;
 
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.List;

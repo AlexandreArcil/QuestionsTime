@@ -35,6 +35,6 @@ public class QuestionStep implements CreationStep {
 
     @Override
     public Step next(final QuestionCreator questionCreator) {
-        return QuestionTypeStep.INSTANCE;
+        return QuestionPropositionStep.INSTANCE;
     }
 }

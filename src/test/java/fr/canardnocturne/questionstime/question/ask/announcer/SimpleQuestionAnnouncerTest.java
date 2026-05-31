@@ -5,8 +5,7 @@ import fr.canardnocturne.questionstime.message.Messages;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.component.Prize;
-import fr.canardnocturne.questionstime.question.type.Question;
-import fr.canardnocturne.questionstime.question.type.QuestionMulti;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.util.MiniMessageTest;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
@@ -37,6 +36,7 @@ import org.spongepowered.plugin.PluginContainer;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.SequencedSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -104,11 +104,11 @@ class SimpleQuestionAnnouncerTest {
         final OutcomeCommand malus1 = new OutcomeCommand("malus1", "");
         final OutcomeCommand malus2 = new OutcomeCommand("malus2", "");
         final Malus malus = new Malus(50, true, new OutcomeCommand[]{malus1, malus2});
-        final LinkedHashSet<String> propositions = new LinkedHashSet<>();
+        final SequencedSet<String> propositions = new LinkedHashSet<>();
         propositions.add("proposition1");
         propositions.add("proposition2");
         propositions.add("proposition3");
-        final Question question = QuestionMulti.builder().setPropositions(propositions).setQuestion("question").setAnswers(Set.of("1")).setWeight(1)
+        final Question question = Question.builder().setPropositions(propositions).setQuestion("question").setAnswers(Set.of("proposition1")).setWeight(1)
                 .setPrizes(Set.of(Prize.builder(1).setAnnounce(true).setMoney(50)
                                 .addCommand(winner1)
                                 .addCommand(winner2)

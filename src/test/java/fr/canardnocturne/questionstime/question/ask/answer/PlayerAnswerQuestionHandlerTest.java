@@ -4,7 +4,7 @@ import fr.canardnocturne.questionstime.message.Messages;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.component.Prize;
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.util.MiniMessageTest;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.text.Component;

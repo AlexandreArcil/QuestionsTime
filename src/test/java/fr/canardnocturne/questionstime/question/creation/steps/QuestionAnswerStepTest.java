@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class SimpleQuestionAnswerStepTest {
+class QuestionAnswerStepTest {
     
     @Mock
     private QuestionCreator qc;
@@ -27,14 +27,14 @@ class SimpleQuestionAnswerStepTest {
 
     @Test
     void questionDefined() {
-        assertNotNull(SimpleQuestionAnswerStep.INSTANCE.question());
+        assertNotNull(QuestionAnswerStep.INSTANCE.question());
     }
 
     @Test
     void confirmWithNoAnswers() {
         Mockito.when(qc.getAnswers()).thenReturn(new ArrayList<>());
 
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "confirm", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "confirm", qc);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
@@ -47,7 +47,7 @@ class SimpleQuestionAnswerStepTest {
         final List<String> answers = new ArrayList<>(List.of("A"));
         Mockito.when(qc.getAnswers()).thenReturn(answers);
 
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "confirm", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "confirm", qc);
 
         assertTrue(finished);
     }
@@ -56,7 +56,7 @@ class SimpleQuestionAnswerStepTest {
     void listNoAnswers() {
         Mockito.when(qc.getAnswers()).thenReturn(new ArrayList<>());
 
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "list", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "list", qc);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
@@ -69,7 +69,7 @@ class SimpleQuestionAnswerStepTest {
         final List<String> answers = new ArrayList<>(List.of("One", "Two"));
         Mockito.when(qc.getAnswers()).thenReturn(answers);
 
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "list", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "list", qc);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
@@ -82,7 +82,7 @@ class SimpleQuestionAnswerStepTest {
         final List<String> answers = new ArrayList<>();
         Mockito.when(qc.getAnswers()).thenReturn(answers);
 
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "add Coin", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "add Coin", qc);
 
         assertFalse(finished);
         assertTrue(answers.contains("Coin"));
@@ -93,7 +93,7 @@ class SimpleQuestionAnswerStepTest {
         final List<String> answers = new ArrayList<>();
         Mockito.when(qc.getAnswers()).thenReturn(answers);
 
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "add A;B", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "add A;B", qc);
 
         assertFalse(finished);
         assertTrue(answers.contains("A"));
@@ -105,7 +105,7 @@ class SimpleQuestionAnswerStepTest {
         final List<String> answers = new ArrayList<>(List.of("Coin"));
         Mockito.when(qc.getAnswers()).thenReturn(answers);
 
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "add Coin", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "add Coin", qc);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
@@ -118,7 +118,7 @@ class SimpleQuestionAnswerStepTest {
         final List<String> answers = new ArrayList<>(List.of("First", "Second"));
         Mockito.when(qc.getAnswers()).thenReturn(answers);
 
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "del 1", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "del 1", qc);
 
         assertFalse(finished);
         assertFalse(answers.contains("First"));
@@ -126,7 +126,7 @@ class SimpleQuestionAnswerStepTest {
 
     @Test
     void removeNonNumericPosition() {
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "del a", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "del a", qc);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
@@ -141,7 +141,7 @@ class SimpleQuestionAnswerStepTest {
         final List<String> answers = new ArrayList<>(List.of("OnlyOne"));
         Mockito.when(qc.getAnswers()).thenReturn(answers);
 
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "del 2", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "del 2", qc);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
@@ -151,7 +151,7 @@ class SimpleQuestionAnswerStepTest {
 
     @Test
     void removeNegativePosition() {
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "del -1", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "del -1", qc);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
@@ -161,7 +161,7 @@ class SimpleQuestionAnswerStepTest {
 
     @Test
     void deleteWithoutPosition() {
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "del", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "del", qc);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
@@ -171,7 +171,7 @@ class SimpleQuestionAnswerStepTest {
 
     @Test
     void addWithoutAnswer() {
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "add", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "add", qc);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
@@ -180,8 +180,20 @@ class SimpleQuestionAnswerStepTest {
     }
 
     @Test
+    void addAnswerNotProposition() {
+        Mockito.when(qc.getPropositions()).thenReturn(List.of("first", "second"));
+
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "add second;third;fourth", qc);
+
+        assertFalse(finished);
+        Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
+                MiniMessageTest.NO_STYLE_COMPONENT.serialize(component).contains("The following answers are not propositions: third, fourth")
+        ));
+    }
+
+    @Test
     void unknownCommand() {
-        final boolean finished = SimpleQuestionAnswerStep.INSTANCE.handle(sender, "coin", qc);
+        final boolean finished = QuestionAnswerStep.INSTANCE.handle(sender, "coin", qc);
 
         assertFalse(finished);
         Mockito.verify(sender).sendMessage(Mockito.argThat(component ->
@@ -191,11 +203,11 @@ class SimpleQuestionAnswerStepTest {
 
     @Test
     void shouldNotSkip() {
-        assertFalse(SimpleQuestionAnswerStep.INSTANCE.shouldSkip(qc));
+        assertFalse(QuestionAnswerStep.INSTANCE.shouldSkip(qc));
     }
 
     @Test
     void nextDefined() {
-        assertNotNull(SimpleQuestionAnswerStep.INSTANCE.next(qc));
+        assertNotNull(QuestionAnswerStep.INSTANCE.next(qc));
     }
 }

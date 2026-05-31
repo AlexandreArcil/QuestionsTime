@@ -44,8 +44,9 @@ import fr.canardnocturne.questionstime.question.save.QuestionRegister;
 import fr.canardnocturne.questionstime.question.serializer.MalusTypeSerializer;
 import fr.canardnocturne.questionstime.question.serializer.OutcomeCommandTypeSerializer;
 import fr.canardnocturne.questionstime.question.serializer.PrizeTypeSerializer;
-import fr.canardnocturne.questionstime.question.serializer.QuestionTypeSerializer;
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.serializer.QuestionSerializer;
+import fr.canardnocturne.questionstime.question.Question;
+import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -129,7 +130,7 @@ public class QuestionsTime {
         final ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder()
                 .defaultOptions(ConfigurationOptions.defaults()
                         .serializers(ConfigurationOptions.defaults().serializers().childBuilder()
-                                .register(Question.class, new QuestionTypeSerializer())
+                                .register(Question.class, new QuestionSerializer())
                                 .register(Prize.class, new PrizeTypeSerializer())
                                 .register(Malus.class, new MalusTypeSerializer())
                                 .register(OutcomeCommand.class, new OutcomeCommandTypeSerializer())

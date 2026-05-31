@@ -4,7 +4,7 @@ import fr.canardnocturne.questionstime.question.ask.announcer.QuestionAnnouncer;
 import fr.canardnocturne.questionstime.question.ask.launcher.QuestionLauncher;
 import fr.canardnocturne.questionstime.question.ask.picker.QuestionPicker;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreationManager;
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +24,7 @@ import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -134,7 +135,7 @@ class QuestionAskManagerTest {
         Mockito.when(game.server()).thenReturn(server);
         Mockito.when(server.onlinePlayers()).thenReturn(Set.of(player2));
         Mockito.when(questionPicker.pick()).thenReturn(question);
-        Mockito.when(question.getPrizes()).thenReturn(Optional.empty());
+        Mockito.when(question.getPrizes()).thenReturn(Collections.emptySortedSet());
 
         final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, 1);
         manager.askRandomQuestion();
@@ -163,7 +164,7 @@ class QuestionAskManagerTest {
             Mockito.when(game.server()).thenReturn(server);
             Mockito.when(server.onlinePlayers()).thenReturn(Set.of(player));
             Mockito.when(question.getAnswers()).thenReturn(Set.of(answer));
-            Mockito.when(question.getPrizes()).thenReturn(Optional.empty());
+            Mockito.when(question.getPrizes()).thenReturn(Collections.emptySortedSet());
 
             final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, 1);
             manager.setQuestionLauncher(launcher);
@@ -196,7 +197,7 @@ class QuestionAskManagerTest {
             Mockito.when(game.server()).thenReturn(server);
             Mockito.when(server.onlinePlayers()).thenReturn(Set.of(player));
             Mockito.when(question.getAnswers()).thenReturn(Set.of(answer));
-            Mockito.when(question.getPrizes()).thenReturn(Optional.empty());
+            Mockito.when(question.getPrizes()).thenReturn(Collections.emptySortedSet());
             Mockito.when(question.isTimed()).thenReturn(true);
             Mockito.when(question.getTimer()).thenReturn(5);
 

@@ -12,16 +12,20 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang3.StringUtils;
 
-public class SimpleQuestionAnswerStep implements CreationStep {
+import java.util.Arrays;
+import java.util.List;
 
-    public static final CreationStep INSTANCE = new SimpleQuestionAnswerStep();
+public class QuestionAnswerStep implements CreationStep {
+
+    public static final CreationStep INSTANCE = new QuestionAnswerStep();
 
     @Override
     public Component question() {
-        return TextUtils.composed("What's the answer to the question ? Answer with ", "/qtc add [answer]")
+        return TextUtils.composed("What's the answer or answers to the question ? Answer with ", "/qtc add [answer]")
                 .appendNewline().append(TextUtils.composed("The question can have multiple answers, separate them with ", ";", " or use ", "/qtc add [answer]", " multiple times"))
                 .appendNewline().append(TextUtils.composed("To see the answers, use ", "/qtc list"))
                 .appendNewline().append(TextUtils.composed("To remove an answer, use ", "/qtc del [position]"))
+                .appendNewline().append(TextUtils.normalWithPrefix("If you added propositions, an answer must be a proposition"))
                 .appendNewline().append(TextUtils.normalWithPrefix("When you're done, type "))
                 .append(TextUtils.commandShortcut("confirm"));
     }
@@ -55,6 +59,15 @@ public class SimpleQuestionAnswerStep implements CreationStep {
 
     private void addAnswer(final Audience sender, final String answer, final QuestionCreator questionCreator) {
         final String[] answers = answer.split(";");
+        if(!questionCreator.getPropositions().isEmpty()) {
+            final List<String> answersNotProposition = Arrays.stream(answers)
+                    .filter(answerProposition -> !questionCreator.getPropositions().contains(answerProposition))
+                    .toList();
+            if(!answersNotProposition.isEmpty()) {
+                sender.sendMessage(TextUtils.composed("The following answers are not propositions: ", String.join(", ", answersNotProposition)));
+                return;
+            }
+        }
         if(answers.length == 1) {
             if(questionCreator.getAnswers().contains(answer)) {
                 sender.sendMessage(TextUtils.composed("Answer ", answer, " already exists"));

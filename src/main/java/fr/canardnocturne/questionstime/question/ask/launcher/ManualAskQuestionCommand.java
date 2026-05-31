@@ -1,7 +1,7 @@
 package fr.canardnocturne.questionstime.question.ask.launcher;
 
 import fr.canardnocturne.questionstime.question.ask.QuestionAskManager;
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.command.CommandExecutor;

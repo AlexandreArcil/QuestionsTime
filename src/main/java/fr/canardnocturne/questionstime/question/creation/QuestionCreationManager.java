@@ -5,7 +5,7 @@ import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import fr.canardnocturne.questionstime.question.creation.orchestrator.QuestionCreationOrchestrator;
 import fr.canardnocturne.questionstime.question.creation.orchestrator.QuestionCreationOrchestratorFactory;
 import fr.canardnocturne.questionstime.question.save.QuestionRegister;
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

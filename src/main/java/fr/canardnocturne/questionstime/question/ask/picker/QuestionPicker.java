@@ -1,7 +1,7 @@
 package fr.canardnocturne.questionstime.question.ask.picker;
 
 import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 
 public abstract class QuestionPicker {
 

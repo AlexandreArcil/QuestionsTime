@@ -1,6 +1,6 @@
 package fr.canardnocturne.questionstime.question.ask.pool;
 
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
