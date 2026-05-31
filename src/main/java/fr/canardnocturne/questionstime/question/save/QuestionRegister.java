@@ -1,6 +1,6 @@
 package fr.canardnocturne.questionstime.question.save;
 
-import fr.canardnocturne.questionstime.question.type.Question;
+import fr.canardnocturne.questionstime.question.Question;
 
 import java.io.IOException;
 
