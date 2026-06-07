@@ -2,6 +2,26 @@ package fr.canardnocturne.questionstime;
 
 import com.google.inject.Inject;
 import fr.canardnocturne.questionstime.command.BaseCommandExecutor;
+import fr.canardnocturne.questionstime.command.change.ChangeConfigurationExecutor;
+import fr.canardnocturne.questionstime.command.change.QuestionModifier;
+import fr.canardnocturne.questionstime.command.change.QuestionModifierImpl;
+import fr.canardnocturne.questionstime.command.set.answers.SetQuestionAnswers;
+import fr.canardnocturne.questionstime.command.set.answers.SetQuestionAnswersList;
+import fr.canardnocturne.questionstime.command.set.SetQuestionExecutor;
+import fr.canardnocturne.questionstime.command.set.SetQuestionTimeBetweenAnswer;
+import fr.canardnocturne.questionstime.command.set.SetQuestionTimerExecutor;
+import fr.canardnocturne.questionstime.command.set.SetQuestionWeightExecutor;
+import fr.canardnocturne.questionstime.command.set.malus.SetQuestionMalusAnnounceExecutor;
+import fr.canardnocturne.questionstime.command.set.malus.SetQuestionMalusCommandsExecutor;
+import fr.canardnocturne.questionstime.command.set.malus.SetQuestionMalusCommandsListExecutor;
+import fr.canardnocturne.questionstime.command.set.malus.SetQuestionMalusMoneyExecutor;
+import fr.canardnocturne.questionstime.command.set.prize.SetQuestionPrizesCommandsExecutor;
+import fr.canardnocturne.questionstime.command.set.prize.SetQuestionPrizesCommandsListExecutor;
+import fr.canardnocturne.questionstime.command.set.prize.SetQuestionPrizesItemsExecutor;
+import fr.canardnocturne.questionstime.command.set.prize.SetQuestionPrizesItemsListExecutor;
+import fr.canardnocturne.questionstime.command.set.prize.SetQuestionPrizesMoneyExecutor;
+import fr.canardnocturne.questionstime.command.set.propositions.SetQuestionPropositions;
+import fr.canardnocturne.questionstime.command.set.propositions.SetQuestionPropositionsList;
 import fr.canardnocturne.questionstime.config.QuestionTimeConfiguration;
 import fr.canardnocturne.questionstime.config.loader.PluginConfigurationLoader;
 import fr.canardnocturne.questionstime.config.loader.SafePluginConfigurationLoader;
@@ -55,6 +75,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -185,12 +206,164 @@ public class QuestionsTime {
                 .addParameter(questionParameter)
                 .executor(new ManualAskQuestionCommand(this.questionAskManager, this.questionLauncher, specificQuestionParameter, this.logger))
                 .build();
+
+//        final ChangeQuestionComponentExecutor changeQuestionComponentExecutor = new ChangeQuestionComponentExecutor(
+//                new QuestionModifierImpl(this.questionPool), questionRegister, specificQuestionParameter);
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+
+        final Command.Parameterized commandQTSetQuestionMalusAnnounce = Command.builder()
+                .shortDescription(Component.text("Set the malus announce for a question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionMalusAnnounceExecutor.VALUE)
+                .executor(new SetQuestionMalusAnnounceExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionMalusCommandsList = Command.builder()
+                .shortDescription(Component.text("List the malus commands for a question").color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionMalusCommandsListExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionMalusCommands = Command.builder()
+                .shortDescription(Component.text("Set the question malus commands").color(NamedTextColor.YELLOW))
+                .addParameters(Parameter.firstOf(Parameter.subcommand(commandQTSetQuestionMalusCommandsList, "list"),
+                        SetQuestionMalusCommandsExecutor.ACTIONS))
+                .executor(new SetQuestionMalusCommandsExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionMalusMoney = Command.builder()
+                .shortDescription(Component.text("Set the malus money for a question").color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionMalusMoneyExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetMalus = Command.builder()
+                .shortDescription(Component.text("Set the malus for a question").color(NamedTextColor.YELLOW))
+                .addChild(commandQTSetQuestionMalusAnnounce, "announce")
+                .addChild(commandQTSetQuestionMalusCommands, "commands")
+                .addChild(commandQTSetQuestionMalusMoney, "money")
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionPrizesMoney = Command.builder()
+                .shortDescription(Component.text("Set the prizes money for a question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionPrizesMoneyExecutor.POSITION, SetQuestionPrizesMoneyExecutor.AMOUNT)
+                .executor(new SetQuestionPrizesMoneyExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionPrizesCommandsList = Command.builder()
+                .shortDescription(Component.text("List the question commands prizes").color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionPrizesCommandsListExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionPrizesItemsList = Command.builder()
+                .shortDescription(Component.text("List the question items prizes").color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionPrizesItemsListExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionPrizesCommands = Command.builder()
+                .shortDescription(Component.text("Set the question prizes commands").color(NamedTextColor.YELLOW))
+                .addParameters(Parameter.firstOf(Parameter.subcommand(commandQTSetQuestionPrizesCommandsList, "list"),
+                        SetQuestionPrizesCommandsExecutor.ACTIONS))
+                .executor(new SetQuestionPrizesCommandsExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionPrizesItems = Command.builder()
+                .shortDescription(Component.text("Set the question prizes items").color(NamedTextColor.YELLOW))
+                .addParameters(Parameter.firstOf(Parameter.subcommand(commandQTSetQuestionPrizesItemsList, "list"),
+                        SetQuestionPrizesItemsExecutor.ACTIONS))
+                .executor(new SetQuestionPrizesItemsExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionPrizes = Command.builder()
+                .shortDescription(Component.text("Set the prizes for a question").color(NamedTextColor.YELLOW))
+//                .executor(changeQuestionComponentExecutor)
+                .addChild(commandQTSetQuestionPrizesMoney, "money")
+                .addChild(commandQTSetQuestionPrizesCommands, "commands")
+                .addChild(commandQTSetQuestionPrizesItems, "items")
+                .build();
+
+        final Command.Parameterized commandQTSetWeight = Command.builder()
+                .shortDescription(Component.text("Set the weight of a question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionWeightExecutor.WEIGHT)
+                .executor(new SetQuestionWeightExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetTimer = Command.builder()
+                .shortDescription(Component.text("Set the timer of a question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionTimerExecutor.TIMER)
+                .executor(new SetQuestionTimerExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetTimeBetweenAnswer = Command.builder()
+                .shortDescription(Component.text("Set the time between answers of a question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionTimeBetweenAnswer.TIME_BETWEEN_ANSWER)
+                .executor(new SetQuestionTimeBetweenAnswer())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionQuestion = Command.builder()
+                .shortDescription(Component.text("Set the question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionExecutor.QUESTION)
+                .executor(new SetQuestionExecutor())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionAnswersList = Command.builder()
+                .shortDescription(Component.text("List the question answers").color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionAnswersList(specificQuestionParameter))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionAnswers = Command.builder()
+                .shortDescription(Component.text("Set the question answers").color(NamedTextColor.YELLOW))
+                .addParameters(Parameter.firstOf(Parameter.subcommand(commandQTSetQuestionAnswersList, "list"), SetQuestionAnswers.ACTIONS))
+                .executor(new SetQuestionAnswers(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionPropositionsList = Command.builder()
+                .shortDescription(Component.text("List the question propositions").color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionPropositionsList())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionPropositions = Command.builder()
+                .shortDescription(Component.text("Set the question propositions").color(NamedTextColor.YELLOW))
+                .addParameters(Parameter.firstOf(Parameter.subcommand(commandQTSetQuestionPropositionsList, "list"), SetQuestionAnswers.ACTIONS))
+                .executor(new SetQuestionPropositions())
+                .build();
+
+        final Command.Parameterized commandQTSetQuestion = Command.builder()
+                .shortDescription(Component.text("Change a value of a question").color(NamedTextColor.YELLOW))
+                .permission("questionstime.command.set")
+                .addParameters(specificQuestionParameter, Parameter.firstOf(
+                        Parameter.subcommand(commandQTSetQuestionAnswers, "answers"),
+                        Parameter.subcommand(commandQTSetQuestionPropositions,"propositions"),
+                        Parameter.subcommand(commandQTSetMalus, "malus"),
+                        Parameter.subcommand(commandQTSetQuestionPrizes, "prizes"),
+                        Parameter.subcommand(commandQTSetQuestionQuestion, "question"),
+                        Parameter.subcommand(commandQTSetTimer, "timer"),
+                        Parameter.subcommand(commandQTSetWeight, "weight"),
+                        Parameter.subcommand(commandQTSetTimeBetweenAnswer, "time_between_answer")))
+                .executor(context -> CommandResult.error(TextUtils.errorWithPrefix("Select a question")))
+                .build();
+
+        final Command.Parameterized commandQTSetConfig = Command.builder()
+                .shortDescription(Component.text("Change a configuration value").color(NamedTextColor.YELLOW))
+                .permission("questionstime.command.set")
+                .addParameters(ChangeConfigurationExecutor.CONFIG, ChangeConfigurationExecutor.VALUE)
+                .executor(new ChangeConfigurationExecutor(null))
+                .build();
+
+        final Command.Parameterized commandQTSet = Command.builder()
+                .shortDescription(Component.text("Change a configuration or question value").color(NamedTextColor.YELLOW))
+                .permission("questionstime.command.set")
+                .addChild(commandQTSetQuestion, "question")
+                .addChild(commandQTSetConfig, "config")
+                .build();
+
         final Command.Parameterized commandQTBase = Command.builder()
                 .shortDescription(Component.text("List of all subcommands").color(NamedTextColor.YELLOW))
                 .permission("questionstime.command.base")
                 .executor(new BaseCommandExecutor())
                 .addChild(commandQTAskQuestion, "ask")
+                .addChild(commandQTSet, "set")
                 .build();
+
+        //multiple childs: mis au meme niveau que les questions
+        //parameter.subcommands: on peut en mettre qu'un
         event.register(this.plugin, commandQTBase, "questionstime", "qt");
     }
 

@@ -9,6 +9,8 @@ public interface QuestionPool {
 
     void add(final Question question);
 
+    void replace(final Question question, final Question newQuestion);
+
     Optional<Question> get(final String question);
 
     Collection<Question> getAll();

@@ -32,6 +32,22 @@ public class Prize {
         this.position = builder.position;
     }
 
+    public Prize(final Prize prize) {
+        this.money = prize.money;
+        this.announce = prize.announce;
+        this.items = new ItemStack[prize.items.length];
+        for (int i = 0; i < prize.items.length; i++) {
+            final ItemStack item = prize.items[i];
+            this.items[i] = item.copy();
+        }
+        this.commands = new OutcomeCommand[prize.commands.length];
+        for (int i = 0; i < prize.commands.length; i++) {
+            final OutcomeCommand command = prize.commands[i];
+            this.commands[i] = new OutcomeCommand(command.message(), command.command());
+        }
+        this.position = prize.position;
+    }
+
     public int getMoney() {
         return money;
     }
@@ -75,6 +91,10 @@ public class Prize {
         return Objects.hashCode(position);
     }
 
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
     public static Builder builder(final int position) {
         return new Builder(position);
     }
@@ -91,6 +111,20 @@ public class Prize {
             this.position = position;
             this.items = new ArrayList<>();
             this.commands = new ArrayList<>();
+        }
+
+        private Builder(final Prize prize) {
+            this.money = prize.money;
+            this.announce = prize.announce;
+            this.position = prize.position;
+            this.items = new ArrayList<>();
+            for (final ItemStack item : prize.items) {
+                this.items.add(item.copy());
+            }
+            this.commands = new ArrayList<>();
+            for (final OutcomeCommand command : prize.commands) {
+                this.commands.add(new OutcomeCommand(command.message(), command.command()));
+            }
         }
 
         public int getMoney() {

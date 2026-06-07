@@ -73,6 +73,10 @@ public class Question {
         return new QuestionBuilder();
     }
 
+    public QuestionBuilder toBuilder() {
+        return new QuestionBuilder(this);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (!(o instanceof final Question question1)) return false;
@@ -112,6 +116,21 @@ public class Question {
             this.propositions = new LinkedHashSet<>();
             this.answers = new HashSet<>();
             this.prizes = new TreeSet<>(Comparator.comparingInt(Prize::getPosition));
+        }
+
+        private QuestionBuilder(final Question question) {
+            this();
+            this.question = question.question;
+            this.propositions.addAll(question.propositions);
+            this.answers.addAll(question.answers);
+            for (final Prize prize : question.prizes) {
+                final Prize prizeClone = new Prize(prize);
+                this.prizes.add(prizeClone);
+            }
+            this.malus = new Malus(question.malus);
+            this.timer = question.timer;
+            this.timeBetweenAnswer = question.timeBetweenAnswer;
+            this.weight = question.weight;
         }
 
         public QuestionBuilder setQuestion(final String question) {
@@ -161,8 +180,12 @@ public class Question {
             if (StringUtils.isEmpty(this.question)) {
                 throw new QuestionException("The question is not defined");
             }
-            if (this.answers == null || this.answers.isEmpty()) {
+            if (this.answers.isEmpty()) {
                 throw new QuestionException("The answer is not defined");
+            }
+            final Set<String> answersUnique = new HashSet<>(this.answers);
+            if(answersUnique.size() != this.answers.size()) {
+                throw new QuestionException("The answers are not unique");
             }
             if (this.weight <= 0) {
                 throw new QuestionException("Weight must be greater or equal than 1");
@@ -180,7 +203,7 @@ public class Question {
                 }
             }
             //check that the positions of the prizes doesn't have "hole"
-            if(this.prizes != null) {
+            if(!this.prizes.isEmpty()) {
                 this.prizes.stream().map(Prize::getPosition).reduce((previous, current) -> {
                     final int next = previous + 1;
                     if (next != current) {

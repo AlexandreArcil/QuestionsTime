@@ -46,6 +46,28 @@ public class HoconQuestionRegister implements QuestionRegister {
         }
     }
 
+    @Override
+    public void update(final Question question) throws IOException {
+        final CommentedConfigurationNode rootNode = this.getQuestionsNode();
+        try {
+            final CommentedConfigurationNode questionsNode = rootNode.node("questions");
+            final List<Question> questionsInNode = Optional.ofNullable(questionsNode.getList(Question.class)).orElse(Collections.emptyList());
+            final List<Question> questions = new ArrayList<>(questionsInNode);
+            questions.removeIf(q -> q.equals(question));
+            questions.add(question);
+            questionsNode.setList(Question.class, questions);
+            this.configLoader.save(rootNode);
+        } catch (final SerializationException e) {
+            logger.error("Question '" + question.getQuestion() + "' not updated because an error occurred when serializing it", e);
+            logger.debug(question);
+            throw e;
+        } catch (final ConfigurateException e) {
+            logger.error("Question '" + question.getQuestion() + "' not updated because an error occurred when saving it to the config file", e);
+            logger.debug(question);
+            throw e;
+        }
+    }
+
     private CommentedConfigurationNode getQuestionsNode() {
         if (this.questionsNode == null) {
             try {

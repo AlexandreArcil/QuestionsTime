@@ -21,6 +21,15 @@ public class ArrayListQuestionPool implements QuestionPool {
     }
 
     @Override
+    public void replace(final Question question, final Question newQuestion) {
+        final int index = this.questions.indexOf(question);
+        if (index == -1) {
+            throw new IllegalArgumentException("The question is not in the pool !");
+        }
+        this.questions.set(index, newQuestion);
+    }
+
+    @Override
     public Optional<Question> get(final String question) {
         return this.questions.stream()
                 .filter(registeredQuestion -> registeredQuestion.getQuestion().equals(question))

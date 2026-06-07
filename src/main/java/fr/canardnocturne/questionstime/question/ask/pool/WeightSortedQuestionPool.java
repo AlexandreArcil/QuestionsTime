@@ -20,6 +20,14 @@ public class WeightSortedQuestionPool implements QuestionPool {
     }
 
     @Override
+    public void replace(final Question question, final Question newQuestion) {
+        if (!this.weightTree.remove(question)) {
+            throw new IllegalArgumentException("The question is not in the pool !");
+        }
+        this.weightTree.add(newQuestion);
+    }
+
+    @Override
     public Optional<Question> get(final String question) {
         return this.weightTree.stream()
                 .filter(registeredQuestion -> registeredQuestion.getQuestion().equals(question))
