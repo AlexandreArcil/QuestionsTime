@@ -6,9 +6,9 @@ import fr.canardnocturne.questionstime.question.component.Prize;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.SequencedSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,14 +52,14 @@ class QuestionTest {
                 .setQuestion("What sound a duck does?")
                 .setAnswers(new LinkedHashSet<>(List.of("Quack")))
                 .setWeight(1)
-                .setPropositions(new LinkedHashSet<>(List.of("Quack")));
+                .setPropositions(List.of("Quack"));
         final Exception exception = assertThrows(QuestionException.class, builder::build);
         assertEquals("The question need at least 2 propositions", exception.getMessage());
     }
 
     @Test
     void tooManyPropositions() {
-        final SequencedSet<String> propositions = new LinkedHashSet<>();
+        final List<String> propositions = new ArrayList<>();
         for (int i = 0; i < 129; i++) {
             propositions.add("Quack " + i);
         }
@@ -78,7 +78,7 @@ class QuestionTest {
                 .setQuestion("What sound a duck does?")
                 .setAnswers(new LinkedHashSet<>(List.of("Beeee")))
                 .setWeight(1)
-                .setPropositions(new LinkedHashSet<>(List.of("Quack", "Meow", "Woof")));
+                .setPropositions(List.of("Quack", "Meow", "Woof"));
         final Exception exception = assertThrows(QuestionException.class, builder::build);
         assertEquals("The question answers '[Beeee]' need to be a proposition", exception.getMessage());
     }

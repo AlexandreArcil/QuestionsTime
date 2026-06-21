@@ -132,7 +132,7 @@ public class QuestionsTime {
         this.messageUpdater = new SafeMessageUpdater(logger);
         this.messageConfigurationUpdater = new AddMissingMessageConfiguration(logger);
         this.pluginConfigurationLoader = new SafePluginConfigurationLoader(logger);
-        this.configurationUpgrade = new ConfigurationUpgradeOrchestrator(List.of(new NoVersionConfigurationUpdate(), new FirstVersionConfigurationUpdate()), logger);
+        this.configurationUpgrade = new ConfigurationUpgradeOrchestrator(List.of(new NoVersionConfigurationUpdate(), new FirstVersionConfigurationUpdate(), new SecondVersionConfigurationUpdate()), logger);
         this.verifyConfigurationValues = new SetDefaultWrongConfigurationValues(logger);
     }
 

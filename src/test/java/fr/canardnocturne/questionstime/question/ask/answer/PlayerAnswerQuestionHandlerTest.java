@@ -92,10 +92,7 @@ class PlayerAnswerQuestionHandlerTest {
 
         final PlayerAnswerQuestionHandler handler = new PlayerAnswerQuestionHandler(logger, question, game, pluginContainer);
         try (final MockedStatic<Sponge> spongeMock = Mockito.mockStatic(Sponge.class)) {
-            final ServiceProvider.ServerScoped serviceProvider = Mockito.mock(ServiceProvider.ServerScoped.class);
-            Mockito.when(serviceProvider.provide(EconomyService.class)).thenReturn(Optional.empty());
             final Server server = Mockito.mock(Server.class);
-            Mockito.when(server.serviceProvider()).thenReturn(serviceProvider);
             spongeMock.when(Sponge::server).thenReturn(server);
 
             final boolean finishedOne = handler.answer(player, firstAnswer, List.of(player));
@@ -294,6 +291,39 @@ class PlayerAnswerQuestionHandlerTest {
         handler.end(List.of(player));
         Mockito.verify(player).sendMessage(message.capture());
         assertTrue(MiniMessageTest.NO_STYLE_COMPONENT.serialize(message.getValue()).contains(Messages.QUESTION_TIMER_OUT.getMessage()));
+    }
+
+    @Test
+    void answerNumberIsPropositionCorrect() {
+        final Question question = Question.builder().setQuestion("question").setAnswers(Set.of("proposition1"))
+                .setWeight(1).setPropositions(List.of("proposition1", "proposition2")).build();
+
+        final PlayerAnswerQuestionHandler handler = new PlayerAnswerQuestionHandler(logger, question, game, pluginContainer);
+        final boolean finished = handler.answer(player, "1", List.of(player));
+
+        assertTrue(finished);
+    }
+
+    @Test
+    void answerNumberIsPropositionIncorrect() {
+        final Question question = Question.builder().setQuestion("question").setAnswers(Set.of("proposition1"))
+                .setWeight(1).setPropositions(List.of("proposition1", "proposition2")).build();
+
+        final PlayerAnswerQuestionHandler handler = new PlayerAnswerQuestionHandler(logger, question, game, pluginContainer);
+        final boolean finished = handler.answer(player, "2", List.of(player));
+
+        assertFalse(finished);
+    }
+
+    @Test
+    void answerNumberIsNotProposition() {
+        final Question question = Question.builder().setQuestion("question").setAnswers(Set.of("proposition1"))
+                .setWeight(1).setPropositions(List.of("proposition1", "proposition2")).build();
+
+        final PlayerAnswerQuestionHandler handler = new PlayerAnswerQuestionHandler(logger, question, game, pluginContainer);
+        final boolean finished = handler.answer(player, "3", List.of(player));
+
+        assertFalse(finished);
     }
 
 }

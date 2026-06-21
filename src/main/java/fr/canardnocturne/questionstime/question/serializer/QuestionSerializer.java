@@ -1,8 +1,8 @@
 package fr.canardnocturne.questionstime.question.serializer;
 
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.Prize;
-import fr.canardnocturne.questionstime.question.Question;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
@@ -11,11 +11,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
-import java.util.SequencedSet;
 import java.util.Set;
-import java.util.SortedSet;
 
 public class QuestionSerializer implements TypeSerializer<Question> {
 
@@ -35,7 +33,7 @@ public class QuestionSerializer implements TypeSerializer<Question> {
         final Set<Prize> prizes = new HashSet<>(prizeNode.getList(Prize.class, Collections.emptyList()));
         final ConfigurationNode malusNode = node.node("malus");
         final Malus malus = malusNode.get(Malus.class);
-        final SequencedSet<String> propositions = new LinkedHashSet<>(node.node("proposition").getList(String.class, Collections.emptyList()));
+        final List<String> propositions = node.node("proposition").getList(String.class, Collections.emptyList());
 
         final Question.QuestionBuilder questionBuilder = Question.builder();
         try {

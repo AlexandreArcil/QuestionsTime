@@ -45,7 +45,7 @@ public class QuestionCreator {
         final Malus malus = this.moneyMalus > 0 || !this.commandsMalus.isEmpty() ?
                 new Malus(this.moneyMalus, this.announceMalus, this.commandsMalus.toArray(new OutcomeCommand[0])) : null;
         final Question.QuestionBuilder questionBuilder = Question.builder();
-        return questionBuilder.setQuestion(this.question).setPropositions(new LinkedHashSet<>(this.propositions)).setAnswers(new HashSet<>(this.answers))
+        return questionBuilder.setQuestion(this.question).setPropositions(this.propositions).setAnswers(new HashSet<>(this.answers))
                 .setPrizes(prizes).setMalus(malus).setTimer(this.duration).setTimeBetweenAnswer(this.timeBetweenAnswer).setWeight(this.weight).build();
     }
 

@@ -9,10 +9,10 @@ import fr.canardnocturne.questionstime.question.serializer.OutcomeCommandSeriali
 import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.item.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
-import java.util.SequencedSet;
 import java.util.TreeSet;
 
 public class QuestionModifierImpl implements QuestionModifier {
@@ -154,7 +154,7 @@ public class QuestionModifierImpl implements QuestionModifier {
                 builder.setAnswers(answers);
                 break;
             case PROPOSITIONS:
-                final SequencedSet<String> propositions = new LinkedHashSet<>(question.getPropositions());
+                final List<String> propositions = new ArrayList<>(question.getPropositions());
                 propositions.add(value);
                 builder.setPropositions(propositions);
                 break;
@@ -182,7 +182,7 @@ public class QuestionModifierImpl implements QuestionModifier {
                 builder.setAnswers(answers);
                 break;
             case PROPOSITIONS:
-                final SequencedSet<String> propositions = new LinkedHashSet<>(question.getPropositions());
+                final List<String> propositions = new ArrayList<>(question.getPropositions());
                 propositions.remove(value);
                 builder.setPropositions(propositions);
                 break;

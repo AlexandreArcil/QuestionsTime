@@ -7,6 +7,7 @@ import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.text.Component;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
@@ -47,7 +48,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     public boolean answer(final Player player, final String answer, final List<ServerPlayer> eligiblePlayers) {
         if (!this.canAnswer(player, eligiblePlayers)) return false;
 
-        if (this.question.getAnswers().contains(answer)) {
+        if (this.isAnswer(answer)) {
             this.winners.add(player);
             player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.FOUND_ANSWER.getMessage())));
             if(this.winners.size() == this.winnersCount) {
@@ -88,12 +89,12 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     }
 
     private void givePrizes() {
-        final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class).orElse(null);
         final SortedSet<Prize> prizes = this.question.getPrizes();
         if (prizes.isEmpty()) {
             return;
         }
         final Task givePrizeTask = Task.builder().execute(() -> {
+                    final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class).orElse(null);
                     int position = 1;
                     for (final Player winner : this.winners) {
                         final int finalPosition = position;
@@ -161,8 +162,8 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
     }
 
     private void giveMalus(final Player loser) {
-        final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class).orElse(null);
         question.getMalus().ifPresent(malus -> {
+            final EconomyService economyService = Sponge.server().serviceProvider().provide(EconomyService.class).orElse(null);
             if (economyService != null) {
                 loser.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWER_MALUS.format()
                         .setMoney(malus.getMoney())
@@ -199,6 +200,19 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
             return false;
         }
         return true;
+    }
+
+    private boolean isAnswer(final String answer) {
+        if(this.question.getAnswers().contains(answer)) {
+            return true;
+        }
+        final int propositionPosition = NumberUtils.toInt(answer);
+        if(propositionPosition >= 1 && propositionPosition <= this.question.getPropositions().size()) {
+            final String proposition =  this.question.getPropositions().get(propositionPosition - 1);
+            return this.question.getAnswers().contains(proposition);
+        } else {
+            return false;
+        }
     }
 
 }

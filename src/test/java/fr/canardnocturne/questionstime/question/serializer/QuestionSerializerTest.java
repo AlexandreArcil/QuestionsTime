@@ -104,7 +104,7 @@ class QuestionSerializerTest {
         final int timeBetweenAnswer = 60;
         final int weight = 90;
         final Set<String> answers = Set.of("quack");
-        final SequencedSet<String> propositions = new LinkedHashSet<>(List.of("quack", "green", "white", "red", "yellow"));
+        final List<String> propositions = List.of("quack", "green", "white", "red", "yellow");
         final Prize prize = Mockito.mock(Prize.class);
         final Malus malus = Mockito.mock(Malus.class);
         final Question question = Question.builder().setQuestion(questionText).setPropositions(propositions).setAnswers(answers).setWeight(weight)

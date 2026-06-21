@@ -10,7 +10,7 @@ import java.util.*;
 public class Question {
 
     private final String question;
-    private final SequencedSet<String> propositions;
+    private final List<String> propositions;
     private final Set<String> answers;
     private final SortedSet<Prize> prizes;
     private final Malus malus;
@@ -26,7 +26,7 @@ public class Question {
         this.malus = builder.malus;
         this.timeBetweenAnswer = builder.timeBetweenAnswer;
         this.weight = builder.weight;
-        this.propositions = Collections.unmodifiableSequencedSet(builder.propositions);
+        this.propositions = Collections.unmodifiableList(builder.propositions);
     }
 
     public SortedSet<Prize> getPrizes() {
@@ -37,7 +37,7 @@ public class Question {
         return answers;
     }
 
-    public SequencedSet<String> getPropositions() {
+    public List<String> getPropositions() {
         return propositions;
     }
 
@@ -104,7 +104,7 @@ public class Question {
     public static class QuestionBuilder {
 
         private String question;
-        private final SequencedSet<String> propositions;
+        private final List<String> propositions;
         private final Set<String> answers;
         private final SortedSet<Prize> prizes;
         private Malus malus;
@@ -113,7 +113,7 @@ public class Question {
         private int weight;
 
         private QuestionBuilder() {
-            this.propositions = new LinkedHashSet<>();
+            this.propositions = new ArrayList<>();
             this.answers = new HashSet<>();
             this.prizes = new TreeSet<>(Comparator.comparingInt(Prize::getPosition));
         }
@@ -138,7 +138,7 @@ public class Question {
             return this;
         }
 
-        public QuestionBuilder setPropositions(final SequencedSet<String> propositions) {
+        public QuestionBuilder setPropositions(final List<String> propositions) {
             this.propositions.clear();
             this.propositions.addAll(propositions);
             return this;

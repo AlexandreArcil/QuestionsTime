@@ -55,7 +55,7 @@ public class QuestionTimeConfiguration {
                     .build(),
             Question.builder()
                     .setQuestion("Among these propositions, who created the QuestionsTime plugin ?")
-                    .setPropositions(new LinkedHashSet<>(Arrays.asList("CanardNocturne", "Notch", "Pewdiepie", "Donald Trump", "Chicky the chicken")))
+                    .setPropositions(Arrays.asList("CanardNocturne", "Notch", "Pewdiepie", "Donald Trump", "Chicky the chicken"))
                     .setAnswers(Set.of("CanardNocturne"))
                     .setPrizes(Set.of(new Prize(500, true, null,
                             new OutcomeCommand[]{new OutcomeCommand("A secret about the plugin's creator",
@@ -140,7 +140,7 @@ public class QuestionTimeConfiguration {
     }
 
     public static class DefaultValues {
-        public static final int VERSION = 2;
+        public static final int VERSION = 3;
         public static final Mode MODE = Mode.FIXED;
         public static final int COOLDOWN = 36000;
         public static final int MIN_COOLDOWN = 36000;

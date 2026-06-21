@@ -6,4 +6,8 @@ public class ConfigurationUpgradeException extends Exception {
         super(cause);
   }
 
+  public ConfigurationUpgradeException(final String message) {
+        super(message);
+  }
+
 }

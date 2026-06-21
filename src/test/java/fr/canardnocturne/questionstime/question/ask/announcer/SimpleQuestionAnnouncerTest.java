@@ -2,10 +2,10 @@ package fr.canardnocturne.questionstime.question.ask.announcer;
 
 import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.message.Messages;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.component.Prize;
-import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.util.MiniMessageTest;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
@@ -33,10 +33,9 @@ import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.SequencedSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -104,7 +103,7 @@ class SimpleQuestionAnnouncerTest {
         final OutcomeCommand malus1 = new OutcomeCommand("malus1", "");
         final OutcomeCommand malus2 = new OutcomeCommand("malus2", "");
         final Malus malus = new Malus(50, true, new OutcomeCommand[]{malus1, malus2});
-        final SequencedSet<String> propositions = new LinkedHashSet<>();
+        final List<String> propositions = new ArrayList<>();
         propositions.add("proposition1");
         propositions.add("proposition2");
         propositions.add("proposition3");

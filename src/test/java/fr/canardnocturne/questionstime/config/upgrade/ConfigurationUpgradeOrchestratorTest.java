@@ -81,7 +81,7 @@ class ConfigurationUpgradeOrchestratorTest {
     }
 
     @Test
-    void updaterThrowSerializationException() throws ConfigurateException {
+    void updaterThrowSerializationException() throws ConfigurateException, ConfigurationUpgradeException {
         final Logger logger = Mockito.mock(Logger.class);
         final List<ConfigurationUpdater> configUpdaters = this.createConfigUpdaters();
         final CommentedConfigurationNode node = Mockito.mock(CommentedConfigurationNode.class);
@@ -99,7 +99,7 @@ class ConfigurationUpgradeOrchestratorTest {
     }
 
     @Test
-    void configLoaderThrowConfigurateException() throws ConfigurateException {
+    void configLoaderThrowConfigurateException() throws ConfigurateException, ConfigurationUpgradeException {
         final Logger logger = Mockito.mock(Logger.class);
         final List<ConfigurationUpdater> configUpdaters = this.createConfigUpdaters();
         final ConfigurationLoader<CommentedConfigurationNode> configLoader = Mockito.mock(ConfigurationLoader.class);
