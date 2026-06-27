@@ -28,7 +28,7 @@ public final class TextUtils {
     }
 
     public static Component normalWithPrefix(final String message) {
-        return QuestionsTime.PREFIX.appendSpace().append(normal(message));
+        return QuestionsTime.PREFIX.append(normal(message));
     }
 
     public static Component special(final String message) {
@@ -36,11 +36,11 @@ public final class TextUtils {
     }
 
     public static Component specialWithPrefix(final String message) {
-        return QuestionsTime.PREFIX.appendSpace().append(special(message));
+        return QuestionsTime.PREFIX.append(special(message));
     }
 
     public static Component composed(final String... texts) {
-        return QuestionsTime.PREFIX.appendSpace().append(composedWithoutPrefix(texts));
+        return QuestionsTime.PREFIX.append(composedWithoutPrefix(texts));
     }
 
     public static Component composedWithoutPrefix(final String... texts) {
@@ -62,13 +62,13 @@ public final class TextUtils {
     }
 
     public static Component example(final String content) {
-        return QuestionsTime.PREFIX.appendSpace()
+        return QuestionsTime.PREFIX
                 .append(Component.text("Example: ", NamedTextColor.DARK_GRAY))
                 .append(Component.text(content, NamedTextColor.GRAY, TextDecoration.ITALIC));
     }
 
     public static void sendTextToEveryone(final Component text, final List<ServerPlayer> players) {
-        players.forEach(player -> player.sendMessage(QuestionsTime.PREFIX.appendSpace().append(text)));
+        players.forEach(player -> player.sendMessage(QuestionsTime.PREFIX.append(text)));
     }
 
     public static Component displayItem(final ItemStack is) {

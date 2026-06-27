@@ -101,9 +101,10 @@ import java.util.Map;
 @Plugin("questionstime")
 public class QuestionsTime {
 
-    public static final TextComponent PREFIX = Component.text("[", NamedTextColor.AQUA)
+    public static final Component PREFIX = Component.text("[", NamedTextColor.AQUA)
             .append(Component.text("QT", NamedTextColor.YELLOW))
-            .append(Component.text("] ", NamedTextColor.AQUA));
+            .append(Component.text("]", NamedTextColor.AQUA))
+            .appendSpace();
 
     private final Logger logger;
     private final Game game;
