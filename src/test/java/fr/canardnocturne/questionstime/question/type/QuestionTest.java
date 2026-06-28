@@ -83,4 +83,14 @@ class QuestionTest {
         assertEquals("The question answers '[Beeee]' need to be a proposition", exception.getMessage());
     }
 
+    @Test
+    void malusNullNotSet() {
+        final Question question = Question.builder()
+                .setQuestion("What sound a duck does?")
+                .setAnswers(new LinkedHashSet<>(List.of("Beeee")))
+                .setWeight(1)
+                .build();
+        Assertions.assertDoesNotThrow(() -> question.toBuilder().build());
+    }
+
 }

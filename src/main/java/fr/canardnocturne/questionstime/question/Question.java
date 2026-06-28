@@ -127,7 +127,9 @@ public class Question {
                 final Prize prizeClone = new Prize(prize);
                 this.prizes.add(prizeClone);
             }
-            this.malus = new Malus(question.malus);
+            if(question.malus != null) {
+                this.malus = new Malus(question.malus);
+            }
             this.timer = question.timer;
             this.timeBetweenAnswer = question.timeBetweenAnswer;
             this.weight = question.weight;
