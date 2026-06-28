@@ -148,9 +148,6 @@ class QuestionAskManagerTest {
     void answerFound() {
         try(final MockedStatic<Sponge> spongeMock = Mockito.mockStatic(Sponge.class)) {
             final Server server = Mockito.mock(Server.class);
-            final ServiceProvider.ServerScoped serviceProvider = Mockito.mock(ServiceProvider.ServerScoped.class);
-            Mockito.when(serviceProvider.provide(EconomyService.class)).thenReturn(Optional.empty());
-            Mockito.when(server.serviceProvider()).thenReturn(serviceProvider);
             spongeMock.when(Sponge::server).thenReturn(server);
 
             final QuestionLauncher launcher = Mockito.mock(QuestionLauncher.class);
@@ -181,9 +178,6 @@ class QuestionAskManagerTest {
         try(final MockedStatic<Sponge> spongeMock = Mockito.mockStatic(Sponge.class);
             final MockedStatic<Task> taskMock = Mockito.mockStatic(Task.class)) {
             final Server server = Mockito.mock(Server.class);
-            final ServiceProvider.ServerScoped serviceProvider = Mockito.mock(ServiceProvider.ServerScoped.class);
-            Mockito.when(serviceProvider.provide(EconomyService.class)).thenReturn(Optional.empty());
-            Mockito.when(server.serviceProvider()).thenReturn(serviceProvider);
             spongeMock.when(Sponge::server).thenReturn(server);
 
             final QuestionLauncher launcher = Mockito.mock(QuestionLauncher.class);
