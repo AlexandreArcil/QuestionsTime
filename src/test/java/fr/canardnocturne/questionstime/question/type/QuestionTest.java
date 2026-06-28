@@ -43,7 +43,8 @@ class QuestionTest {
                 .setPrizes(Set.of(new Prize(50, false, null, null, 1),
                         new Prize(50, false, null, null, 5)))
                 .build());
-        Assertions.assertEquals("The position prize 2 is missing", exception.getMessage());
+        Assertions.assertEquals("The following prize positions are missing: 2, 3, 4. You can't have holes in the prize positions. If you want to remove a prize, you need to remove all prizes after it.",
+                exception.getMessage());
     }
 
     @Test

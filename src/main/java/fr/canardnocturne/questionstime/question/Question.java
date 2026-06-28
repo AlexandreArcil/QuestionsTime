@@ -6,6 +6,7 @@ import fr.canardnocturne.questionstime.question.component.Prize;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Question {
 
@@ -206,13 +207,19 @@ public class Question {
             }
             //check that the positions of the prizes doesn't have "hole"
             if(!this.prizes.isEmpty()) {
-                this.prizes.stream().map(Prize::getPosition).reduce((previous, current) -> {
-                    final int next = previous + 1;
-                    if (next != current) {
-                        throw new QuestionException("The position prize " + next + " is missing");
+                final int maxPosition = this.prizes.stream().mapToInt(Prize::getPosition).max().getAsInt();
+                final Set<Integer> allPositions = this.prizes.stream().map(Prize::getPosition).collect(Collectors.toSet());
+                final List<Integer> missingPositions = new ArrayList<>();
+                for (int i = 1; i < maxPosition; i++) {
+                    if (!allPositions.contains(i)) {
+                        missingPositions.add(i);
                     }
-                    return current;
-                });
+                }
+                if (!missingPositions.isEmpty()) {
+                    throw new QuestionException("The following prize positions are missing: " +
+                            String.join(", ", missingPositions.stream().map(String::valueOf).toList()) +
+                            ". You can't have holes in the prize positions. If you want to remove a prize, you need to remove all prizes after it.");
+                }
             }
             return new Question(this);
         }
