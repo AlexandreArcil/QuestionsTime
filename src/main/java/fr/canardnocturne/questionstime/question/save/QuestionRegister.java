@@ -8,6 +8,6 @@ public interface QuestionRegister {
 
     void register(Question question) throws IOException;
 
-    void update(Question question) throws IOException;
+    void replace(Question oldQuestion, Question newQuestion) throws IOException;
 
 }

@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public record OutcomeCommand(String message, String command) {
 
@@ -12,4 +13,8 @@ public record OutcomeCommand(String message, String command) {
                 .hoverEvent(HoverEvent.showText(Component.text(this.command())));
     }
 
+    @Override
+    public @NonNull String toString() {
+        return message+";"+command;
+    }
 }

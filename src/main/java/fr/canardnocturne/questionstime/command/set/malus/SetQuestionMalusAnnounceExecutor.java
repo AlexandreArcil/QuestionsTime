@@ -1,13 +1,12 @@
 package fr.canardnocturne.questionstime.command.set.malus;
 
 import fr.canardnocturne.questionstime.QuestionException;
-import fr.canardnocturne.questionstime.command.change.QuestionComponent;
-import fr.canardnocturne.questionstime.command.change.QuestionModifier;
+import fr.canardnocturne.questionstime.question.QuestionComponent;
+import fr.canardnocturne.questionstime.question.modifier.QuestionModifier;
 import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import fr.canardnocturne.questionstime.question.save.QuestionRegister;
 import fr.canardnocturne.questionstime.util.TextUtils;
-import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -36,9 +35,9 @@ public class SetQuestionMalusAnnounceExecutor implements CommandExecutor {
         final Question question = context.requireOne(this.specificQuestionParameter);
         final boolean value = context.requireOne(VALUE);
         try {
-            this.questionModifier.set(question, QuestionComponent.MALUS_ANNOUNCE, value);
-            this.questionRegister.update(question);
-            this.questionPool.replace(question, question);
+            final Question modifiedQuestion = this.questionModifier.set(question, QuestionComponent.MALUS_ANNOUNCE, value);
+            this.questionRegister.replace(question, modifiedQuestion);
+            this.questionPool.replace(question, modifiedQuestion);
             context.sendMessage(TextUtils.composed("Malus announce set to ", String.valueOf(value), " !"));
             return CommandResult.success();
         } catch (final QuestionException | IllegalArgumentException e) {

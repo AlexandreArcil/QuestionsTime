@@ -68,6 +68,10 @@ public class Prize {
         return position;
     }
 
+    public boolean isEmpty() {
+        return this.money <= 0 && this.items.length == 0 && this.commands.length == 0;
+    }
+
     @Override
     public String toString() {
         return "Prize{" +

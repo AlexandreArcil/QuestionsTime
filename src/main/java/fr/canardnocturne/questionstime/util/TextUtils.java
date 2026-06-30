@@ -61,6 +61,12 @@ public final class TextUtils {
                 .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/qtc " + commandArg));
     }
 
+    public static Component commandSuggestion(final String commandArg) {
+        return Component.text("[/qt " + commandArg + "]", NamedTextColor.GREEN, TextDecoration.BOLD)
+                .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/qt " + commandArg))
+                .hoverEvent(HoverEvent.showText(Component.text("Click to copy the command in your chat box", NamedTextColor.GRAY)));
+    }
+
     public static Component example(final String content) {
         return QuestionsTime.PREFIX
                 .append(Component.text("Example: ", NamedTextColor.DARK_GRAY))

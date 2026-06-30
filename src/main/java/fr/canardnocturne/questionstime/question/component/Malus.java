@@ -44,6 +44,10 @@ public class Malus {
         return this.commands;
     }
 
+    public boolean isEmpty() {
+        return ArrayUtils.isEmpty(this.commands) && this.money == 0;
+    }
+
     @Override
     public String toString() {
         return "Malus{" +

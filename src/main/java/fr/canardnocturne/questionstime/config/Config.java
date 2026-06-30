@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.command.change;
+package fr.canardnocturne.questionstime.config;
 
 public enum Config {
 

@@ -1,6 +1,7 @@
-package fr.canardnocturne.questionstime.command.change;
+package fr.canardnocturne.questionstime.question.modifier;
 
 import fr.canardnocturne.questionstime.question.Question;
+import fr.canardnocturne.questionstime.question.QuestionComponent;
 
 public interface QuestionModifier {
 

@@ -93,8 +93,9 @@ public class Question {
     public String toString() {
         return "Question{" +
                 "question='" + question + '\'' +
-                ", answers='" + answers + '\'' +
-                ", prize=" + prizes +
+                ", propositions=" + propositions +
+                ", answers=" + answers +
+                ", prizes=" + prizes +
                 ", malus=" + malus +
                 ", timer=" + timer +
                 ", timeBetweenAnswer=" + timeBetweenAnswer +
@@ -181,10 +182,10 @@ public class Question {
 
         public Question build() {
             if (StringUtils.isEmpty(this.question)) {
-                throw new QuestionException("The question is not defined");
+                throw new QuestionException("The question must be defined");
             }
             if (this.answers.isEmpty()) {
-                throw new QuestionException("The answer is not defined");
+                throw new QuestionException("The question must have at least one answer");
             }
             final Set<String> answersUnique = new HashSet<>(this.answers);
             if(answersUnique.size() != this.answers.size()) {
@@ -202,7 +203,7 @@ public class Question {
                 }
                 final List<String> answersNotProposition = this.answers.stream().filter(answer -> !propositions.contains(answer)).toList();
                 if (!answersNotProposition.isEmpty()) {
-                    throw new QuestionException("The question answers '" + answersNotProposition + "' need to be a proposition");
+                    throw new QuestionException("The question answers '" + String.join(", ", answersNotProposition) + "' need to be a proposition");
                 }
             }
             //check that the positions of the prizes doesn't have "hole"

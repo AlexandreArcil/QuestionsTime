@@ -15,6 +15,8 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
 class HoconQuestionRegisterTest {
@@ -44,7 +46,7 @@ class HoconQuestionRegisterTest {
     }
 
     @Test
-    void serializationException() throws IOException {
+    void questionRegisterSerializationException() throws IOException {
         final CommentedConfigurationNode rootNode = Mockito.mock(CommentedConfigurationNode.class);
         final CommentedConfigurationNode questionsNode = Mockito.mock(CommentedConfigurationNode.class);
         Mockito.when(this.configLoader.load()).thenReturn(rootNode);
@@ -58,7 +60,7 @@ class HoconQuestionRegisterTest {
     }
 
     @Test
-    void configurateException() throws IOException {
+    void questionRegisterConfigurateException() throws IOException {
         final CommentedConfigurationNode rootNode = Mockito.mock(CommentedConfigurationNode.class);
         final CommentedConfigurationNode questionsNode = Mockito.mock(CommentedConfigurationNode.class);
         Mockito.when(this.configLoader.load()).thenReturn(rootNode);
@@ -78,6 +80,68 @@ class HoconQuestionRegisterTest {
         Assertions.assertThrows(IllegalStateException.class, () -> this.register.register(Mockito.mock(Question.class)));
 
         Mockito.verify(this.logger).error(Mockito.contains("Unable to load the config file"), Mockito.any(IOException.class));
+    }
+
+    @Test
+    void replaceQuestion() throws IOException {
+        final CommentedConfigurationNode rootNode = Mockito.mock(CommentedConfigurationNode.class);
+        final CommentedConfigurationNode questionsNode = Mockito.mock(CommentedConfigurationNode.class);
+        Mockito.when(this.configLoader.load()).thenReturn(rootNode);
+        Mockito.when(rootNode.node("questions")).thenReturn(questionsNode);
+        final Question oldQuestion = Question.builder().setQuestion("Old question").setAnswers(Set.of("answer")).setWeight(1).build();
+        Mockito.when(questionsNode.getList(Question.class)).thenReturn(List.of(oldQuestion));
+        final Question newQuestion = Question.builder().setQuestion("New question").setAnswers(Set.of("new answer")).setWeight(1).build();
+
+        this.register.replace(oldQuestion, newQuestion);
+
+        Mockito.verify(questionsNode).setList(Mockito.eq(Question.class), Mockito.argThat(questions ->
+                questions != null && questions.contains(newQuestion) && !questions.contains(oldQuestion)));
+        Mockito.verify(this.configLoader).save(rootNode);
+    }
+
+    @Test
+    void replaceQuestionNotInList() throws IOException {
+        final CommentedConfigurationNode rootNode = Mockito.mock(CommentedConfigurationNode.class);
+        final CommentedConfigurationNode questionsNode = Mockito.mock(CommentedConfigurationNode.class);
+        Mockito.when(this.configLoader.load()).thenReturn(rootNode);
+        Mockito.when(rootNode.node("questions")).thenReturn(questionsNode);
+        final Question oldQuestion = Question.builder().setQuestion("Old question").setAnswers(Set.of("answer")).setWeight(1).build();
+        Mockito.when(questionsNode.getList(Question.class)).thenReturn(List.of());
+        final Question newQuestion = Question.builder().setQuestion("New question").setAnswers(Set.of("new answer")).setWeight(1).build();
+
+        this.register.replace(oldQuestion, newQuestion);
+
+        Mockito.verify(questionsNode).setList(Mockito.eq(Question.class), Mockito.argThat(questions ->
+                questions != null && questions.contains(newQuestion) && !questions.contains(oldQuestion)));
+        Mockito.verify(this.configLoader).save(rootNode);
+    }
+
+    @Test
+    void replaceQuestionSerializationException() throws IOException {
+        final CommentedConfigurationNode rootNode = Mockito.mock(CommentedConfigurationNode.class);
+        final CommentedConfigurationNode questionsNode = Mockito.mock(CommentedConfigurationNode.class);
+        Mockito.when(this.configLoader.load()).thenReturn(rootNode);
+        Mockito.when(rootNode.node("questions")).thenReturn(questionsNode);
+        final Question question = Mockito.mock(Question.class);
+        Mockito.when(questionsNode.getList(Question.class)).thenThrow(new SerializationException("Serialization error"));
+
+        Assertions.assertThrows(SerializationException.class, () -> this.register.replace(question, question));
+
+        Mockito.verify(this.logger).error(Mockito.contains("not replaced because an error occurred when serializing it"), Mockito.any(SerializationException.class));
+    }
+
+    @Test
+    void replaceQuestionConfigurateException() throws IOException {
+        final CommentedConfigurationNode rootNode = Mockito.mock(CommentedConfigurationNode.class);
+        final CommentedConfigurationNode questionsNode = Mockito.mock(CommentedConfigurationNode.class);
+        Mockito.when(this.configLoader.load()).thenReturn(rootNode);
+        Mockito.when(rootNode.node("questions")).thenReturn(questionsNode);
+        final Question question = Mockito.mock(Question.class);
+        Mockito.doThrow(new ConfigurateException("IO error")).when(this.configLoader).save(rootNode);
+
+        Assertions.assertThrows(ConfigurateException.class, () -> this.register.replace(question, question));
+
+        Mockito.verify(this.logger).error(Mockito.contains("not replaced because an error occurred when saving it to the config file"), Mockito.any(IOException.class));
     }
 
 }
