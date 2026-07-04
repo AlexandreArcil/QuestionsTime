@@ -4,29 +4,29 @@ import com.google.inject.Inject;
 import fr.canardnocturne.questionstime.command.BaseCommandExecutor;
 import fr.canardnocturne.questionstime.question.modifier.QuestionModifier;
 import fr.canardnocturne.questionstime.question.modifier.QuestionModifierImpl;
-import fr.canardnocturne.questionstime.command.set.answers.SetQuestionAddAnswers;
-import fr.canardnocturne.questionstime.command.set.answers.SetQuestionAnswersList;
-import fr.canardnocturne.questionstime.command.set.SetQuestionExecutor;
-import fr.canardnocturne.questionstime.command.set.SetQuestionTimeBetweenAnswer;
-import fr.canardnocturne.questionstime.command.set.SetQuestionTimerExecutor;
-import fr.canardnocturne.questionstime.command.set.SetQuestionWeightExecutor;
-import fr.canardnocturne.questionstime.command.set.answers.SetQuestionRemoveAnswers;
-import fr.canardnocturne.questionstime.command.set.malus.SetQuestionMalusAnnounceExecutor;
-import fr.canardnocturne.questionstime.command.set.malus.commands.SetQuestionMalusAddCommandsExecutor;
-import fr.canardnocturne.questionstime.command.set.malus.commands.SetQuestionMalusCommandsListExecutor;
-import fr.canardnocturne.questionstime.command.set.malus.SetQuestionMalusMoneyExecutor;
-import fr.canardnocturne.questionstime.command.set.malus.commands.SetQuestionMalusRemoveCommandsExecutor;
-import fr.canardnocturne.questionstime.command.set.prize.commands.SetQuestionPrizesAddCommandsExecutor;
-import fr.canardnocturne.questionstime.command.set.prize.commands.SetQuestionPrizesCommandsListExecutor;
-import fr.canardnocturne.questionstime.command.set.prize.commands.SetQuestionPrizesRemoveCommandsExecutor;
-import fr.canardnocturne.questionstime.command.set.prize.items.SetQuestionPrizesAddItemsExecutor;
-import fr.canardnocturne.questionstime.command.set.prize.items.SetQuestionPrizesItemsListExecutor;
-import fr.canardnocturne.questionstime.command.set.prize.SetQuestionPrizesMoneyExecutor;
-import fr.canardnocturne.questionstime.command.set.prize.SetQuestionPrizesMoneyListExecutor;
-import fr.canardnocturne.questionstime.command.set.prize.items.SetQuestionPrizesRemoveItemsExecutor;
-import fr.canardnocturne.questionstime.command.set.propositions.SetQuestionAddPropositions;
-import fr.canardnocturne.questionstime.command.set.propositions.SetQuestionPropositionsList;
-import fr.canardnocturne.questionstime.command.set.propositions.SetQuestionRemovePropositions;
+import fr.canardnocturne.questionstime.command.set.question.answers.SetQuestionAddAnswersExecutor;
+import fr.canardnocturne.questionstime.command.set.question.answers.SetQuestionAnswersListExecutor;
+import fr.canardnocturne.questionstime.command.set.question.SetQuestionExecutor;
+import fr.canardnocturne.questionstime.command.set.question.SetQuestionTimeBetweenAnswerExecutor;
+import fr.canardnocturne.questionstime.command.set.question.SetQuestionTimerExecutor;
+import fr.canardnocturne.questionstime.command.set.question.SetQuestionWeightExecutor;
+import fr.canardnocturne.questionstime.command.set.question.answers.SetQuestionRemoveAnswersExecutor;
+import fr.canardnocturne.questionstime.command.set.question.malus.SetQuestionMalusAnnounceExecutor;
+import fr.canardnocturne.questionstime.command.set.question.malus.commands.SetQuestionMalusAddCommandsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.malus.commands.SetQuestionMalusCommandsListExecutor;
+import fr.canardnocturne.questionstime.command.set.question.malus.SetQuestionMalusMoneyExecutor;
+import fr.canardnocturne.questionstime.command.set.question.malus.commands.SetQuestionMalusRemoveCommandsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.prize.commands.SetQuestionPrizesAddCommandsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.prize.commands.SetQuestionPrizesCommandsListExecutor;
+import fr.canardnocturne.questionstime.command.set.question.prize.commands.SetQuestionPrizesRemoveCommandsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.prize.items.SetQuestionPrizesAddItemsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.prize.items.SetQuestionPrizesItemsListExecutor;
+import fr.canardnocturne.questionstime.command.set.question.prize.SetQuestionPrizesMoneyExecutor;
+import fr.canardnocturne.questionstime.command.set.question.prize.SetQuestionPrizesMoneyListExecutor;
+import fr.canardnocturne.questionstime.command.set.question.prize.items.SetQuestionPrizesRemoveItemsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.propositions.SetQuestionAddPropositionsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.propositions.SetQuestionPropositionsListExecutor;
+import fr.canardnocturne.questionstime.command.set.question.propositions.SetQuestionRemovePropositionsExecutor;
 import fr.canardnocturne.questionstime.config.QuestionTimeConfiguration;
 import fr.canardnocturne.questionstime.config.loader.PluginConfigurationLoader;
 import fr.canardnocturne.questionstime.config.loader.SafePluginConfigurationLoader;
@@ -213,8 +213,6 @@ public class QuestionsTime {
                 .executor(new ManualAskQuestionCommand(this.questionAskManager, this.questionLauncher, specificQuestionParameter, this.logger))
                 .build();
 
-//        final ChangeQuestionComponentExecutor changeQuestionComponentExecutor = new ChangeQuestionComponentExecutor(
-//                new QuestionModifierImpl(this.questionPool), questionRegister, specificQuestionParameter);
         final QuestionModifier questionModifier = new QuestionModifierImpl();
 
         final Command.Parameterized commandQTSetQuestionMalusAnnounce = Command.builder()
@@ -346,8 +344,8 @@ public class QuestionsTime {
 
         final Command.Parameterized commandQTSetTimeBetweenAnswer = Command.builder()
                 .shortDescription(Component.text("Set the time between answers of a question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionTimeBetweenAnswer.TIME_BETWEEN_ANSWER)
-                .executor(new SetQuestionTimeBetweenAnswer(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(SetQuestionTimeBetweenAnswerExecutor.TIME_BETWEEN_ANSWER)
+                .executor(new SetQuestionTimeBetweenAnswerExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionQuestion = Command.builder()
@@ -358,19 +356,19 @@ public class QuestionsTime {
 
         final Command.Parameterized commandQTSetQuestionAnswersList = Command.builder()
                 .shortDescription(Component.text("List the question answers").color(NamedTextColor.YELLOW))
-                .executor(new SetQuestionAnswersList(specificQuestionParameter))
+                .executor(new SetQuestionAnswersListExecutor(specificQuestionParameter))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionAddAnswers = Command.builder()
                 .shortDescription(Component.text("Add an answer to the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionAddAnswers.ANSWER)
-                .executor(new SetQuestionAddAnswers(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(SetQuestionAddAnswersExecutor.ANSWER)
+                .executor(new SetQuestionAddAnswersExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionRemoveAnswers = Command.builder()
                 .shortDescription(Component.text("Remove an answer from the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionRemoveAnswers.ANSWER)
-                .executor(new SetQuestionRemoveAnswers(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(SetQuestionRemoveAnswersExecutor.ANSWER)
+                .executor(new SetQuestionRemoveAnswersExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionAnswers = Command.builder()
@@ -382,19 +380,19 @@ public class QuestionsTime {
 
         final Command.Parameterized commandQTSetQuestionPropositionsList = Command.builder()
                 .shortDescription(Component.text("List the question propositions").color(NamedTextColor.YELLOW))
-                .executor(new SetQuestionPropositionsList(specificQuestionParameter))
+                .executor(new SetQuestionPropositionsListExecutor(specificQuestionParameter))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionAddPropositions = Command.builder()
                 .shortDescription(Component.text("Add a proposition to the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionAddPropositions.PROPOSITION)
-                .executor(new SetQuestionAddPropositions(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(SetQuestionAddPropositionsExecutor.PROPOSITION)
+                .executor(new SetQuestionAddPropositionsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionRemovePropositions = Command.builder()
                 .shortDescription(Component.text("Remove a proposition from the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionRemovePropositions.PROPOSITION)
-                .executor(new SetQuestionRemovePropositions(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(SetQuestionRemovePropositionsExecutor.PROPOSITION)
+                .executor(new SetQuestionRemovePropositionsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionPropositions = Command.builder()
@@ -433,8 +431,6 @@ public class QuestionsTime {
                 .addChild(commandQTSet, "set")
                 .build();
 
-        //multiple childs: mis au meme niveau que les questions
-        //parameter.subcommands: on peut en mettre qu'un
         event.register(this.plugin, commandQTBase, "questionstime", "qt");
     }
 

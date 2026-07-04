@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.command.set;
+package fr.canardnocturne.questionstime.command.set.question.prize.items;
 
 import fr.canardnocturne.questionstime.QuestionException;
 import fr.canardnocturne.questionstime.question.QuestionComponent;
@@ -15,15 +15,17 @@ import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
 
-public class SetQuestionTimeBetweenAnswer implements CommandExecutor {
+public class SetQuestionPrizesAddItemsExecutor implements CommandExecutor {
 
-    public static final Parameter.Value<Integer> TIME_BETWEEN_ANSWER = Parameter.integerNumber().key("time_between_answer").build();
+    public static final Parameter.Value<Integer> POSITION = Parameter.integerNumber().key("position").build();
+    public static final Parameter.Value<String> ITEM = Parameter.remainingJoinedStrings().key("item").build();
+
     private final Parameter.Value<Question> specificQuestionParameter;
     private final QuestionModifier questionModifier;
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
 
-    public SetQuestionTimeBetweenAnswer(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
+    public SetQuestionPrizesAddItemsExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
         this.specificQuestionParameter = specificQuestionParameter;
         this.questionModifier = questionModifier;
         this.questionPool = questionPool;
@@ -32,13 +34,14 @@ public class SetQuestionTimeBetweenAnswer implements CommandExecutor {
 
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
+        final Integer position = context.requireOne(POSITION);
+        final String item = context.requireOne(ITEM);
         final Question question = context.requireOne(this.specificQuestionParameter);
-        final Integer timeBetweenAnswer = context.requireOne(TIME_BETWEEN_ANSWER);
         try {
-            final Question modifiedQuestion = this.questionModifier.set(question, QuestionComponent.TIMER_BETWEEN_ANSWER, timeBetweenAnswer);
+            final Question modifiedQuestion = this.questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, position, item);
             this.questionRegister.replace(question, modifiedQuestion);
             this.questionPool.replace(question, modifiedQuestion);
-            context.sendMessage(TextUtils.composed("Time between answer set to ", String.valueOf(timeBetweenAnswer), " !"));
+            context.sendMessage(TextUtils.composed("Item added to position ", String.valueOf(position), " !"));
             return CommandResult.success();
         } catch (final QuestionException | IllegalArgumentException e) {
             return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));

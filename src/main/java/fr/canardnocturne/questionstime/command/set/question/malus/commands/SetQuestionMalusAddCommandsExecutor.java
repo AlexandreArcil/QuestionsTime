@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.command.set.malus.commands;
+package fr.canardnocturne.questionstime.command.set.question.malus.commands;
 
 import fr.canardnocturne.questionstime.QuestionException;
 import fr.canardnocturne.questionstime.question.QuestionComponent;
@@ -15,7 +15,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
 
-public class SetQuestionMalusRemoveCommandsExecutor implements CommandExecutor {
+public class SetQuestionMalusAddCommandsExecutor implements CommandExecutor {
 
     public static final Parameter.Value<String> COMMAND = Parameter.remainingJoinedStrings().key("command").build();
 
@@ -24,7 +24,7 @@ public class SetQuestionMalusRemoveCommandsExecutor implements CommandExecutor {
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
 
-    public SetQuestionMalusRemoveCommandsExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
+    public SetQuestionMalusAddCommandsExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
         this.specificQuestionParameter = specificQuestionParameter;
         this.questionModifier = questionModifier;
         this.questionPool = questionPool;
@@ -36,10 +36,10 @@ public class SetQuestionMalusRemoveCommandsExecutor implements CommandExecutor {
         final String command = context.requireOne(COMMAND);
         final Question question = context.requireOne(this.specificQuestionParameter);
         try {
-            final Question modifiedQuestion = this.questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, command);
+            final Question modifiedQuestion = this.questionModifier.add(question, QuestionComponent.MALUS_COMMANDS, command);
             this.questionRegister.replace(question, modifiedQuestion);
             this.questionPool.replace(question, modifiedQuestion);
-            context.sendMessage(TextUtils.composed("Command ", command, " removed !"));
+            context.sendMessage(TextUtils.composed("Command ", command, " added !"));
             return CommandResult.success();
         } catch (final QuestionException | IllegalArgumentException e) {
             return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));

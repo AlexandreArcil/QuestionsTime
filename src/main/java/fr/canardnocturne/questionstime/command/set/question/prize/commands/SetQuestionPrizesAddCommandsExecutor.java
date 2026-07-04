@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.command.set.malus;
+package fr.canardnocturne.questionstime.command.set.question.prize.commands;
 
 import fr.canardnocturne.questionstime.QuestionException;
 import fr.canardnocturne.questionstime.question.QuestionComponent;
@@ -15,15 +15,17 @@ import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
 
-public class SetQuestionMalusAnnounceExecutor implements CommandExecutor {
+public class SetQuestionPrizesAddCommandsExecutor implements CommandExecutor {
 
-    public static final Parameter.Value<Boolean> VALUE = Parameter.bool().key("value").build();
+    public static final Parameter.Value<Integer> POSITION = Parameter.integerNumber().key("position").build();
+    public static final Parameter.Value<String> COMMAND = Parameter.remainingJoinedStrings().key("command").build();
+
     private final Parameter.Value<Question> specificQuestionParameter;
     private final QuestionModifier questionModifier;
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
 
-    public SetQuestionMalusAnnounceExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
+    public SetQuestionPrizesAddCommandsExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
         this.specificQuestionParameter = specificQuestionParameter;
         this.questionModifier = questionModifier;
         this.questionPool = questionPool;
@@ -32,13 +34,14 @@ public class SetQuestionMalusAnnounceExecutor implements CommandExecutor {
 
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
+        final Integer position = context.requireOne(POSITION);
+        final String command = context.requireOne(COMMAND);
         final Question question = context.requireOne(this.specificQuestionParameter);
-        final boolean value = context.requireOne(VALUE);
         try {
-            final Question modifiedQuestion = this.questionModifier.set(question, QuestionComponent.MALUS_ANNOUNCE, value);
+            final Question modifiedQuestion = this.questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, position, command);
             this.questionRegister.replace(question, modifiedQuestion);
             this.questionPool.replace(question, modifiedQuestion);
-            context.sendMessage(TextUtils.composed("Malus announce set to ", String.valueOf(value), " !"));
+            context.sendMessage(TextUtils.composed( "Command ", command , " added to position ", String.valueOf(position), " !"));
             return CommandResult.success();
         } catch (final QuestionException | IllegalArgumentException e) {
             return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));

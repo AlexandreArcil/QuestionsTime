@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.command.set.answers;
+package fr.canardnocturne.questionstime.command.set.question.answers;
 
 import fr.canardnocturne.questionstime.QuestionException;
 import fr.canardnocturne.questionstime.question.QuestionComponent;
@@ -15,7 +15,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
 
-public class SetQuestionRemoveAnswers implements CommandExecutor {
+public class SetQuestionRemoveAnswersExecutor implements CommandExecutor {
 
     public static final Parameter.Value<String> ANSWER = Parameter.remainingJoinedStrings().key("answer").build();
 
@@ -24,7 +24,7 @@ public class SetQuestionRemoveAnswers implements CommandExecutor {
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
 
-    public SetQuestionRemoveAnswers(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
+    public SetQuestionRemoveAnswersExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
         this.specificQuestionParameter = specificQuestionParameter;
         this.questionModifier = questionModifier;
         this.questionPool = questionPool;

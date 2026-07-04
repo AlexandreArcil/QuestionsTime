@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.command.set.propositions;
+package fr.canardnocturne.questionstime.command.set.question.propositions;
 
 import fr.canardnocturne.questionstime.QuestionException;
 import fr.canardnocturne.questionstime.question.QuestionComponent;
@@ -15,7 +15,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
 
-public class SetQuestionRemovePropositions implements CommandExecutor  {
+public class SetQuestionRemovePropositionsExecutor implements CommandExecutor  {
 
     public static final Parameter.Value<String> PROPOSITION = Parameter.remainingJoinedStrings().key("proposition").build();
 
@@ -24,7 +24,7 @@ public class SetQuestionRemovePropositions implements CommandExecutor  {
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
 
-    public SetQuestionRemovePropositions(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
+    public SetQuestionRemovePropositionsExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
         this.specificQuestionParameter = specificQuestionParameter;
         this.questionModifier = questionModifier;
         this.questionPool = questionPool;

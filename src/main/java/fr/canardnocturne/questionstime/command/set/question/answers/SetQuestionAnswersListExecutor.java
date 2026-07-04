@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.command.set.answers;
+package fr.canardnocturne.questionstime.command.set.question.answers;
 
 import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.Question;
@@ -16,11 +16,11 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
-public class SetQuestionAnswersList implements CommandExecutor {
+public class SetQuestionAnswersListExecutor implements CommandExecutor {
 
     private final Parameter.Value<Question> specificQuestionParameter;
 
-    public SetQuestionAnswersList(final Parameter.Value<Question> specificQuestionParameter) {
+    public SetQuestionAnswersListExecutor(final Parameter.Value<Question> specificQuestionParameter) {
         this.specificQuestionParameter = specificQuestionParameter;
     }
 

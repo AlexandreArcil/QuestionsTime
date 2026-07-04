@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.command.set.prize;
+package fr.canardnocturne.questionstime.command.set.question.prize;
 
 import fr.canardnocturne.questionstime.QuestionException;
 import fr.canardnocturne.questionstime.QuestionsTime;

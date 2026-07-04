@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.command.set;
+package fr.canardnocturne.questionstime.command.set.question;
 
 import fr.canardnocturne.questionstime.QuestionException;
 import fr.canardnocturne.questionstime.question.QuestionComponent;
@@ -15,16 +15,15 @@ import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
 
-public class SetQuestionExecutor implements CommandExecutor {
+public class SetQuestionWeightExecutor implements CommandExecutor {
 
-    public static final Parameter.Value<String> QUESTION = Parameter.remainingJoinedStrings().key("question").build();
-
+    public static final Parameter.Value<Integer> WEIGHT = Parameter.integerNumber().key("weight").build();
     private final Parameter.Value<Question> specificQuestionParameter;
     private final QuestionModifier questionModifier;
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
 
-    public SetQuestionExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
+    public SetQuestionWeightExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
         this.specificQuestionParameter = specificQuestionParameter;
         this.questionModifier = questionModifier;
         this.questionPool = questionPool;
@@ -34,12 +33,12 @@ public class SetQuestionExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
         final Question question = context.requireOne(this.specificQuestionParameter);
-        final String questionValue = context.requireOne(QUESTION);
+        final Integer weight = context.requireOne(WEIGHT);
         try {
-            final Question modifiedQuestion = this.questionModifier.set(question, QuestionComponent.QUESTION, questionValue);
+            final Question modifiedQuestion = this.questionModifier.set(question, QuestionComponent.WEIGHT, weight);
             this.questionRegister.replace(question, modifiedQuestion);
             this.questionPool.replace(question, modifiedQuestion);
-            context.sendMessage(TextUtils.composed("Question set to ", questionValue, " !"));
+            context.sendMessage(TextUtils.composed("Weight set to ", String.valueOf(weight), " !"));
             return CommandResult.success();
         } catch (final QuestionException | IllegalArgumentException e) {
             return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));

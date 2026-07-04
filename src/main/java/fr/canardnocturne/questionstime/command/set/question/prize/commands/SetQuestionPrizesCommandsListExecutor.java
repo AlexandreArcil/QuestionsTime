@@ -1,8 +1,8 @@
-package fr.canardnocturne.questionstime.command.set.prize.items;
+package fr.canardnocturne.questionstime.command.set.question.prize.commands;
 
 import fr.canardnocturne.questionstime.QuestionsTime;
 import fr.canardnocturne.questionstime.question.Question;
-import fr.canardnocturne.questionstime.question.serializer.ItemStackSerializer;
+import fr.canardnocturne.questionstime.question.serializer.OutcomeCommandSerializer;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -19,11 +19,11 @@ import org.spongepowered.api.command.parameter.Parameter;
 
 import java.util.stream.Stream;
 
-public class SetQuestionPrizesItemsListExecutor implements CommandExecutor {
+public class SetQuestionPrizesCommandsListExecutor implements CommandExecutor {
 
     private final Parameter.Value<Question> specificQuestionParameter;
 
-    public SetQuestionPrizesItemsListExecutor(final Parameter.Value<Question> specificQuestionParameter) {
+    public SetQuestionPrizesCommandsListExecutor(final Parameter.Value<Question> specificQuestionParameter) {
         this.specificQuestionParameter = specificQuestionParameter;
     }
 
@@ -32,31 +32,31 @@ public class SetQuestionPrizesItemsListExecutor implements CommandExecutor {
         final Question question = context.requireOne(specificQuestionParameter);
         final TextComponent.Builder message = Component.text();
         if(question.getPrizes().isEmpty()) {
-            message.append(TextUtils.normalWithPrefix("No prizes"));
+            message.append(TextUtils.normalWithPrefix("No commands"));
         } else {
-            message.append(TextUtils.normalWithPrefix("Prize items: ")).appendNewline()
-                    .append(Component.join(JoinConfiguration.newlines(), question.getPrizes().stream().map(prize -> {
+            message.append(TextUtils.normalWithPrefix("Prize commands: ")).appendNewline()
+            .append(Component.join(JoinConfiguration.newlines(), question.getPrizes().stream().map(prize -> {
                 final TextComponent.Builder prizeMessage = Component.text().append(TextUtils.normalWithPrefix("Position " + prize.getPosition() + ":"))
                         .appendNewline();
-                if (prize.getItemStacks().length == 0) {
-                    prizeMessage.append(TextUtils.normalWithPrefix("  No items"));
+                if (prize.getCommands().length == 0) {
+                    prizeMessage.append(TextUtils.normalWithPrefix("  No commands"));
                 } else {
-                    prizeMessage.append(Component.join(JoinConfiguration.newlines(),  Stream.of(prize.getItemStacks()).map(item -> {
-                        final String itemSerialized = ItemStackSerializer.fromItemStack(item);
+                    prizeMessage.append(Component.join(JoinConfiguration.newlines(), Stream.of(prize.getCommands()).map(command -> {
+                        final String commandSerialized = OutcomeCommandSerializer.serialize(command);
                         return QuestionsTime.PREFIX.appendSpace().appendSpace()
                                 .append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
-                                        .clickEvent(ClickEvent.runCommand("/qt set question \"" + question.getQuestion() + "\" prizes items remove " + prize.getPosition() + " " + itemSerialized))
-                                        .hoverEvent(HoverEvent.showText(Component.text("Delete the item"))))
+                                        .clickEvent(ClickEvent.runCommand("/qt set question \"" + question.getQuestion() + "\" prizes commands remove " + prize.getPosition() + " " + commandSerialized))
+                                        .hoverEvent(HoverEvent.showText(Component.text("Delete the command"))))
                                 .appendSpace()
-                                .append(TextUtils.displayItem(item));
+                                .append(command.format());
                     }).toList()));
                 }
                 return prizeMessage.build();
             }).toList()));
         }
         message.appendNewline()
-                        .append(TextUtils.normalWithPrefix("You can add an item with the command "))
-                        .append(TextUtils.commandSuggestion("set question \"" + question.getQuestion() + "\" prizes items add position_number {ModID:}ItemID{;Count}{;DisplayName}{;Lore}"));
+                        .append(TextUtils.normalWithPrefix("You can add a command with the command "))
+                        .append(TextUtils.commandSuggestion("set question \"" + question.getQuestion() + "\" prizes commands add position_number message;command"));
         context.sendMessage(message.build());
         return CommandResult.success();
     }

@@ -1,4 +1,4 @@
-package fr.canardnocturne.questionstime.command.set.prize.commands;
+package fr.canardnocturne.questionstime.command.set.question.malus;
 
 import fr.canardnocturne.questionstime.QuestionException;
 import fr.canardnocturne.questionstime.question.QuestionComponent;
@@ -15,17 +15,15 @@ import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
 
-public class SetQuestionPrizesRemoveCommandsExecutor implements CommandExecutor {
+public class SetQuestionMalusMoneyExecutor implements CommandExecutor {
 
-    public static final Parameter.Value<Integer> POSITION = Parameter.integerNumber().key("position").build();
-    public static final Parameter.Value<String> COMMAND = Parameter.remainingJoinedStrings().key("command").build();
-
+    public static final Parameter.Value<Integer> MONEY = Parameter.integerNumber().key("money").build();
     private final Parameter.Value<Question> specificQuestionParameter;
     private final QuestionModifier questionModifier;
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
 
-    public SetQuestionPrizesRemoveCommandsExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
+    public SetQuestionMalusMoneyExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
         this.specificQuestionParameter = specificQuestionParameter;
         this.questionModifier = questionModifier;
         this.questionPool = questionPool;
@@ -34,14 +32,13 @@ public class SetQuestionPrizesRemoveCommandsExecutor implements CommandExecutor 
 
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
-        final Integer position = context.requireOne(POSITION);
-        final String command = context.requireOne(COMMAND);
         final Question question = context.requireOne(this.specificQuestionParameter);
+        final Integer money = context.requireOne(MONEY);
         try {
-            final Question modifiedQuestion = this.questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, position, command);
+            final Question modifiedQuestion = this.questionModifier.set(question, QuestionComponent.MALUS_MONEY, money);
             this.questionRegister.replace(question, modifiedQuestion);
             this.questionPool.replace(question, modifiedQuestion);
-            context.sendMessage(TextUtils.composed("Command removed from position ", String.valueOf(position), " !"));
+            context.sendMessage(TextUtils.composed("Malus money set to ", String.valueOf(money), " !"));
             return CommandResult.success();
         } catch (final QuestionException | IllegalArgumentException e) {
             return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));
