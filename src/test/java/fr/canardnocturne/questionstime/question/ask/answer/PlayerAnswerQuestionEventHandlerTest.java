@@ -1,5 +1,6 @@
 package fr.canardnocturne.questionstime.question.ask.answer;
 
+import fr.canardnocturne.questionstime.config.ConfigMutable;
 import fr.canardnocturne.questionstime.question.ask.QuestionAskManager;
 import net.kyori.adventure.text.Component;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class PlayerAnswerQuestionEventHandlerTest {
         Mockito.when(event.player()).thenReturn(Optional.of(player));
         Mockito.when(event.originalMessage()).thenReturn(Component.text("qt>" + answerText));
 
-        final PlayerAnswerQuestionEventHandler handler = new PlayerAnswerQuestionEventHandler(questionAskManager, false);
+        final PlayerAnswerQuestionEventHandler handler = new PlayerAnswerQuestionEventHandler(questionAskManager, new ConfigMutable<>(false));
         handler.execute(event);
 
         Mockito.verify(questionAskManager).answer(player, answerText);
@@ -38,7 +39,7 @@ class PlayerAnswerQuestionEventHandlerTest {
         Mockito.when(event.player()).thenReturn(Optional.of(player));
         Mockito.when(event.originalMessage()).thenReturn(Component.text("qt>" + answerText));
 
-        final PlayerAnswerQuestionEventHandler handler = new PlayerAnswerQuestionEventHandler(questionAskManager, true);
+        final PlayerAnswerQuestionEventHandler handler = new PlayerAnswerQuestionEventHandler(questionAskManager, new ConfigMutable<>(true));
         handler.execute(event);
 
         Mockito.verify(questionAskManager).answer(player, answerText);
@@ -54,7 +55,7 @@ class PlayerAnswerQuestionEventHandlerTest {
         Mockito.when(event.player()).thenReturn(Optional.of(player));
         Mockito.when(event.originalMessage()).thenReturn(Component.text("Coin coin"));
 
-        final PlayerAnswerQuestionEventHandler handler = new PlayerAnswerQuestionEventHandler(questionAskManager, false);
+        final PlayerAnswerQuestionEventHandler handler = new PlayerAnswerQuestionEventHandler(questionAskManager, new ConfigMutable<>(false));
         handler.execute(event);
 
         Mockito.verify(questionAskManager, Mockito.never()).answer(Mockito.any(), Mockito.anyString());
@@ -69,7 +70,7 @@ class PlayerAnswerQuestionEventHandlerTest {
         Mockito.when(event.player()).thenReturn(Optional.empty());
         Mockito.when(event.originalMessage()).thenReturn(Component.text("qt>Coin coin"));
 
-        final PlayerAnswerQuestionEventHandler handler = new PlayerAnswerQuestionEventHandler(questionAskManager, false);
+        final PlayerAnswerQuestionEventHandler handler = new PlayerAnswerQuestionEventHandler(questionAskManager, new ConfigMutable<>(false));
         handler.execute(event);
 
         Mockito.verify(questionAskManager, Mockito.never()).answer(Mockito.any(), Mockito.anyString());
@@ -85,7 +86,7 @@ class PlayerAnswerQuestionEventHandlerTest {
         Mockito.when(event.player()).thenReturn(Optional.of(player));
         Mockito.when(event.originalMessage()).thenReturn(Component.text("qt>Coin coin"));
 
-        final PlayerAnswerQuestionEventHandler handler = new PlayerAnswerQuestionEventHandler(questionAskManager, false);
+        final PlayerAnswerQuestionEventHandler handler = new PlayerAnswerQuestionEventHandler(questionAskManager, new ConfigMutable<>(false));
         handler.execute(event);
 
         Mockito.verify(questionAskManager, Mockito.never()).answer(Mockito.any(), Mockito.anyString());

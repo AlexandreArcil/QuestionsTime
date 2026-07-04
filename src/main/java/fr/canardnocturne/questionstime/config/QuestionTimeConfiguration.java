@@ -103,6 +103,10 @@ public class QuestionTimeConfiguration {
         return personalAnswer;
     }
 
+    public void setPersonalAnswer(final boolean personalAnswer) {
+        this.personalAnswer = personalAnswer;
+    }
+
     public Collection<Question> getQuestions() {
         return Collections.unmodifiableSet(questions);
     }
@@ -117,6 +121,10 @@ public class QuestionTimeConfiguration {
 
     public Mode getMode() {
         return mode;
+    }
+
+    public void setMode(final Mode mode) {
+        this.mode = mode;
     }
 
     @Override

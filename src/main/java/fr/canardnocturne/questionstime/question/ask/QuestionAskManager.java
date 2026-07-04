@@ -1,5 +1,6 @@
 package fr.canardnocturne.questionstime.question.ask;
 
+import fr.canardnocturne.questionstime.config.Config;
 import fr.canardnocturne.questionstime.message.Messages;
 import fr.canardnocturne.questionstime.question.ask.announcer.QuestionAnnouncer;
 import fr.canardnocturne.questionstime.question.ask.answer.AnswerHandler;
@@ -28,22 +29,26 @@ public class QuestionAskManager {
     private final Game game;
     private final PluginContainer plugin;
     private final Logger logger;
-    private final int minimumConnectedPlayers;
+    private final Config<Integer> minimumConnectedPlayersConfig;
+    private final Config<QuestionLauncher> questionLauncherConfig;
 
-    private QuestionLauncher questionLauncher;
     private Question currentQuestion;
     private ScheduledTask timerTask;
     private AnswerHandler playerAnswerQuestionHandler;
     private long timerStarted;
 
-    public QuestionAskManager(final QuestionPicker questionPicker, final QuestionAnnouncer questionAnnouncer, final QuestionCreationManager questionCreationManager, final Game game, final PluginContainer plugin, final Logger logger, final int minimumConnectedPlayers) {
+    public QuestionAskManager(final QuestionPicker questionPicker, final QuestionAnnouncer questionAnnouncer,
+                              final QuestionCreationManager questionCreationManager, final Game game,
+                              final PluginContainer plugin, final Logger logger, final Config<Integer> minimumConnectedPlayersConfig,
+                              final Config<QuestionLauncher> questionLauncherConfig) {
         this.questionPicker = questionPicker;
         this.questionAnnouncer = questionAnnouncer;
         this.questionCreationManager = questionCreationManager;
         this.game = game;
         this.plugin = plugin;
         this.logger = logger;
-        this.minimumConnectedPlayers = minimumConnectedPlayers;
+        this.minimumConnectedPlayersConfig = minimumConnectedPlayersConfig;
+        this.questionLauncherConfig = questionLauncherConfig;
     }
 
     public void askRandomQuestion() {
@@ -62,9 +67,9 @@ public class QuestionAskManager {
                     this.startTimer(this.currentQuestion.getTimer());
                 }
             } else {
-                this.logger.info("No enough eligible players ({}/{}), no question asked.", eligiblePlayers.size(), this.minimumConnectedPlayers);
-                if (this.questionLauncher != null) {
-                    this.questionLauncher.start();
+                this.logger.info("No enough eligible players ({}/{}), no question asked.", eligiblePlayers.size(), this.minimumConnectedPlayersConfig.getValue());
+                if (this.questionLauncherConfig.getValue() != null) {
+                    this.questionLauncherConfig.getValue().start();
                 }
             }
         } else {
@@ -84,12 +89,6 @@ public class QuestionAskManager {
             }
         } else {
             player.sendMessage(TextUtils.normalWithPrefix("No question has been asked, wait for the next one!"));
-        }
-    }
-
-    public void setQuestionLauncher(final QuestionLauncher questionLauncher) {
-        if (this.questionLauncher == null) {
-            this.questionLauncher = questionLauncher;
         }
     }
 
@@ -122,8 +121,8 @@ public class QuestionAskManager {
         this.currentQuestion = null;
         this.timerTask = null;
         this.timerStarted = 0;
-        if (this.questionLauncher != null) {
-            this.questionLauncher.start();
+        if (this.questionLauncherConfig.getValue() != null) {
+            this.questionLauncherConfig.getValue().start();
         }
     }
 
@@ -133,7 +132,7 @@ public class QuestionAskManager {
     }
 
     private boolean enoughEligiblePlayers(final List<ServerPlayer> eligiblePlayers) {
-        return eligiblePlayers.size() >= this.minimumConnectedPlayers;
+        return eligiblePlayers.size() >= this.minimumConnectedPlayersConfig.getValue();
     }
 
     private List<ServerPlayer> getEligiblePlayers() {

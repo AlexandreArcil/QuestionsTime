@@ -1,5 +1,6 @@
 package fr.canardnocturne.questionstime.question.ask.answer;
 
+import fr.canardnocturne.questionstime.config.Config;
 import fr.canardnocturne.questionstime.question.ask.QuestionAskManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -9,11 +10,11 @@ import org.spongepowered.api.event.message.PlayerChatEvent;
 public class PlayerAnswerQuestionEventHandler {
 
     private final QuestionAskManager questionAskManager;
-    private final boolean isPersonalAnswer;
+    private final Config<Boolean> personalAnswerConfig;
 
-    public PlayerAnswerQuestionEventHandler(final QuestionAskManager questionAskManager, final boolean isPersonalAnswer) {
+    public PlayerAnswerQuestionEventHandler(final QuestionAskManager questionAskManager, final Config<Boolean> personalAnswerConfig) {
         this.questionAskManager = questionAskManager;
-        this.isPersonalAnswer = isPersonalAnswer;
+        this.personalAnswerConfig = personalAnswerConfig;
     }
 
     @Listener
@@ -25,7 +26,7 @@ public class PlayerAnswerQuestionEventHandler {
                 if (originalMessage.startsWith("qt>")) {
                     final String answer = originalMessage.substring(3).stripLeading();
                     this.questionAskManager.answer(player, answer);
-                    event.setCancelled(this.isPersonalAnswer);
+                    event.setCancelled(this.personalAnswerConfig.getValue());
                 }
             }
         }

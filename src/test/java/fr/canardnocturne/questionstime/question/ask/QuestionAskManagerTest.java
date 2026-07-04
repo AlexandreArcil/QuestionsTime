@@ -1,5 +1,6 @@
 package fr.canardnocturne.questionstime.question.ask;
 
+import fr.canardnocturne.questionstime.config.ConfigMutable;
 import fr.canardnocturne.questionstime.question.ask.announcer.QuestionAnnouncer;
 import fr.canardnocturne.questionstime.question.ask.launcher.QuestionLauncher;
 import fr.canardnocturne.questionstime.question.ask.picker.QuestionPicker;
@@ -82,7 +83,7 @@ class QuestionAskManagerTest {
             Mockito.when(taskBuilder.plugin(Mockito.any(PluginContainer.class))).thenReturn(taskBuilder);
             Mockito.when(taskBuilder.build()).thenReturn(task);
             
-            final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, 1);
+            final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(null));
             manager.askRandomQuestion();
 
             Mockito.verify(questionPicker).pick();
@@ -100,8 +101,7 @@ class QuestionAskManagerTest {
         Mockito.when(game.server()).thenReturn(server);
         Mockito.when(server.onlinePlayers()).thenReturn(Set.of());
 
-        final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, 1);
-        manager.setQuestionLauncher(launcher);
+        final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(launcher));
         manager.askQuestion(question);
 
         Mockito.verify(questionAnnouncer, Mockito.never()).announce(Mockito.any(), Mockito.anyList());
@@ -112,7 +112,7 @@ class QuestionAskManagerTest {
     void playerAnswerWithoutCurrentQuestion() {
         final Player player = Mockito.mock(Player.class);
 
-        final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, 1);
+        final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(null));
         manager.answer(player, "coin");
 
         Mockito.verify(player).sendMessage(Mockito.any());
@@ -137,7 +137,7 @@ class QuestionAskManagerTest {
         Mockito.when(questionPicker.pick()).thenReturn(question);
         Mockito.when(question.getPrizes()).thenReturn(Collections.emptySortedSet());
 
-        final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, 1);
+        final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(null));
         manager.askRandomQuestion();
         manager.answer(player, "any");
 
@@ -163,8 +163,7 @@ class QuestionAskManagerTest {
             Mockito.when(question.getAnswers()).thenReturn(Set.of(answer));
             Mockito.when(question.getPrizes()).thenReturn(Collections.emptySortedSet());
 
-            final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, 1);
-            manager.setQuestionLauncher(launcher);
+            final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(launcher));
             manager.askRandomQuestion();
             manager.answer(player, answer);
 
@@ -208,7 +207,7 @@ class QuestionAskManagerTest {
             Mockito.when(taskBuilder.plugin(Mockito.any(PluginContainer.class))).thenReturn(taskBuilder);
             Mockito.when(taskBuilder.build()).thenReturn(task);
 
-            final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, 1);
+            final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(null));
             manager.askRandomQuestion();
             manager.answer(player, answer);
 
@@ -225,7 +224,7 @@ class QuestionAskManagerTest {
         Mockito.when(server.onlinePlayers()).thenReturn(Set.of(sp));
         Mockito.when(questionCreationManager.isCreator(Mockito.any())).thenReturn(false);
 
-        final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, 1);
+        final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(null));
 
         assertTrue(manager.enoughEligiblePlayers());
     }
@@ -244,7 +243,7 @@ class QuestionAskManagerTest {
         Mockito.when(questionCreationManager.isCreator(uuid)).thenReturn(true);
         Mockito.when(questionCreationManager.isCreator(uuid2)).thenReturn(false);
 
-        final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, 2);
+        final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(2), new ConfigMutable<>(null));
 
         assertFalse(manager.enoughEligiblePlayers());
     }

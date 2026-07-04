@@ -1,21 +1,15 @@
 package fr.canardnocturne.questionstime.config;
 
-public enum Config {
+public class Config<T> {
 
-    COOLDOWN("cooldown"),
-    MODE("mode"),
-    MIN_COOLDOWN("minimum_cooldown"),
-    MAX_COOLDOWN("maximum_cooldown"),
-    PERSONAL_ANSWER("personal_answer"),
-    MINIMUM_CONNECTED("minimum_connected");
+    protected T value;
 
-    private final String name;
-
-    Config(final String name) {
-        this.name = name;
+    public Config(final T value) {
+        this.value = value;
     }
 
-    public String getName() {
-        return name;
+    public T getValue() {
+        return value;
     }
+
 }

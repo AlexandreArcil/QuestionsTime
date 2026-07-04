@@ -2,6 +2,16 @@ package fr.canardnocturne.questionstime;
 
 import com.google.inject.Inject;
 import fr.canardnocturne.questionstime.command.BaseCommandExecutor;
+import fr.canardnocturne.questionstime.command.set.config.SetConfigCooldownExecutor;
+import fr.canardnocturne.questionstime.command.set.config.SetConfigMaximumCooldownExecutor;
+import fr.canardnocturne.questionstime.command.set.config.SetConfigMinimumConnectedExecutor;
+import fr.canardnocturne.questionstime.command.set.config.SetConfigMinimumCooldownExecutor;
+import fr.canardnocturne.questionstime.command.set.config.SetConfigModeExecutor;
+import fr.canardnocturne.questionstime.command.set.config.SetConfigPersonalAnswerExecutor;
+import fr.canardnocturne.questionstime.config.ConfigField;
+import fr.canardnocturne.questionstime.config.ConfigMutable;
+import fr.canardnocturne.questionstime.config.save.HoconPluginConfigurationSave;
+import fr.canardnocturne.questionstime.config.save.PluginConfigurationSave;
 import fr.canardnocturne.questionstime.question.modifier.QuestionModifier;
 import fr.canardnocturne.questionstime.question.modifier.QuestionModifierImpl;
 import fr.canardnocturne.questionstime.command.set.question.answers.SetQuestionAddAnswersExecutor;
@@ -37,7 +47,7 @@ import fr.canardnocturne.questionstime.config.upgrade.ConfigurationUpgradeOrches
 import fr.canardnocturne.questionstime.config.upgrade.update.FirstVersionConfigurationUpdate;
 import fr.canardnocturne.questionstime.config.upgrade.update.NoVersionConfigurationUpdate;
 import fr.canardnocturne.questionstime.config.upgrade.update.SecondVersionConfigurationUpdate;
-import fr.canardnocturne.questionstime.config.verificator.SetDefaultWrongConfigurationValues;
+import fr.canardnocturne.questionstime.config.verificator.VerifyConfigurationValuesImpl;
 import fr.canardnocturne.questionstime.config.verificator.VerifyConfigurationValues;
 import fr.canardnocturne.questionstime.message.Messages;
 import fr.canardnocturne.questionstime.message.SimpleMessage;
@@ -122,11 +132,10 @@ public class QuestionsTime {
     private final ConfigurationUpgrade configurationUpgrade;
     private final VerifyConfigurationValues verifyConfigurationValues;
 
-    private QuestionTimeConfiguration pluginConfig;
-    private QuestionCreationManager questionCreationManager;
     private QuestionLauncher questionLauncher;
     private QuestionPool questionPool;
-    private QuestionAskManager questionAskManager;
+    private PlayerAnswerQuestionEventHandler playerAnswerQuestionEventHandler;
+    private CreatorLeftServerEventHandler creatorLeftServerEventHandler;
 
     @Inject
     public QuestionsTime(final Logger logger, final Game game, @ConfigDir(sharedRoot = false) final Path pluginFolder, final PluginContainer pluginContainer) {
@@ -139,14 +148,14 @@ public class QuestionsTime {
         this.messageConfigurationUpdater = new AddMissingMessageConfiguration(logger);
         this.pluginConfigurationLoader = new SafePluginConfigurationLoader(logger);
         this.configurationUpgrade = new ConfigurationUpgradeOrchestrator(List.of(new NoVersionConfigurationUpdate(), new FirstVersionConfigurationUpdate(), new SecondVersionConfigurationUpdate()), logger);
-        this.verifyConfigurationValues = new SetDefaultWrongConfigurationValues(logger);
+        this.verifyConfigurationValues = new VerifyConfigurationValuesImpl();
     }
 
     @Listener
     public void onServerStarted(final StartedEngineEvent<Server> event) {
         Sponge.eventManager()
-                .registerListeners(this.plugin, new PlayerAnswerQuestionEventHandler(this.questionAskManager, this.pluginConfig.isPersonalAnswer()), MethodHandles.lookup())
-                .registerListeners(this.plugin, new CreatorLeftServerEventHandler(this.questionCreationManager), MethodHandles.lookup());
+                .registerListeners(this.plugin, this.playerAnswerQuestionEventHandler, MethodHandles.lookup())
+                .registerListeners(this.plugin, this.creatorLeftServerEventHandler, MethodHandles.lookup());
     }
 
     @Listener
@@ -166,30 +175,43 @@ public class QuestionsTime {
                 .path(configFile)
                 .build();
         final QuestionRegister questionRegister = new HoconQuestionRegister(configLoader, logger);
+        final PluginConfigurationSave pluginConfigurationSave = new HoconPluginConfigurationSave(configLoader, logger);
+        QuestionTimeConfiguration pluginConfig;
         try {
             if (Files.notExists(this.pluginFolder)) {
                 Files.createDirectories(this.pluginFolder);
             }
             this.createConfigFile(configFile, configLoader);
-            this.loadConfig(configLoader);
+            pluginConfig = this.loadConfig(configLoader);
 
             final Path messagesConfigPath = pluginFolder.resolve("message.conf");
             this.createMessagesFile(messagesConfigPath);
             this.loadMessages(messagesConfigPath);
         } catch (final IOException e) {
             this.logger.error("Unable to create the plugin folder", e);
+            pluginConfig = new QuestionTimeConfiguration();
         }
 
-        this.questionPool = new WeightSortedQuestionPool(this.pluginConfig.getQuestions());
-        this.questionCreationManager = new QuestionCreationManager(new StoppableQuestionCreationOrchestrator.StoppableQuestionCreationOrchestratorFactory(),
+        this.questionPool = new WeightSortedQuestionPool(pluginConfig.getQuestions());
+        final QuestionCreationManager questionCreationManager = new QuestionCreationManager(new StoppableQuestionCreationOrchestrator.StoppableQuestionCreationOrchestratorFactory(),
                 this.questionPool, questionRegister, this.logger);
+        this.creatorLeftServerEventHandler = new CreatorLeftServerEventHandler(questionCreationManager);
+
+        final ConfigMutable<Integer> cooldownConfig = new ConfigMutable<>(pluginConfig.getCooldown());
+        final ConfigMutable<Integer> minimumCooldownConfig = new ConfigMutable<>(pluginConfig.getMinCooldown());
+        final ConfigMutable<Integer> maximumCooldownConfig = new ConfigMutable<>(pluginConfig.getMaxCooldown());
+        final ConfigMutable<Integer> minConnectedConfig = new ConfigMutable<>(pluginConfig.getMinConnected());
+        final ConfigMutable<Boolean> personalAnswerConfig = new ConfigMutable<>(pluginConfig.isPersonalAnswer());
+        final ConfigMutable<QuestionLauncher> questionLauncherConfig = new ConfigMutable<>(null);
 
         final QuestionPicker questionPicker = new WeightedRandomnessQuestionPicker(this.questionPool, this.logger);
         final QuestionAnnouncer questionAnnouncer = new SimpleQuestionAnnouncer(this.game, this.plugin);
-        this.questionAskManager = new QuestionAskManager(questionPicker, questionAnnouncer, this.questionCreationManager, this.game, this.plugin, this.logger, this.pluginConfig.getMinConnected());
+        final QuestionAskManager questionAskManager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, this.game, this.plugin, this.logger, minConnectedConfig, questionLauncherConfig);
+        final QuestionLauncherFactory questionLauncherFactory = new QuestionLauncherFactory(this.plugin, this.game, questionAskManager, cooldownConfig, minimumCooldownConfig, maximumCooldownConfig);
+        this.playerAnswerQuestionEventHandler = new PlayerAnswerQuestionEventHandler(questionAskManager, personalAnswerConfig);
         try {
-            this.questionLauncher = QuestionLauncherFactory.create(this.pluginConfig, this.plugin, this.game, this.questionAskManager);
-            this.questionAskManager.setQuestionLauncher(questionLauncher);
+            this.questionLauncher = questionLauncherFactory.create(pluginConfig.getMode());
+            questionLauncherConfig.setValue(this.questionLauncher);
         } catch (final IllegalStateException e) {
             this.logger.error(e.getMessage(), e);
         }
@@ -199,7 +221,7 @@ public class QuestionsTime {
                 .permission("questionstime.command.create")
                 .executionRequirements(commandCause -> commandCause.root() instanceof ServerPlayer)
                 .addParameter(CreateQuestionCommand.STEP_ARG)
-                .executor(new CreateQuestionCommand(this.questionCreationManager))
+                .executor(new CreateQuestionCommand(questionCreationManager))
                 .build();
         event.register(this.plugin, commandQTCreator, "questionstimecreator", "qtc");
 
@@ -210,7 +232,7 @@ public class QuestionsTime {
                 .shortDescription(Component.text("Ask a question").color(NamedTextColor.YELLOW))
                 .permission("questionstime.command.ask")
                 .addParameter(questionParameter)
-                .executor(new ManualAskQuestionCommand(this.questionAskManager, this.questionLauncher, specificQuestionParameter, this.logger))
+                .executor(new ManualAskQuestionCommand(questionAskManager, this.questionLauncher, specificQuestionParameter, this.logger))
                 .build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
@@ -417,10 +439,58 @@ public class QuestionsTime {
                 .executor(context -> CommandResult.error(TextUtils.errorWithPrefix("Select a question")))
                 .build();
 
+        final Command.Parameterized commandQTSetConfigMaximumCooldown = Command.builder()
+                .shortDescription(Component.text("Set the maximum cooldown").color(NamedTextColor.YELLOW))
+                .addParameters(SetConfigMaximumCooldownExecutor.MAXIMUM_COOLDOWN)
+                .executor(new SetConfigMaximumCooldownExecutor(verifyConfigurationValues, pluginConfig, pluginConfigurationSave, maximumCooldownConfig, logger))
+                .build();
+
+        final Command.Parameterized commandQTSetConfigMinimumCooldown = Command.builder()
+                .shortDescription(Component.text("Set the minimum cooldown").color(NamedTextColor.YELLOW))
+                .addParameters(SetConfigMinimumCooldownExecutor.MINIMUM_COOLDOWN)
+                .executor(new SetConfigMinimumCooldownExecutor(verifyConfigurationValues, pluginConfig, pluginConfigurationSave, minimumCooldownConfig, logger))
+                .build();
+
+        final Command.Parameterized commandQTSetConfigCooldown = Command.builder()
+                .shortDescription(Component.text("Set the cooldown").color(NamedTextColor.YELLOW))
+                .addParameters(SetConfigCooldownExecutor.COOLDOWN)
+                .executor(new SetConfigCooldownExecutor(verifyConfigurationValues, pluginConfig, pluginConfigurationSave, cooldownConfig, logger))
+                .build();
+
+        final Command.Parameterized commandQTSetPersonalAnswer = Command.builder()
+                .shortDescription(Component.text("Set the personal answer").color(NamedTextColor.YELLOW))
+                .addParameters(SetConfigPersonalAnswerExecutor.PERSONAL_ANSWER)
+                .executor(new SetConfigPersonalAnswerExecutor(pluginConfig, pluginConfigurationSave, personalAnswerConfig, logger))
+                .build();
+
+        final Command.Parameterized commandQTSetMinimumConnected = Command.builder()
+                .shortDescription(Component.text("Set the minimum connected players").color(NamedTextColor.YELLOW))
+                .addParameters(SetConfigMinimumConnectedExecutor.MINIMUM_CONNECTED)
+                .executor(new SetConfigMinimumConnectedExecutor(verifyConfigurationValues, pluginConfig, pluginConfigurationSave, minConnectedConfig, logger))
+                .build();
+
+        final Command.Parameterized commandQTSetMode = Command.builder()
+                .shortDescription(Component.text("Set the mode").color(NamedTextColor.YELLOW))
+                .addParameters(SetConfigModeExecutor.MODES)
+                .executor(new SetConfigModeExecutor(pluginConfig, pluginConfigurationSave, questionLauncherFactory, questionLauncherConfig, logger))
+                .build();
+
+        final Command.Parameterized commandQTSetConfig = Command.builder()
+                .shortDescription(Component.text("Set a configuration value").color(NamedTextColor.YELLOW))
+                .permission("questionstime.command.set")
+                .addChild(commandQTSetConfigMinimumCooldown, "minimum_cooldown")
+                .addChild(commandQTSetConfigMaximumCooldown, "maximum_cooldown")
+                .addChild(commandQTSetConfigCooldown, "cooldown")
+                .addChild(commandQTSetPersonalAnswer, "personal_answer")
+                .addChild(commandQTSetMinimumConnected, "minimum_connected")
+                .addChild(commandQTSetMode, "mode")
+                .build();
+
         final Command.Parameterized commandQTSet = Command.builder()
                 .shortDescription(Component.text("Change a configuration or question value").color(NamedTextColor.YELLOW))
                 .permission("questionstime.command.set")
                 .addChild(commandQTSetQuestion, "question")
+                .addChild(commandQTSetConfig, "config")
                 .build();
 
         final Command.Parameterized commandQTBase = Command.builder()
@@ -461,17 +531,47 @@ public class QuestionsTime {
         }
     }
 
-    private void loadConfig(final ConfigurationLoader<CommentedConfigurationNode> configLoader) {
+    private QuestionTimeConfiguration loadConfig(final ConfigurationLoader<CommentedConfigurationNode> configLoader) {
         this.logger.info("Loading configurations from config.conf...");
         try {
             this.configurationUpgrade.upgrade(configLoader);
-            final QuestionTimeConfiguration questionTimeConfiguration = this.pluginConfigurationLoader.load(configLoader);
-            this.verifyConfigurationValues.verify(questionTimeConfiguration);
-            this.pluginConfig = questionTimeConfiguration;
+            final QuestionTimeConfiguration questionTimeConfiguration = pluginConfigurationLoader.load(configLoader);
+            final VerifyConfigurationValues.Result verificationResult = this.verifyConfigurationValues.verify(questionTimeConfiguration);
+            if(!verificationResult.isSuccess()) {
+                this.setConfigDefaultValue(verificationResult, questionTimeConfiguration);
+            }
             this.logger.info("Configuration loaded with {} questions", String.valueOf(questionTimeConfiguration.getQuestions().size()));
+            return questionTimeConfiguration;
         } catch (final ConfigurationUpgradeException e) {
             this.logger.error("A problem occurred when upgrading the config.conf file, default configuration will be used", e);
-            this.pluginConfig = new QuestionTimeConfiguration();
+            return new QuestionTimeConfiguration();
+        }
+    }
+
+    private void setConfigDefaultValue(final VerifyConfigurationValues.Result verificationResult,
+                                       final QuestionTimeConfiguration questionTimeConfiguration) {
+        for (final Map.Entry<ConfigField, List<String>> entry : verificationResult.getWrongValues().entrySet()) {
+            final ConfigField configField = entry.getKey();
+            for (final String errorReason : entry.getValue()) {
+                switch (configField) {
+                    case MINIMUM_CONNECTED -> {
+                        questionTimeConfiguration.setMinConnected(QuestionTimeConfiguration.DefaultValues.MIN_CONNECTED);
+                        this.logger.warn("The config '{}' value is {}. The default value {} will be used instead", ConfigField.MIN_COOLDOWN.getName(), errorReason, QuestionTimeConfiguration.DefaultValues.MIN_CONNECTED);
+                    }
+                    case MIN_COOLDOWN -> {
+                        questionTimeConfiguration.setMinCooldown(QuestionTimeConfiguration.DefaultValues.MIN_COOLDOWN);
+                        this.logger.warn("The config '{}' value is {}. The default value {} will be used instead", ConfigField.MIN_COOLDOWN.getName(), errorReason, QuestionTimeConfiguration.DefaultValues.MIN_COOLDOWN);
+                    }
+                    case MAX_COOLDOWN -> {
+                        questionTimeConfiguration.setMaxCooldown(QuestionTimeConfiguration.DefaultValues.MAX_COOLDOWN);
+                        this.logger.warn("The config '{}' value is {}. The default value {} will be used instead", ConfigField.MAX_COOLDOWN.getName(), errorReason, QuestionTimeConfiguration.DefaultValues.MAX_COOLDOWN);
+                    }
+                    case VERSION -> {
+                        questionTimeConfiguration.setVersion(QuestionTimeConfiguration.DefaultValues.VERSION);
+                        this.logger.warn("The config '{}' value is {}. The default value {} will be used instead", ConfigField.VERSION.getName(), errorReason, QuestionTimeConfiguration.DefaultValues.VERSION);
+                    }
+                }
+            }
         }
     }
 
