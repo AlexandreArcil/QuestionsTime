@@ -19,6 +19,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class QuestionAskManager {
@@ -143,6 +144,10 @@ public class QuestionAskManager {
 
     public boolean isQuestionHasBeenAsked() {
         return this.currentQuestion != null;
+    }
+
+    public Optional<Question> getCurrentQuestion() {
+        return Optional.ofNullable(this.currentQuestion);
     }
 
 }

@@ -12,6 +12,7 @@ import fr.canardnocturne.questionstime.config.ConfigField;
 import fr.canardnocturne.questionstime.config.ConfigMutable;
 import fr.canardnocturne.questionstime.config.save.HoconPluginConfigurationSave;
 import fr.canardnocturne.questionstime.config.save.PluginConfigurationSave;
+import fr.canardnocturne.questionstime.question.ask.announcer.AskQuestionOnPlayerJoinEventHandler;
 import fr.canardnocturne.questionstime.question.modifier.QuestionModifier;
 import fr.canardnocturne.questionstime.question.modifier.QuestionModifierImpl;
 import fr.canardnocturne.questionstime.command.set.question.answers.SetQuestionAddAnswersExecutor;
@@ -136,6 +137,7 @@ public class QuestionsTime {
     private QuestionPool questionPool;
     private PlayerAnswerQuestionEventHandler playerAnswerQuestionEventHandler;
     private CreatorLeftServerEventHandler creatorLeftServerEventHandler;
+    private AskQuestionOnPlayerJoinEventHandler askQuestionOnPlayerJoinEventHandler;
 
     @Inject
     public QuestionsTime(final Logger logger, final Game game, @ConfigDir(sharedRoot = false) final Path pluginFolder, final PluginContainer pluginContainer) {
@@ -155,7 +157,8 @@ public class QuestionsTime {
     public void onServerStarted(final StartedEngineEvent<Server> event) {
         Sponge.eventManager()
                 .registerListeners(this.plugin, this.playerAnswerQuestionEventHandler, MethodHandles.lookup())
-                .registerListeners(this.plugin, this.creatorLeftServerEventHandler, MethodHandles.lookup());
+                .registerListeners(this.plugin, this.creatorLeftServerEventHandler, MethodHandles.lookup())
+                .registerListeners(this.plugin, this.askQuestionOnPlayerJoinEventHandler, MethodHandles.lookup());
     }
 
     @Listener
@@ -209,6 +212,7 @@ public class QuestionsTime {
         final QuestionAskManager questionAskManager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, this.game, this.plugin, this.logger, minConnectedConfig, questionLauncherConfig);
         final QuestionLauncherFactory questionLauncherFactory = new QuestionLauncherFactory(this.plugin, this.game, questionAskManager, cooldownConfig, minimumCooldownConfig, maximumCooldownConfig);
         this.playerAnswerQuestionEventHandler = new PlayerAnswerQuestionEventHandler(questionAskManager, personalAnswerConfig);
+        this.askQuestionOnPlayerJoinEventHandler = new AskQuestionOnPlayerJoinEventHandler(questionAskManager, questionAnnouncer);
         try {
             this.questionLauncher = questionLauncherFactory.create(pluginConfig.getMode());
             questionLauncherConfig.setValue(this.questionLauncher);
