@@ -36,6 +36,8 @@ public class Messages {
     public static final SimpleMessage REWARD_ANNOUNCE = register(new SimpleMessage("reward.announce", "§e§lHere's your reward :"));
     public static final MessageFormat<RewardPrizeMessage.Format> REWARD_PRIZE = register(new RewardPrizeMessage("reward.prize", "§9• {quantity} * {modid}§f{item}"));
     public static final MessageFormat<RewardMoneyMessage.Format> REWARD_MONEY = register(new RewardMoneyMessage("reward.money", "§9•{money} §r{currency}"));
+    public static final MessageFormat<AnswerRevealMessage.Format> ANSWER_REVEAL = register(new AnswerRevealMessage("answer.reveal", "§eThe answer was §l{answer}"));
+    public static final MessageFormat<AnswersRevealMessage.Format> ANSWERS_REVEAL = register(new AnswersRevealMessage("answer.reveal_all", "§eThe answers were §l{answers}"));
 
     private static <T extends SimpleMessage> T register(final T message) {
         messages.put(message.getSection(), message);

@@ -21,7 +21,7 @@ public class QuestionSerializer implements TypeSerializer<Question> {
     public Question deserialize(final Type type, final ConfigurationNode node) throws SerializationException {
         if (this.isInvalid(node)) {
             throw new SerializationException(node, Question.class, "The question " + node.key() + " contain one or several errors. " +
-                    "Check if he contain the sections \"question\" and \"answer\" at least.");
+                    "Check if it contains the sections \"question\" and \"answer\" at least.");
         }
 
         final String askedQuestion = node.node("question").getString();
@@ -29,6 +29,7 @@ public class QuestionSerializer implements TypeSerializer<Question> {
         final int timer = node.node("timer").getInt(-1);
         final int timeBetweenAnswer = node.node("time-between-answer").getInt(-1);
         final int weight = node.node("weight").getInt(1);
+        final boolean revealAnswer = node.node("reveal-answer").getBoolean(false);
         final ConfigurationNode prizeNode = node.node("prizes");
         final Set<Prize> prizes = new HashSet<>(prizeNode.getList(Prize.class, Collections.emptyList()));
         final ConfigurationNode malusNode = node.node("malus");
@@ -39,7 +40,7 @@ public class QuestionSerializer implements TypeSerializer<Question> {
         try {
             return questionBuilder.setAnswers(answers).setPropositions(propositions).setQuestion(askedQuestion).setPrizes(prizes)
                     .setMalus(malus).setTimer(timer).setTimeBetweenAnswer(timeBetweenAnswer)
-                    .setWeight(weight).build();
+                    .setWeight(weight).setRevealAnswer(revealAnswer).build();
         } catch (final Exception e) {
             throw new SerializationException(e);
         }
@@ -53,6 +54,7 @@ public class QuestionSerializer implements TypeSerializer<Question> {
             node.node("timer").set(question.getTimer());
             node.node("time-between-answer").set(question.getTimeBetweenAnswer());
             node.node("weight").set(question.getWeight());
+            node.node("reveal-answer").set(question.isRevealAnswer());
             if(!question.getPropositions().isEmpty()) {
                 node.node("proposition").setList(String.class, new ArrayList<>(question.getPropositions()));
             }

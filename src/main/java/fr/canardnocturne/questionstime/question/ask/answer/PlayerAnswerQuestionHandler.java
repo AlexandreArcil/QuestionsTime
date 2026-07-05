@@ -70,6 +70,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
         if(!this.winners.isEmpty()) {
             this.announceWinners(eligiblePlayers);
             this.givePrizes();
+            this.announceAnswers(eligiblePlayers);
         } else {
             TextUtils.sendTextToEveryone(Component.text(Messages.QUESTION_TIMER_OUT.getMessage()), eligiblePlayers);
         }
@@ -86,6 +87,18 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
         });
 //      })).async().delay(500, TimeUnit.MILLISECONDS)
 //          .submit(instance.getContainer().getInstance().get());
+    }
+
+    private void announceAnswers(final List<ServerPlayer> eligiblePlayers) {
+        if(this.question.isRevealAnswer()) {
+            eligiblePlayers.forEach(player -> {
+                if(question.getAnswers().size() == 1) {
+                    player.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWER_REVEAL.format().setAnswer(this.question.getAnswers().iterator().next()).message()));
+                } else {
+                    player.sendMessage(QuestionsTime.PREFIX.append(Messages.ANSWERS_REVEAL.format().setAnswers(this.question.getAnswers()).message()));
+                }
+            });
+        }
     }
 
     private void givePrizes() {

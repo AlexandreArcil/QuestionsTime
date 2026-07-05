@@ -55,6 +55,6 @@ public class WeightStep implements CreationStep {
 
     @Override
     public Step next(final QuestionCreator questionCreator) {
-        return null;
+        return RevealAnswerStep.INSTANCE;
     }
 }

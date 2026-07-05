@@ -19,13 +19,13 @@ class QuestionTest {
     @Test
     void noQuestion() {
         final QuestionException exception = assertThrows(QuestionException.class, () -> Question.builder().build());
-        Assertions.assertEquals("The question is not defined", exception.getMessage());
+        Assertions.assertEquals("The question must be defined", exception.getMessage());
     }
 
     @Test
     void noAnswer() {
         final QuestionException exception = assertThrows(QuestionException.class, () -> Question.builder().setQuestion("What sound a duck does?").build());
-        Assertions.assertEquals("The answer is not defined", exception.getMessage());
+        Assertions.assertEquals("The question must have at least one answer", exception.getMessage());
     }
 
     @Test
@@ -81,7 +81,7 @@ class QuestionTest {
                 .setWeight(1)
                 .setPropositions(List.of("Quack", "Meow", "Woof"));
         final Exception exception = assertThrows(QuestionException.class, builder::build);
-        assertEquals("The question answers '[Beeee]' need to be a proposition", exception.getMessage());
+        assertEquals("The question answers 'Beeee' need to be a proposition", exception.getMessage());
     }
 
     @Test

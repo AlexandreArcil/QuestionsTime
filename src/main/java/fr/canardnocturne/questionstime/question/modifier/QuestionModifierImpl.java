@@ -143,6 +143,8 @@ public class QuestionModifierImpl implements QuestionModifier {
                     .orElseGet(Malus::builder);
             malus.setAnnounce(value);
             builder.setMalus(malus.build());
+        } else if(component == QuestionComponent.REVEAL_ANSWER) {
+            builder.setRevealAnswer(value);
         } else {
             throw new IllegalArgumentException("Unknown type '" + component + "' for set boolean");
         }

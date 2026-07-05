@@ -29,6 +29,7 @@ public class QuestionCreator {
     private int timeBetweenAnswer = -1;
     private boolean stopped;
     private int weight = 1;
+    private boolean revealAnswer;
 
     public QuestionCreator() {
         this.answers = new ArrayList<>();
@@ -46,7 +47,8 @@ public class QuestionCreator {
                 new Malus(this.moneyMalus, this.announceMalus, this.commandsMalus.toArray(new OutcomeCommand[0])) : null;
         final Question.QuestionBuilder questionBuilder = Question.builder();
         return questionBuilder.setQuestion(this.question).setPropositions(this.propositions).setAnswers(new HashSet<>(this.answers))
-                .setPrizes(prizes).setMalus(malus).setTimer(this.duration).setTimeBetweenAnswer(this.timeBetweenAnswer).setWeight(this.weight).build();
+                .setPrizes(prizes).setMalus(malus).setTimer(this.duration).setTimeBetweenAnswer(this.timeBetweenAnswer).setWeight(this.weight)
+                .setRevealAnswer(this.revealAnswer).build();
     }
 
     public List<String> getPropositions() {
@@ -173,5 +175,9 @@ public class QuestionCreator {
         } else {
             return false;
         }
+    }
+
+    public void setRevealAnswer(final boolean revealAnswer) {
+        this.revealAnswer = revealAnswer;
     }
 }

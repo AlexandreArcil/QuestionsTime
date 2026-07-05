@@ -253,7 +253,7 @@ class PlayerAnswerQuestionHandlerTest {
             textUtilsMock.when(() -> TextUtils.displayItem(Mockito.any())).thenReturn(Component.text("coin"));
             final String command = "/command @winner coin";
             final Question question = Question.builder().setQuestion("question").setAnswers(Set.of("answer"))
-                    .setPrizes(Set.of(Prize.builder(1).setMoney(50).addItem(itemStackMock).build(),
+                    .setRevealAnswer(true).setPrizes(Set.of(Prize.builder(1).setMoney(50).addItem(itemStackMock).build(),
                             Prize.builder(2).addCommand(new OutcomeCommand("message", command)).build()))
                     .setWeight(1).build();
             final PlayerAnswerQuestionHandler handler = new PlayerAnswerQuestionHandler(logger, question, game, pluginContainer);
@@ -268,14 +268,16 @@ class PlayerAnswerQuestionHandlerTest {
             final ServerPlayer playerLoser = Mockito.mock(ServerPlayer.class);
             assertFalse(handler.answer(player2, "answer", List.of(player, player2, playerLoser)));
             assertTrue(handler.answer(player, "answer", List.of(player, player2, playerLoser)));
-            Mockito.verify(playerLoser).sendMessage(message.capture());
+            Mockito.verify(playerLoser, Mockito.times(2)).sendMessage(message.capture());
             final Set<Player> winners = new LinkedHashSet<>();
             winners.add(player2);
             winners.add(player);
-            assertTrue(MiniMessageTest.NO_STYLE_COMPONENT.serialize(message.getValue())
+            assertTrue(MiniMessageTest.NO_STYLE_COMPONENT.serialize(message.getAllValues().getFirst())
                     .contains(MiniMessageTest.NO_STYLE_COMPONENT.serialize(Messages.ANSWER_WIN_ANNOUNCE.format().setPlayerNames(winners).message())));
-            Mockito.verify(player, Mockito.times(3)).sendMessage(Mockito.any(Component.class));
-            Mockito.verify(player2, Mockito.times(5)).sendMessage(Mockito.any(Component.class));
+            assertTrue(MiniMessageTest.NO_STYLE_COMPONENT.serialize(message.getAllValues().get(1))
+                    .contains(MiniMessageTest.NO_STYLE_COMPONENT.serialize(Messages.ANSWER_REVEAL.format().setAnswer("answer").message())));
+            Mockito.verify(player, Mockito.times(4)).sendMessage(Mockito.any(Component.class));
+            Mockito.verify(player2, Mockito.times(6)).sendMessage(Mockito.any(Component.class));
             Mockito.verify(uniqueAccount).deposit(currency, BigDecimal.valueOf(50));
             Mockito.verify(playerInventory).offer(itemStackMock);
             Mockito.verify(commandManager).process(systemSubject, player, command.replace("@winner", player.name()));

@@ -217,6 +217,17 @@ class QuestionModifierImplTest {
     }
 
     @Test
+    void setRevealAnswer() {
+        final boolean newRevealAnswer = true;
+        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1).build();
+
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final Question modifiedQuestion = questionModifier.set(question, QuestionComponent.REVEAL_ANSWER, newRevealAnswer);
+
+        assertTrue(modifiedQuestion.isRevealAnswer());
+    }
+
+    @Test
     void addAnswer() {
         final String newAnswer = "new answer";
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1).build();
@@ -489,7 +500,5 @@ class QuestionModifierImplTest {
 
         assertEquals("Command 'message;cmd' not found in prize with position 1", exception.getMessage());
     }
-
-    //TODO finir de tester le dernier remove => set commande pour question terminer !
 
 }

@@ -86,7 +86,7 @@ class WeightStepTest {
 
     @Test
     void nextDefined() {
-        assertNull(WeightStep.INSTANCE.next(qc));
+        assertNotNull(WeightStep.INSTANCE.next(qc));
     }
 
 }

@@ -64,6 +64,7 @@ public class QuestionTimeConfiguration {
                     .setTimer(1800)
                     .setTimeBetweenAnswer(300)
                     .setWeight(2)
+                    .setRevealAnswer(true)
                     .build()
     );
 

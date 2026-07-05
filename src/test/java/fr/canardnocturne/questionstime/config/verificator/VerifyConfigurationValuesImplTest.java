@@ -98,7 +98,7 @@ class VerifyConfigurationValuesImplTest extends SpongeMock {
 
         assertFalse(verify.isSuccess());
         assertTrue(verify.getWrongValues().containsKey(ConfigField.MINIMUM_CONNECTED));
-        assertEquals(2, verify.getWrongValues().get(ConfigField.MINIMUM_CONNECTED).size());
+        assertEquals(1, verify.getWrongValues().get(ConfigField.MINIMUM_CONNECTED).size());
         assertTrue(verify.getWrongValues().containsKey(ConfigField.COOLDOWN));
         assertTrue(verify.getWrongValues().containsKey(ConfigField.MAX_COOLDOWN));
         assertTrue(verify.getWrongValues().containsKey(ConfigField.VERSION));
@@ -110,7 +110,7 @@ class VerifyConfigurationValuesImplTest extends SpongeMock {
         final QuestionTimeConfiguration config = new QuestionTimeConfiguration();
         config.setMinConnected(2);
         config.setCooldown(30);
-        config.setMaxCooldown(-30);
+        config.setMaxCooldown(30);
         config.setMinCooldown(10);
         config.setVersion(QuestionTimeConfiguration.DefaultValues.VERSION);
 

@@ -18,6 +18,7 @@ public class Question {
     private final int timer;
     private final int timeBetweenAnswer;
     private final int weight;
+    private final boolean revealAnswer;
 
     private Question(final QuestionBuilder builder) {
         this.question = builder.question;
@@ -28,6 +29,7 @@ public class Question {
         this.timeBetweenAnswer = builder.timeBetweenAnswer;
         this.weight = builder.weight;
         this.propositions = Collections.unmodifiableList(builder.propositions);
+        this.revealAnswer = builder.revealAnswer;
     }
 
     public SortedSet<Prize> getPrizes() {
@@ -68,6 +70,10 @@ public class Question {
 
     public int getWeight() {
         return weight;
+    }
+
+    public boolean isRevealAnswer() {
+        return revealAnswer;
     }
 
     public static QuestionBuilder builder() {
@@ -113,6 +119,7 @@ public class Question {
         private int timer;
         private int timeBetweenAnswer;
         private int weight;
+        private boolean revealAnswer;
 
         private QuestionBuilder() {
             this.propositions = new ArrayList<>();
@@ -135,6 +142,7 @@ public class Question {
             this.timer = question.timer;
             this.timeBetweenAnswer = question.timeBetweenAnswer;
             this.weight = question.weight;
+            this.revealAnswer = question.revealAnswer;
         }
 
         public QuestionBuilder setQuestion(final String question) {
@@ -162,6 +170,11 @@ public class Question {
         public QuestionBuilder setPrizes(final Set<Prize> prizes) {
             this.prizes.clear();
             this.prizes.addAll(prizes);
+            return this;
+        }
+
+        public QuestionBuilder setRevealAnswer(final boolean revealAnswer) {
+            this.revealAnswer = revealAnswer;
             return this;
         }
 

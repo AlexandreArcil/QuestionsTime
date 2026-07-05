@@ -12,9 +12,7 @@ import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.SequencedSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,6 +39,7 @@ class QuestionSerializerTest {
         Mockito.when(node.node("prizes")).thenReturn(node);
         Mockito.when(node.node("malus")).thenReturn(node);
         Mockito.when(node.node("proposition")).thenReturn(node);
+        Mockito.when(node.node("reveal-answer")).thenReturn(node);
         Mockito.when(node.empty()).thenReturn(false, false, true);
         Mockito.when(node.getString()).thenReturn(questionText);
         Mockito.when(node.getList(Mockito.eq(String.class), Mockito.anyList())).thenReturn(answers);
@@ -48,6 +47,7 @@ class QuestionSerializerTest {
         Mockito.when(node.getList(Mockito.eq(String.class), Mockito.anyList())).thenReturn(answers, propositions);
         Mockito.when(node.getList(Mockito.eq(Prize.class), Mockito.anyList())).thenReturn(List.of(prize));
         Mockito.when(node.get(Malus.class)).thenReturn(malus);
+        Mockito.when(node.getBoolean(Mockito.anyBoolean())).thenReturn(true);
 
         final QuestionSerializer serializer = new QuestionSerializer();
         final Question question = serializer.deserialize(Object.class, node);
@@ -59,7 +59,8 @@ class QuestionSerializerTest {
         assertEquals(weight, question.getWeight());
         assertTrue(question.getPrizes().contains(prize));
         assertEquals(malus, question.getMalus().get());
-        assertTrue(question.getPropositions().containsAll(propositions));;
+        assertTrue(question.getPropositions().containsAll(propositions));
+        assertTrue(question.isRevealAnswer());
     }
     
     @Test
@@ -76,7 +77,7 @@ class QuestionSerializerTest {
         final QuestionSerializer serializer = new QuestionSerializer();
         final SerializationException exception = Assertions.assertThrows(SerializationException.class, () -> serializer.deserialize(Object.class, node));
 
-        assertEquals("questions.question1 of type fr.canardnocturne.questionstime.question.Question: The question question1 contain one or several errors. Check if he contain the sections \"question\" and \"answer\" at least.", exception.getMessage());
+        assertEquals("questions.question1 of type fr.canardnocturne.questionstime.question.Question: The question question1 contain one or several errors. Check if it contains the sections \"question\" and \"answer\" at least.", exception.getMessage());
     }
 
     @Test
@@ -90,6 +91,7 @@ class QuestionSerializerTest {
         Mockito.when(node.node("weight")).thenReturn(node);
         Mockito.when(node.node("prizes")).thenReturn(node);
         Mockito.when(node.node("malus")).thenReturn(node);
+        Mockito.when(node.node("reveal-answer")).thenReturn(node);
         Mockito.when(node.getString()).thenReturn("");
         Mockito.when(node.empty()).thenReturn(false, false, true);
 
@@ -109,7 +111,7 @@ class QuestionSerializerTest {
         final Malus malus = Mockito.mock(Malus.class);
         final Question question = Question.builder().setQuestion(questionText).setPropositions(propositions).setAnswers(answers).setWeight(weight)
                 .setPrizes(Set.of(prize)).setMalus(malus).setTimer(timer).setTimeBetweenAnswer(timeBetweenAnswer)
-                .build();
+                .setRevealAnswer(true).build();
 
         final ConfigurationNode rootNode = Mockito.mock(ConfigurationNode.class);
         final ConfigurationNode node = Mockito.mock(ConfigurationNode.class);
@@ -121,18 +123,20 @@ class QuestionSerializerTest {
         Mockito.when(rootNode.node("prizes")).thenReturn(node);
         Mockito.when(rootNode.node("malus")).thenReturn(node);
         Mockito.when(rootNode.node("proposition")).thenReturn(node);
+        Mockito.when(rootNode.node("reveal-answer")).thenReturn(node);
 
         final QuestionSerializer serializer = new QuestionSerializer();
         serializer.serialize(Object.class, question, rootNode);
 
         final ArgumentCaptor<Object> questionCaptor = ArgumentCaptor.forClass(Object.class);
-        Mockito.verify(node, Mockito.times(5)).set(questionCaptor.capture());
+        Mockito.verify(node, Mockito.times(6)).set(questionCaptor.capture());
         final List<Object> values = questionCaptor.getAllValues();
         assertEquals(questionText, values.getFirst());
         assertEquals(answers, values.get(1));
         assertEquals(timer, values.get(2));
         assertEquals(timeBetweenAnswer, values.get(3));
         assertEquals(weight, values.get(4));
+        assertEquals(true, values.get(5));
         Mockito.verify(node).setList(Prize.class, List.of(prize));
         Mockito.verify(node).set(Malus.class, malus);
         Mockito.verify(node).setList(String.class, new ArrayList<>(propositions));

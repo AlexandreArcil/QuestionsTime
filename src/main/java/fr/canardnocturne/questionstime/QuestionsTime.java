@@ -8,6 +8,7 @@ import fr.canardnocturne.questionstime.command.set.config.SetConfigMinimumConnec
 import fr.canardnocturne.questionstime.command.set.config.SetConfigMinimumCooldownExecutor;
 import fr.canardnocturne.questionstime.command.set.config.SetConfigModeExecutor;
 import fr.canardnocturne.questionstime.command.set.config.SetConfigPersonalAnswerExecutor;
+import fr.canardnocturne.questionstime.command.set.question.SetQuestionRevealAnswerExecutor;
 import fr.canardnocturne.questionstime.config.ConfigField;
 import fr.canardnocturne.questionstime.config.ConfigMutable;
 import fr.canardnocturne.questionstime.config.save.HoconPluginConfigurationSave;
@@ -428,6 +429,12 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionRemovePropositions, "remove")
                 .build();
 
+        final Command.Parameterized commandQTSetQuestionRevealAnswer = Command.builder()
+                .shortDescription(Component.text("Set if the answer should be revealed at the end of the question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionRevealAnswerExecutor.REVEAL_ANSWER)
+                .executor(new SetQuestionRevealAnswerExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .build();
+
         final Command.Parameterized commandQTSetQuestion = Command.builder()
                 .shortDescription(Component.text("Change a value of a question").color(NamedTextColor.YELLOW))
                 .permission("questionstime.command.set")
@@ -439,7 +446,8 @@ public class QuestionsTime {
                         Parameter.subcommand(commandQTSetQuestionQuestion, "question"),
                         Parameter.subcommand(commandQTSetTimer, "timer"),
                         Parameter.subcommand(commandQTSetWeight, "weight"),
-                        Parameter.subcommand(commandQTSetTimeBetweenAnswer, "time_between_answer")))
+                        Parameter.subcommand(commandQTSetTimeBetweenAnswer, "time_between_answer"),
+                        Parameter.subcommand(commandQTSetQuestionRevealAnswer, "reveal_answer")))
                 .executor(context -> CommandResult.error(TextUtils.errorWithPrefix("Select a question")))
                 .build();
 

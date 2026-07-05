@@ -14,6 +14,7 @@ public enum QuestionComponent {
     MALUS_MONEY,
     MALUS_COMMANDS,
     MALUS_ANNOUNCE,
-    PROPOSITIONS
+    PROPOSITIONS,
+    REVEAL_ANSWER
 
 }
