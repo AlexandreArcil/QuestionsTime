@@ -3,6 +3,8 @@ package fr.canardnocturne.questionstime.question.ask.picker;
 import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import fr.canardnocturne.questionstime.question.Question;
 
+import java.util.Collection;
+
 public abstract class QuestionPicker {
 
     protected final QuestionPool questionPool;
@@ -11,6 +13,6 @@ public abstract class QuestionPicker {
         this.questionPool = questionPool;
     }
 
-    public abstract Question pick();
+    public abstract Question pick(Collection<String> tags);
 
 }

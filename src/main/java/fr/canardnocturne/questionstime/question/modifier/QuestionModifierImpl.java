@@ -14,8 +14,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 public class QuestionModifierImpl implements QuestionModifier {
 
@@ -174,6 +176,11 @@ public class QuestionModifierImpl implements QuestionModifier {
                 malus.addCommand(outcomeCommand);
                 builder.setMalus(malus.build());
                 break;
+            case TAGS:
+                final Set<String> tags = new HashSet<>(question.getTags());
+                Stream.of(value.split(";")).map(String::trim).forEach(tags::add);
+                builder.setTags(tags);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown type '" + component + "' for add string");
         }
@@ -220,6 +227,17 @@ public class QuestionModifierImpl implements QuestionModifier {
                 } else {
                     builder.setMalus(null);
                 }
+                break;
+            case TAGS:
+                final Set<String> tags = new HashSet<>(question.getTags());
+                final String[] tagsArray = value.split(";");
+                final int initialTagsSize = tags.size();
+                Stream.of(tagsArray).map(String::trim).forEach(tags::remove);
+                final int expectedTagsSize = initialTagsSize - tagsArray.length;
+                if(tags.size() != expectedTagsSize) {
+                    throw new IllegalArgumentException("Tag(s) '" + String.join(", ", tagsArray) + "' is/are not present in the question");
+                }
+                builder.setTags(tags);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown type '" + component + "' for remove string");

@@ -18,6 +18,7 @@ import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -52,8 +53,8 @@ public class QuestionAskManager {
         this.questionLauncherConfig = questionLauncherConfig;
     }
 
-    public void askRandomQuestion() {
-        final Question randomQuestion = this.questionPicker.pick();
+    public void askRandomQuestion(final Collection<String> tags) {
+        final Question randomQuestion = this.questionPicker.pick(tags);
         this.askQuestion(randomQuestion);
     }
 

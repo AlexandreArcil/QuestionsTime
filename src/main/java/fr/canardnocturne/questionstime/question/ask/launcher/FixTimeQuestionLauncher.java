@@ -9,6 +9,8 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.Collections;
+
 public class FixTimeQuestionLauncher implements QuestionLauncher {
 
     private final PluginContainer pluginContainer;
@@ -27,7 +29,7 @@ public class FixTimeQuestionLauncher implements QuestionLauncher {
 
     @Override
     public void start() {
-        final Task task = Task.builder().execute(questionAskManager::askRandomQuestion)
+        final Task task = Task.builder().execute(() -> questionAskManager.askRandomQuestion(Collections.emptyList()))
                 .delay(Ticks.of(this.cooldown.getValue()))
                 .plugin(this.pluginContainer)
                 .build();

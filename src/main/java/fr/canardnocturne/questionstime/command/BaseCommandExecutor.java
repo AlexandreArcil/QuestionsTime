@@ -18,9 +18,10 @@ public class BaseCommandExecutor implements CommandExecutor {
         message.append(Component.text("---- ", NamedTextColor.AQUA)
                 .append(Component.text("QuestionsTime", NamedTextColor.YELLOW, TextDecoration.BOLD))
                 .append(Component.text(" ----", NamedTextColor.AQUA)));
-        message.appendNewline().append(this.commandDescription("/qt ask [random/<question>]", "Ask a random or specific question now")
-                .appendNewline().append(this.commandDescription("/qtc", "Create a question")));
-        message.appendNewline().append(this.commandDescription("/qt set [<question>] [<component>] [<value>]", "Change a question's component value"));
+        message.appendNewline().append(this.commandDescription("/qt ask [random/<question>] {tags}", "Ask a random or specific question now")
+            .appendNewline().append(this.commandDescription("/qt set [<question>] [<component>] [<value>]", "Change a question's component value"))
+                .appendNewline().append(this.commandDescription("/qt set config [<config>] [<value>]", "Change a config value"))
+            .appendNewline().append(this.commandDescription("/qtc", "Create a question")));
         context.sendMessage(message.build());
         return CommandResult.success();
     }

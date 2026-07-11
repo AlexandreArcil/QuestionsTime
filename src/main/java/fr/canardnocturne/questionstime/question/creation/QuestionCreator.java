@@ -30,11 +30,13 @@ public class QuestionCreator {
     private boolean stopped;
     private int weight = 1;
     private boolean revealAnswer;
+    private final Set<String> tags;
 
     public QuestionCreator() {
         this.answers = new ArrayList<>();
         this.propositions = new ArrayList<>();
         this.prizeBuilders = new HashMap<>();
+        this.tags = new HashSet<>();
         this.commandsMalus = new ArrayList<>();
     }
 
@@ -48,7 +50,7 @@ public class QuestionCreator {
         final Question.QuestionBuilder questionBuilder = Question.builder();
         return questionBuilder.setQuestion(this.question).setPropositions(this.propositions).setAnswers(new HashSet<>(this.answers))
                 .setPrizes(prizes).setMalus(malus).setTimer(this.duration).setTimeBetweenAnswer(this.timeBetweenAnswer).setWeight(this.weight)
-                .setRevealAnswer(this.revealAnswer).build();
+                .setRevealAnswer(this.revealAnswer).setTags(this.tags).build();
     }
 
     public List<String> getPropositions() {
@@ -179,5 +181,17 @@ public class QuestionCreator {
 
     public void setRevealAnswer(final boolean revealAnswer) {
         this.revealAnswer = revealAnswer;
+    }
+
+    public void addTags(final Set<String> tags) {
+        this.tags.addAll(tags);
+    }
+
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void removeTags(final Set<String> tags) {
+        this.tags.removeAll(tags);
     }
 }

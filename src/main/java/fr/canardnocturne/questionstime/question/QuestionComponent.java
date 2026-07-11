@@ -15,6 +15,7 @@ public enum QuestionComponent {
     MALUS_COMMANDS,
     MALUS_ANNOUNCE,
     PROPOSITIONS,
-    REVEAL_ANSWER
+    REVEAL_ANSWER,
+    TAGS
 
 }

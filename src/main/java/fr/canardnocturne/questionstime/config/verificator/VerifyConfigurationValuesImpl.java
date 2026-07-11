@@ -30,7 +30,7 @@ public class VerifyConfigurationValuesImpl implements VerifyConfigurationValues 
             wrongConfigurationValues.computeIfAbsent(ConfigField.MAX_COOLDOWN, key -> new ArrayList<>()).add("less than or equal to 0");
         }
 
-        if (!wrongConfigurationValues.containsKey(ConfigField.MIN_COOLDOWN) && config.getMinCooldown() > config.getMaxCooldown()) {
+        if (config.getMinCooldown() > config.getMaxCooldown()) {
             wrongConfigurationValues.computeIfAbsent(ConfigField.MIN_COOLDOWN, key -> new ArrayList<>()).add("greater than the 'max_cooldown' value");
         }
 

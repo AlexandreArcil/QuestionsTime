@@ -21,12 +21,10 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.service.ServiceProvider;
-import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -58,11 +56,12 @@ class QuestionAskManagerTest {
 
     @Test
     void askRandomTimedQuestion() {
+        final Collection<String> tags = Collections.singleton("tag1");
         try(final MockedStatic<Task> taskMock = Mockito.mockStatic(Task.class)) {
             final Question question = Mockito.mock(Question.class);
             Mockito.when(question.isTimed()).thenReturn(true);
             Mockito.when(question.getTimer()).thenReturn(5);
-            Mockito.when(questionPicker.pick()).thenReturn(question);
+            Mockito.when(questionPicker.pick(Mockito.eq(tags))).thenReturn(question);
 
             final Server server = Mockito.mock(Server.class);
             final ServerPlayer sp = Mockito.mock(ServerPlayer.class);
@@ -84,9 +83,9 @@ class QuestionAskManagerTest {
             Mockito.when(taskBuilder.build()).thenReturn(task);
             
             final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(null));
-            manager.askRandomQuestion();
+            manager.askRandomQuestion(tags);
 
-            Mockito.verify(questionPicker).pick();
+            Mockito.verify(questionPicker).pick(Mockito.eq(tags));
             Mockito.verify(questionAnnouncer).announce(Mockito.eq(question), Mockito.anyList());
             Mockito.verify(asyncScheduler).submit(Mockito.any(Task.class), Mockito.anyString());
         }
@@ -134,11 +133,11 @@ class QuestionAskManagerTest {
         final Question question = Mockito.mock(Question.class);
         Mockito.when(game.server()).thenReturn(server);
         Mockito.when(server.onlinePlayers()).thenReturn(Set.of(player2));
-        Mockito.when(questionPicker.pick()).thenReturn(question);
+        Mockito.when(questionPicker.pick(Mockito.eq(Collections.emptyList()))).thenReturn(question);
         Mockito.when(question.getPrizes()).thenReturn(Collections.emptySortedSet());
 
         final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(null));
-        manager.askRandomQuestion();
+        manager.askRandomQuestion(Collections.emptyList());
         manager.answer(player, "any");
 
         Mockito.verify(player).sendMessage(Mockito.any());
@@ -157,14 +156,14 @@ class QuestionAskManagerTest {
             final String answer = "answer";
             Mockito.when(player.uniqueId()).thenReturn(uuid);
             Mockito.when(questionCreationManager.isCreator(uuid)).thenReturn(false);
-            Mockito.when(questionPicker.pick()).thenReturn(question);
+            Mockito.when(questionPicker.pick(Mockito.eq(Collections.emptyList()))).thenReturn(question);
             Mockito.when(game.server()).thenReturn(server);
             Mockito.when(server.onlinePlayers()).thenReturn(Set.of(player));
             Mockito.when(question.getAnswers()).thenReturn(Set.of(answer));
             Mockito.when(question.getPrizes()).thenReturn(Collections.emptySortedSet());
 
             final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(launcher));
-            manager.askRandomQuestion();
+            manager.askRandomQuestion(Collections.emptyList());
             manager.answer(player, answer);
 
             assertFalse(manager.isQuestionHasBeenAsked());
@@ -186,7 +185,7 @@ class QuestionAskManagerTest {
             final String answer = "answer";
             Mockito.when(player.uniqueId()).thenReturn(uuid);
             Mockito.when(questionCreationManager.isCreator(uuid)).thenReturn(false);
-            Mockito.when(questionPicker.pick()).thenReturn(question);
+            Mockito.when(questionPicker.pick(Collections.emptyList())).thenReturn(question);
             Mockito.when(game.server()).thenReturn(server);
             Mockito.when(server.onlinePlayers()).thenReturn(Set.of(player));
             Mockito.when(question.getAnswers()).thenReturn(Set.of(answer));
@@ -208,7 +207,7 @@ class QuestionAskManagerTest {
             Mockito.when(taskBuilder.build()).thenReturn(task);
 
             final QuestionAskManager manager = new QuestionAskManager(questionPicker, questionAnnouncer, questionCreationManager, game, plugin, logger, new ConfigMutable<>(1), new ConfigMutable<>(null));
-            manager.askRandomQuestion();
+            manager.askRandomQuestion(Collections.emptyList());
             manager.answer(player, answer);
 
             assertFalse(manager.isQuestionHasBeenAsked());

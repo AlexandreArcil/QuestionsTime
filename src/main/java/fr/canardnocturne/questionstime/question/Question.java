@@ -19,6 +19,7 @@ public class Question {
     private final int timeBetweenAnswer;
     private final int weight;
     private final boolean revealAnswer;
+    private final Set<String> tags;
 
     private Question(final QuestionBuilder builder) {
         this.question = builder.question;
@@ -30,6 +31,7 @@ public class Question {
         this.weight = builder.weight;
         this.propositions = Collections.unmodifiableList(builder.propositions);
         this.revealAnswer = builder.revealAnswer;
+        this.tags = Collections.unmodifiableSet(builder.tags);
     }
 
     public SortedSet<Prize> getPrizes() {
@@ -76,6 +78,10 @@ public class Question {
         return revealAnswer;
     }
 
+    public Set<String> getTags() {
+        return tags;
+    }
+
     public static QuestionBuilder builder() {
         return new QuestionBuilder();
     }
@@ -106,6 +112,7 @@ public class Question {
                 ", timer=" + timer +
                 ", timeBetweenAnswer=" + timeBetweenAnswer +
                 ", weight=" + weight +
+                ", tags=" + tags +
                 '}';
     }
 
@@ -120,11 +127,13 @@ public class Question {
         private int timeBetweenAnswer;
         private int weight;
         private boolean revealAnswer;
+        private final Set<String> tags;
 
         private QuestionBuilder() {
             this.propositions = new ArrayList<>();
             this.answers = new HashSet<>();
             this.prizes = new TreeSet<>(Comparator.comparingInt(Prize::getPosition));
+            this.tags = new HashSet<>();
         }
 
         private QuestionBuilder(final Question question) {
@@ -143,6 +152,7 @@ public class Question {
             this.timeBetweenAnswer = question.timeBetweenAnswer;
             this.weight = question.weight;
             this.revealAnswer = question.revealAnswer;
+            this.tags.addAll(question.tags);
         }
 
         public QuestionBuilder setQuestion(final String question) {
@@ -190,6 +200,12 @@ public class Question {
 
         public QuestionBuilder setWeight(final int weight) {
             this.weight = weight;
+            return this;
+        }
+
+        public QuestionBuilder setTags(final Set<String> tags) {
+            this.tags.clear();
+            this.tags.addAll(tags);
             return this;
         }
 

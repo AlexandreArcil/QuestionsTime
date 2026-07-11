@@ -10,6 +10,9 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
+import java.util.Collection;
+import java.util.Collections;
+
 public class ManualAskQuestionCommand implements CommandExecutor {
 
     public static final Parameter.Value<String> RANDOM_QUESTION_ARG = Parameter.choices("random").key("random_question").build();
@@ -17,12 +20,16 @@ public class ManualAskQuestionCommand implements CommandExecutor {
     private final QuestionAskManager askManager;
     private final QuestionLauncher questionLauncher;
     private final Parameter.Value<Question> specificQuestionParam;
+    private final Parameter.Value<String> tagsParam;
     private final Logger logger;
 
-    public ManualAskQuestionCommand(final QuestionAskManager askManager, final QuestionLauncher questionLauncher, final Parameter.Value<Question> specificQuestionParam, final Logger logger) {
+    public ManualAskQuestionCommand(final QuestionAskManager askManager, final QuestionLauncher questionLauncher,
+                                    final Parameter.Value<Question> specificQuestionParam, final Parameter.Value<String> tagsParam,
+                                    final Logger logger) {
         this.askManager = askManager;
         this.questionLauncher = questionLauncher;
         this.specificQuestionParam = specificQuestionParam;
+        this.tagsParam = tagsParam;
         this.logger = logger;
     }
 
@@ -39,9 +46,15 @@ public class ManualAskQuestionCommand implements CommandExecutor {
         if(this.questionLauncher != null) {
             this.questionLauncher.stop();
         }
+
         if(context.hasAny(RANDOM_QUESTION_ARG)) {
-            this.logger.info("A random question has been manually asked by {}", causeIdentifier);
-            this.askManager.askRandomQuestion();
+            final Collection<String> tags = Collections.unmodifiableCollection(context.all(this.tagsParam));
+            this.logger.info("A random question has been manually asked by {} with the tags {}", causeIdentifier,  tags);
+            try {
+                this.askManager.askRandomQuestion(tags);
+            } catch (final IllegalArgumentException e) {
+                return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));
+            }
         } else {
             final Question questionArg = context.requireOne(this.specificQuestionParam);
             this.logger.info("Question '{}' manually asked by {}", questionArg.getQuestion(), causeIdentifier);

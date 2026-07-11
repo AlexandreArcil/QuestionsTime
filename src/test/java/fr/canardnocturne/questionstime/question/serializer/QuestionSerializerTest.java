@@ -28,6 +28,7 @@ class QuestionSerializerTest {
         final int weight = 90;
         final List<String> answers = List.of("quack");
         final List<String> propositions = List.of("quack", "green", "white", "red", "yellow");
+        final List<String> tags = List.of("tag1", "tag2", "tag3");
         final Prize prize = Mockito.mock(Prize.class);
         final Malus malus = Mockito.mock(Malus.class);
         final ConfigurationNode node = Mockito.mock(ConfigurationNode.class);
@@ -40,11 +41,12 @@ class QuestionSerializerTest {
         Mockito.when(node.node("malus")).thenReturn(node);
         Mockito.when(node.node("proposition")).thenReturn(node);
         Mockito.when(node.node("reveal-answer")).thenReturn(node);
+        Mockito.when(node.node("tags")).thenReturn(node);
         Mockito.when(node.empty()).thenReturn(false, false, true);
         Mockito.when(node.getString()).thenReturn(questionText);
         Mockito.when(node.getList(Mockito.eq(String.class), Mockito.anyList())).thenReturn(answers);
         Mockito.when(node.getInt(Mockito.anyInt())).thenReturn(timer, timeBetweenAnswer, weight);
-        Mockito.when(node.getList(Mockito.eq(String.class), Mockito.anyList())).thenReturn(answers, propositions);
+        Mockito.when(node.getList(Mockito.eq(String.class), Mockito.anyList())).thenReturn(answers, propositions, tags);
         Mockito.when(node.getList(Mockito.eq(Prize.class), Mockito.anyList())).thenReturn(List.of(prize));
         Mockito.when(node.get(Malus.class)).thenReturn(malus);
         Mockito.when(node.getBoolean(Mockito.anyBoolean())).thenReturn(true);
@@ -60,6 +62,7 @@ class QuestionSerializerTest {
         assertTrue(question.getPrizes().contains(prize));
         assertEquals(malus, question.getMalus().get());
         assertTrue(question.getPropositions().containsAll(propositions));
+        assertTrue(question.getTags().containsAll(tags));
         assertTrue(question.isRevealAnswer());
     }
     
@@ -92,6 +95,7 @@ class QuestionSerializerTest {
         Mockito.when(node.node("prizes")).thenReturn(node);
         Mockito.when(node.node("malus")).thenReturn(node);
         Mockito.when(node.node("reveal-answer")).thenReturn(node);
+        Mockito.when(node.node("tags")).thenReturn(node);
         Mockito.when(node.getString()).thenReturn("");
         Mockito.when(node.empty()).thenReturn(false, false, true);
 
@@ -107,11 +111,12 @@ class QuestionSerializerTest {
         final int weight = 90;
         final Set<String> answers = Set.of("quack");
         final List<String> propositions = List.of("quack", "green", "white", "red", "yellow");
+        final Set<String> tags = Set.of("tag1", "tag2", "tag3");
         final Prize prize = Mockito.mock(Prize.class);
         final Malus malus = Mockito.mock(Malus.class);
         final Question question = Question.builder().setQuestion(questionText).setPropositions(propositions).setAnswers(answers).setWeight(weight)
                 .setPrizes(Set.of(prize)).setMalus(malus).setTimer(timer).setTimeBetweenAnswer(timeBetweenAnswer)
-                .setRevealAnswer(true).build();
+                .setRevealAnswer(true).setTags(tags).build();
 
         final ConfigurationNode rootNode = Mockito.mock(ConfigurationNode.class);
         final ConfigurationNode node = Mockito.mock(ConfigurationNode.class);
@@ -124,6 +129,7 @@ class QuestionSerializerTest {
         Mockito.when(rootNode.node("malus")).thenReturn(node);
         Mockito.when(rootNode.node("proposition")).thenReturn(node);
         Mockito.when(rootNode.node("reveal-answer")).thenReturn(node);
+        Mockito.when(rootNode.node("tags")).thenReturn(node);
 
         final QuestionSerializer serializer = new QuestionSerializer();
         serializer.serialize(Object.class, question, rootNode);
@@ -140,6 +146,7 @@ class QuestionSerializerTest {
         Mockito.verify(node).setList(Prize.class, List.of(prize));
         Mockito.verify(node).set(Malus.class, malus);
         Mockito.verify(node).setList(String.class, new ArrayList<>(propositions));
+        Mockito.verify(node).setList(Mockito.eq(String.class), Mockito.argThat(list -> list.containsAll(tags)));
     }
 
 }

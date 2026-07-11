@@ -35,12 +35,13 @@ public class QuestionSerializer implements TypeSerializer<Question> {
         final ConfigurationNode malusNode = node.node("malus");
         final Malus malus = malusNode.get(Malus.class);
         final List<String> propositions = node.node("proposition").getList(String.class, Collections.emptyList());
+        final Set<String> tags = new HashSet<>(node.node("tags").getList(String.class, Collections.emptyList()));
 
         final Question.QuestionBuilder questionBuilder = Question.builder();
         try {
             return questionBuilder.setAnswers(answers).setPropositions(propositions).setQuestion(askedQuestion).setPrizes(prizes)
                     .setMalus(malus).setTimer(timer).setTimeBetweenAnswer(timeBetweenAnswer)
-                    .setWeight(weight).setRevealAnswer(revealAnswer).build();
+                    .setWeight(weight).setRevealAnswer(revealAnswer).setTags(tags).build();
         } catch (final Exception e) {
             throw new SerializationException(e);
         }
@@ -67,6 +68,9 @@ public class QuestionSerializer implements TypeSerializer<Question> {
             final Optional<Malus> malusOptional = question.getMalus();
             if (malusOptional.isPresent()) {
                 malusNode.set(Malus.class, malusOptional.get());
+            }
+            if (!question.getTags().isEmpty()) {
+                node.node("tags").setList(String.class, new ArrayList<>(question.getTags()));
             }
         }
     }

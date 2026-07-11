@@ -1,7 +1,7 @@
 package fr.canardnocturne.questionstime.question.ask.picker;
 
-import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import fr.canardnocturne.questionstime.question.Question;
+import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
@@ -17,9 +17,14 @@ public class WeightedRandomnessQuestionPicker extends QuestionPicker {
     }
 
     @Override
-    public Question pick() {
+    public Question pick(final Collection<String> tags) {
         final Random rand = new Random();
-        final Collection<Question> questions = this.questionPool.getAll();
+        final Collection<Question> questions = this.questionPool.getAll().stream()
+                .filter(question -> tags.isEmpty() || question.getTags().stream().anyMatch(tags::contains))
+                .toList();
+        if(questions.isEmpty()) {
+            throw new IllegalArgumentException("No question found with tags: " + String.join(", ", tags));
+        }
         Question chosenQuestion = null;
 
         final int totalWeight = questions.stream().mapToInt(Question::getWeight).sum();

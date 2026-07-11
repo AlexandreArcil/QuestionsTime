@@ -277,6 +277,17 @@ class QuestionModifierImplTest {
     }
 
     @Test
+    void addTags() {
+        final String addTagsCommand = "tag1; tag2; tag3";
+        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1).build();
+
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.TAGS, addTagsCommand);
+
+        assertTrue(modifiedQuestion.getTags().containsAll(Set.of("tag1", "tag2", "tag3")));
+    }
+
+    @Test
     void removeAnswer() {
         final String answerToRemove = "wow";
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of(answerToRemove, "test")).setWeight(1).build();
@@ -371,6 +382,32 @@ class QuestionModifierImplTest {
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommand));
 
         assertEquals("Command 'malusCommand;cmd' not found in malus", exception.getMessage());
+    }
+
+    @Test
+    void removeTags() {
+        final String removeTagsCommand = "tag1; tag2";
+        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
+                .setTags(Set.of("tag1", "tag2", "tag3")).build();
+
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.TAGS, removeTagsCommand);
+
+        assertTrue(modifiedQuestion.getTags().contains("tag3"));
+        assertFalse(modifiedQuestion.getTags().contains("tag2"));
+        assertFalse(modifiedQuestion.getTags().contains("tag1"));
+    }
+
+    @Test
+    void removeInexistentTags() {
+        final String removeTagsCommand = "tag1; tag4";
+        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
+                .setTags(Set.of("tag1", "tag2", "tag3")).build();
+
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->questionModifier.remove(question, QuestionComponent.TAGS, removeTagsCommand));
+
+        assertEquals("Tag(s) 'tag1,  tag4' is/are not present in the question", exception.getMessage());
     }
 
     @Test

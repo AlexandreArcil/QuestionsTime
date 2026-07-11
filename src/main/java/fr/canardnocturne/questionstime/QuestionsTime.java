@@ -9,6 +9,9 @@ import fr.canardnocturne.questionstime.command.set.config.SetConfigMinimumCooldo
 import fr.canardnocturne.questionstime.command.set.config.SetConfigModeExecutor;
 import fr.canardnocturne.questionstime.command.set.config.SetConfigPersonalAnswerExecutor;
 import fr.canardnocturne.questionstime.command.set.question.SetQuestionRevealAnswerExecutor;
+import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionAddTagsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionRemoveTagsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionTagsListExecutor;
 import fr.canardnocturne.questionstime.config.ConfigField;
 import fr.canardnocturne.questionstime.config.ConfigMutable;
 import fr.canardnocturne.questionstime.config.save.HoconPluginConfigurationSave;
@@ -114,6 +117,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Plugin("questionstime")
 public class QuestionsTime {
@@ -232,12 +236,16 @@ public class QuestionsTime {
 
         //For the Optional#get: As specified in the doc, the function should take as argument a choice which is from the collection of questions, so I assume that it should always get a question from a player choice
         final Parameter.Value<Question> specificQuestionParameter = Parameter.choices(Question.class, s -> this.questionPool.get(s).get(), () -> this.questionPool.getAll().stream().map(Question::getQuestion).toList()).key("question").build();
+        final Parameter.Value<String> tagsParameter = Parameter.choices(String.class,
+                s -> s,
+                () -> this.questionPool.getAll().stream().flatMap(question -> question.getTags().stream()).collect(Collectors.toSet()))
+                .key("tags").optional().consumeAllRemaining().build();
         final Parameter questionParameter = Parameter.firstOf(ManualAskQuestionCommand.RANDOM_QUESTION_ARG, specificQuestionParameter);
         final Command.Parameterized commandQTAskQuestion = Command.builder()
                 .shortDescription(Component.text("Ask a question").color(NamedTextColor.YELLOW))
                 .permission("questionstime.command.ask")
-                .addParameter(questionParameter)
-                .executor(new ManualAskQuestionCommand(questionAskManager, this.questionLauncher, specificQuestionParameter, this.logger))
+                .addParameters(questionParameter, tagsParameter)
+                .executor(new ManualAskQuestionCommand(questionAskManager, this.questionLauncher, specificQuestionParameter, tagsParameter, this.logger))
                 .build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
@@ -435,6 +443,30 @@ public class QuestionsTime {
                 .executor(new SetQuestionRevealAnswerExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
+        final Command.Parameterized commandQTSetQuestionTagsList = Command.builder()
+                .shortDescription(Component.text("List the question tags").color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionTagsListExecutor(specificQuestionParameter))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionAddTags = Command.builder()
+                .shortDescription(Component.text("Add tags to the question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionAddTagsExecutor.TAGS)
+                .executor(new SetQuestionAddTagsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionRemoveTags = Command.builder()
+                .shortDescription(Component.text("Remove tags from the question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionRemoveTagsExecutor.TAGS)
+                .executor(new SetQuestionRemoveTagsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionTags = Command.builder()
+                .shortDescription(Component.text("Set the question tags").color(NamedTextColor.YELLOW))
+                .addChild(commandQTSetQuestionTagsList, "list")
+                .addChild(commandQTSetQuestionAddTags, "add")
+                .addChild(commandQTSetQuestionRemoveTags, "remove")
+                .build();
+
         final Command.Parameterized commandQTSetQuestion = Command.builder()
                 .shortDescription(Component.text("Change a value of a question").color(NamedTextColor.YELLOW))
                 .permission("questionstime.command.set")
@@ -447,7 +479,8 @@ public class QuestionsTime {
                         Parameter.subcommand(commandQTSetTimer, "timer"),
                         Parameter.subcommand(commandQTSetWeight, "weight"),
                         Parameter.subcommand(commandQTSetTimeBetweenAnswer, "time_between_answer"),
-                        Parameter.subcommand(commandQTSetQuestionRevealAnswer, "reveal_answer")))
+                        Parameter.subcommand(commandQTSetQuestionRevealAnswer, "reveal_answer"),
+                        Parameter.subcommand(commandQTSetQuestionTags, "tags")))
                 .executor(context -> CommandResult.error(TextUtils.errorWithPrefix("Select a question")))
                 .build();
 

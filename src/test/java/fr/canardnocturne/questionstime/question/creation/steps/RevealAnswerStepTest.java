@@ -48,8 +48,8 @@ class RevealAnswerStepTest {
     }
 
     @Test
-    void lastStep() {
-        assertNull(RevealAnswerStep.INSTANCE.next(questionCreator));
+    void nextStepDefined() {
+        assertNotNull(RevealAnswerStep.INSTANCE.next(questionCreator));
     }
 
 }

@@ -23,7 +23,7 @@ public class RevealAnswerStep implements CreationStep {
     }
 
     @Override
-    public boolean handle(Audience sender, String answer, QuestionCreator questionCreator) {
+    public boolean handle(final Audience sender, final String answer, final QuestionCreator questionCreator) {
         return switch (answer) {
             case YES -> {
                 questionCreator.setRevealAnswer(true);
@@ -41,12 +41,12 @@ public class RevealAnswerStep implements CreationStep {
     }
 
     @Override
-    public boolean shouldSkip(QuestionCreator questionCreator) {
+    public boolean shouldSkip(final QuestionCreator questionCreator) {
         return false;
     }
 
     @Override
-    public Step next(QuestionCreator questionCreator) {
-        return null;
+    public Step next(final QuestionCreator questionCreator) {
+        return TagsStep.INSTANCE;
     }
 }

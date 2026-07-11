@@ -10,6 +10,8 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.Collections;
+
 public class IntervalTimeQuestionLauncher implements QuestionLauncher {
 
     private final PluginContainer pluginContainer;
@@ -30,7 +32,7 @@ public class IntervalTimeQuestionLauncher implements QuestionLauncher {
     @Override
     public void start() {
         final int cooldown = this.minCooldown.getValue() + RandomUtils.nextInt(1, this.maxCooldown.getValue() - this.minCooldown.getValue());
-        final Task mainTask = Task.builder().execute(this.questionAskManager::askRandomQuestion)
+        final Task mainTask = Task.builder().execute(() -> this.questionAskManager.askRandomQuestion(Collections.emptyList()))
                 .plugin(this.pluginContainer)
                 .delay(Ticks.of(cooldown)).build();
         this.pluginContainer.logger().info("Next question will be asked in {}", DurationFormatUtils.formatDuration((cooldown / 20L) * 1000L, "H:mm:ss"));
