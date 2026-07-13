@@ -8,6 +8,7 @@ import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.serializer.ItemStackSerializer;
 import fr.canardnocturne.questionstime.question.serializer.OutcomeCommandSerializer;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -181,6 +182,16 @@ public class QuestionModifierImpl implements QuestionModifier {
                 Stream.of(value.split(";")).map(String::trim).forEach(tags::add);
                 builder.setTags(tags);
                 break;
+            case EXCLUDE_PERMISSIONS:
+                final Set<String> excludePermissions = new HashSet<>(question.getExcludePermissions());
+                Stream.of(value.split(" ")).filter(StringUtils::isNotBlank).forEach(excludePermissions::add);
+                builder.setExcludePermissions(excludePermissions);
+                break;
+            case INCLUDE_PERMISSIONS:
+                final Set<String> includePermissions = new HashSet<>(question.getIncludePermissions());
+                Stream.of(value.split(" ")).filter(StringUtils::isNotBlank).forEach(includePermissions::add);
+                builder.setIncludePermissions(includePermissions);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown type '" + component + "' for add string");
         }
@@ -230,7 +241,7 @@ public class QuestionModifierImpl implements QuestionModifier {
                 break;
             case TAGS:
                 final Set<String> tags = new HashSet<>(question.getTags());
-                final String[] tagsArray = value.split(";");
+                final String[] tagsArray = value.split("; ");
                 final int initialTagsSize = tags.size();
                 Stream.of(tagsArray).map(String::trim).forEach(tags::remove);
                 final int expectedTagsSize = initialTagsSize - tagsArray.length;

@@ -39,7 +39,7 @@ public class SetQuestionRemoveTagsExecutor implements CommandExecutor  {
             final Question modifiedQuestion = this.questionModifier.remove(question, QuestionComponent.TAGS, tags);
             this.questionRegister.replace(question, modifiedQuestion);
             this.questionPool.replace(question, modifiedQuestion);
-            final String[] tagsSeparated = tags.split(";");
+            final String[] tagsSeparated = tags.split("; ");
             if(tagsSeparated.length == 1) {
                 context.sendMessage(TextUtils.composed("Tag ", tags, " removed !"));
             } else {

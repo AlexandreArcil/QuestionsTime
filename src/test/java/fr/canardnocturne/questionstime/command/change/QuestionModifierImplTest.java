@@ -407,7 +407,7 @@ class QuestionModifierImplTest {
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->questionModifier.remove(question, QuestionComponent.TAGS, removeTagsCommand));
 
-        assertEquals("Tag(s) 'tag1,  tag4' is/are not present in the question", exception.getMessage());
+        assertEquals("Tag(s) 'tag1, tag4' is/are not present in the question", exception.getMessage());
     }
 
     @Test
