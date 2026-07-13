@@ -36,12 +36,15 @@ public class QuestionSerializer implements TypeSerializer<Question> {
         final Malus malus = malusNode.get(Malus.class);
         final List<String> propositions = node.node("proposition").getList(String.class, Collections.emptyList());
         final Set<String> tags = new HashSet<>(node.node("tags").getList(String.class, Collections.emptyList()));
+        final Set<String> includePermissions = new HashSet<>(node.node("include-permissions").getList(String.class, Collections.emptyList()));
+        final Set<String> excludePermissions = new HashSet<>(node.node("exclude-permissions").getList(String.class, Collections.emptyList()));
 
         final Question.QuestionBuilder questionBuilder = Question.builder();
         try {
             return questionBuilder.setAnswers(answers).setPropositions(propositions).setQuestion(askedQuestion).setPrizes(prizes)
                     .setMalus(malus).setTimer(timer).setTimeBetweenAnswer(timeBetweenAnswer)
-                    .setWeight(weight).setRevealAnswer(revealAnswer).setTags(tags).build();
+                    .setWeight(weight).setRevealAnswer(revealAnswer).setTags(tags).setIncludePermissions(includePermissions)
+                    .setExcludePermissions(excludePermissions).build();
         } catch (final Exception e) {
             throw new SerializationException(e);
         }
@@ -59,6 +62,15 @@ public class QuestionSerializer implements TypeSerializer<Question> {
             if(!question.getPropositions().isEmpty()) {
                 node.node("proposition").setList(String.class, new ArrayList<>(question.getPropositions()));
             }
+            if (!question.getTags().isEmpty()) {
+                node.node("tags").setList(String.class, new ArrayList<>(question.getTags()));
+            }
+            if(!question.getIncludePermissions().isEmpty()) {
+                node.node("include-permissions").setList(String.class, new ArrayList<>(question.getIncludePermissions()));
+            }
+            if(!question.getExcludePermissions().isEmpty()) {
+                node.node("exclude-permissions").setList(String.class, new ArrayList<>(question.getExcludePermissions()));
+            }
 
             final ConfigurationNode prizeNode = node.node("prizes");
             if (!question.getPrizes().isEmpty()) {
@@ -68,9 +80,6 @@ public class QuestionSerializer implements TypeSerializer<Question> {
             final Optional<Malus> malusOptional = question.getMalus();
             if (malusOptional.isPresent()) {
                 malusNode.set(Malus.class, malusOptional.get());
-            }
-            if (!question.getTags().isEmpty()) {
-                node.node("tags").setList(String.class, new ArrayList<>(question.getTags()));
             }
         }
     }

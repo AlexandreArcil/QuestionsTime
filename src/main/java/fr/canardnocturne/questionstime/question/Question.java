@@ -4,8 +4,18 @@ import fr.canardnocturne.questionstime.QuestionException;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.Prize;
 import org.apache.commons.lang3.StringUtils;
+import org.spongepowered.api.service.permission.Subject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class Question {
@@ -20,6 +30,8 @@ public class Question {
     private final int weight;
     private final boolean revealAnswer;
     private final Set<String> tags;
+    private final Set<String> includePermissions;
+    private final Set<String> excludePermissions;
 
     private Question(final QuestionBuilder builder) {
         this.question = builder.question;
@@ -32,6 +44,8 @@ public class Question {
         this.propositions = Collections.unmodifiableList(builder.propositions);
         this.revealAnswer = builder.revealAnswer;
         this.tags = Collections.unmodifiableSet(builder.tags);
+        this.includePermissions = Collections.unmodifiableSet(builder.includePermissions);
+        this.excludePermissions = Collections.unmodifiableSet(builder.excludePermissions);
     }
 
     public SortedSet<Prize> getPrizes() {
@@ -82,6 +96,19 @@ public class Question {
         return tags;
     }
 
+    public Set<String> getIncludePermissions() {
+        return includePermissions;
+    }
+
+    public Set<String> getExcludePermissions() {
+        return excludePermissions;
+    }
+
+    public boolean canPlayerRespond(final Subject subject) {
+        return (includePermissions.isEmpty() || includePermissions.stream().anyMatch(subject::hasPermission))
+                && (excludePermissions.isEmpty() || excludePermissions.stream().noneMatch(subject::hasPermission));
+    }
+
     public static QuestionBuilder builder() {
         return new QuestionBuilder();
     }
@@ -113,6 +140,8 @@ public class Question {
                 ", timeBetweenAnswer=" + timeBetweenAnswer +
                 ", weight=" + weight +
                 ", tags=" + tags +
+                ", includePermissions=" + includePermissions +
+                ", excludePermissions=" + excludePermissions +
                 '}';
     }
 
@@ -128,12 +157,16 @@ public class Question {
         private int weight;
         private boolean revealAnswer;
         private final Set<String> tags;
+        private final Set<String> includePermissions;
+        private final Set<String> excludePermissions;
 
         private QuestionBuilder() {
             this.propositions = new ArrayList<>();
             this.answers = new HashSet<>();
             this.prizes = new TreeSet<>(Comparator.comparingInt(Prize::getPosition));
             this.tags = new HashSet<>();
+            this.includePermissions = new HashSet<>();
+            this.excludePermissions = new HashSet<>();
         }
 
         private QuestionBuilder(final Question question) {
@@ -153,6 +186,8 @@ public class Question {
             this.weight = question.weight;
             this.revealAnswer = question.revealAnswer;
             this.tags.addAll(question.tags);
+            this.includePermissions.addAll(question.includePermissions);
+            this.excludePermissions.addAll(question.excludePermissions);
         }
 
         public QuestionBuilder setQuestion(final String question) {
@@ -209,6 +244,18 @@ public class Question {
             return this;
         }
 
+        public QuestionBuilder setIncludePermissions(final Set<String> includePermissions) {
+            this.includePermissions.clear();
+            this.includePermissions.addAll(includePermissions);
+            return this;
+        }
+
+        public QuestionBuilder setExcludePermissions(final Set<String> excludePermissions) {
+            this.excludePermissions.clear();
+            this.excludePermissions.addAll(excludePermissions);
+            return this;
+        }
+
         public Question build() {
             if (StringUtils.isEmpty(this.question)) {
                 throw new QuestionException("The question must be defined");
@@ -248,8 +295,11 @@ public class Question {
                 if (!missingPositions.isEmpty()) {
                     throw new QuestionException("The following prize positions are missing: " +
                             String.join(", ", missingPositions.stream().map(String::valueOf).toList()) +
-                            ". You can't have holes in the prize positions. If you want to remove a prize, you need to remove all prizes after it.");
+                            ". You can't have holes in the prize positions. If you want to remove a prize, you need to remove all prizes after it");
                 }
+            }
+            if(!this.includePermissions.isEmpty() && !this.excludePermissions.isEmpty()) {
+                throw new QuestionException("You can't have both include and exclude permissions. You need to choose one or the other");
             }
             return new Question(this);
         }

@@ -16,6 +16,8 @@ public enum QuestionComponent {
     MALUS_ANNOUNCE,
     PROPOSITIONS,
     REVEAL_ANSWER,
-    TAGS
+    TAGS,
+    INCLUDE_PERMISSIONS,
+    EXCLUDE_PERMISSIONS
 
 }

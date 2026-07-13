@@ -2,6 +2,7 @@ package fr.canardnocturne.questionstime.question.ask.picker;
 
 import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import fr.canardnocturne.questionstime.question.Question;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.util.Collection;
 
@@ -13,6 +14,6 @@ public abstract class QuestionPicker {
         this.questionPool = questionPool;
     }
 
-    public abstract Question pick(Collection<String> tags);
+    public abstract Question pick(Collection<String> tags, Collection<ServerPlayer> players, int minimumEligiblePlayers);
 
 }

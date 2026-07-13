@@ -2,17 +2,16 @@ package fr.canardnocturne.questionstime.question.ask;
 
 import fr.canardnocturne.questionstime.config.Config;
 import fr.canardnocturne.questionstime.message.Messages;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.question.ask.announcer.QuestionAnnouncer;
 import fr.canardnocturne.questionstime.question.ask.answer.AnswerHandler;
 import fr.canardnocturne.questionstime.question.ask.answer.PlayerAnswerQuestionHandler;
 import fr.canardnocturne.questionstime.question.ask.launcher.QuestionLauncher;
 import fr.canardnocturne.questionstime.question.ask.picker.QuestionPicker;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreationManager;
-import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
@@ -54,13 +53,13 @@ public class QuestionAskManager {
     }
 
     public void askRandomQuestion(final Collection<String> tags) {
-        final Question randomQuestion = this.questionPicker.pick(tags);
+        final Question randomQuestion = this.questionPicker.pick(tags, this.getNonCreatorPlayers(), this.minimumConnectedPlayersConfig.getValue());
         this.askQuestion(randomQuestion);
     }
 
     public void askQuestion(final Question question) {
         if (!this.isQuestionHasBeenAsked()) {
-            final List<ServerPlayer> eligiblePlayers = this.getEligiblePlayers();
+            final List<ServerPlayer> eligiblePlayers = this.getEligiblePlayers(question);
             if (this.enoughEligiblePlayers(eligiblePlayers)) {
                 this.currentQuestion = question;
                 this.questionAnnouncer.announce(this.currentQuestion, eligiblePlayers);
@@ -79,24 +78,28 @@ public class QuestionAskManager {
         }
     }
 
-    public void answer(final Player player, final String answer) {
-        if (this.currentQuestion != null) {
-            if (!this.questionCreationManager.isCreator(player.uniqueId())) {
-                final boolean answerFound = this.playerAnswerQuestionHandler.answer(player, answer, this.getEligiblePlayers());
-                if (answerFound) {
-                    this.askNewQuestion();
-                }
-            } else {
-                player.sendMessage(TextUtils.normalWithPrefix("You can't answer to a question when you are creating one!"));
-            }
-        } else {
+    public void answer(final ServerPlayer player, final String answer) {
+        if (this.currentQuestion == null) {
             player.sendMessage(TextUtils.normalWithPrefix("No question has been asked, wait for the next one!"));
+            return;
+        }
+        if (this.questionCreationManager.isCreator(player.uniqueId())) {
+            player.sendMessage(TextUtils.normalWithPrefix("You can't answer to a question when you are creating one!"));
+            return;
+        }
+        if(!this.currentQuestion.canPlayerRespond(player)) {
+            player.sendMessage(TextUtils.normalWithPrefix("You are not allowed to answer to the current question!"));
+            return;
+        }
+        final boolean answerFound = this.playerAnswerQuestionHandler.answer(player, answer, this.getEligiblePlayers(this.currentQuestion));
+        if (answerFound) {
+            this.askNewQuestion();
         }
     }
 
     private void startTimer(final int timerSeconds) {
         final Task task = Task.builder().execute(consumer -> {
-                    final List<ServerPlayer> eligiblePlayers = this.getEligiblePlayers();
+                    final List<ServerPlayer> eligiblePlayers = this.getEligiblePlayers(this.currentQuestion);
                     final long secondStarted = (System.currentTimeMillis() - this.timerStarted) / 1000;
                     final int timeLeft = (int) (timerSeconds - secondStarted);
                     if (timeLeft == 0) {
@@ -128,16 +131,19 @@ public class QuestionAskManager {
         }
     }
 
-    public boolean enoughEligiblePlayers() {
-        final List<ServerPlayer> eligiblePlayers = this.getEligiblePlayers();
-        return this.enoughEligiblePlayers(eligiblePlayers);
+    public boolean enoughEligiblePlayers(final Question question) {
+        return this.enoughEligiblePlayers(this.getEligiblePlayers(question));
     }
 
     private boolean enoughEligiblePlayers(final List<ServerPlayer> eligiblePlayers) {
         return eligiblePlayers.size() >= this.minimumConnectedPlayersConfig.getValue();
     }
 
-    private List<ServerPlayer> getEligiblePlayers() {
+    private List<ServerPlayer> getEligiblePlayers(final Question question) {
+        return this.getNonCreatorPlayers().stream().filter(question::canPlayerRespond).toList();
+    }
+
+    private List<ServerPlayer> getNonCreatorPlayers() {
         return this.game.server().onlinePlayers().stream()
                 .filter(player -> !this.questionCreationManager.isCreator(player.uniqueId()))
                 .toList();

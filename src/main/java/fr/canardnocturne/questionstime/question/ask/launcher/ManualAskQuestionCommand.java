@@ -38,9 +38,6 @@ public class ManualAskQuestionCommand implements CommandExecutor {
         if(this.askManager.isQuestionHasBeenAsked()) {
             return CommandResult.error(TextUtils.errorWithPrefix("A question has already being asked"));
         }
-        if(!this.askManager.enoughEligiblePlayers()) {
-            return CommandResult.error(TextUtils.errorWithPrefix("Not enough eligible players to ask a question"));
-        }
 
         final String causeIdentifier = context.friendlyIdentifier().orElse(context.identifier());
         if(this.questionLauncher != null) {
@@ -57,6 +54,9 @@ public class ManualAskQuestionCommand implements CommandExecutor {
             }
         } else {
             final Question questionArg = context.requireOne(this.specificQuestionParam);
+            if(!this.askManager.enoughEligiblePlayers(questionArg)) {
+                return CommandResult.error(TextUtils.errorWithPrefix("Not enough eligible players to ask this question"));
+            }
             this.logger.info("Question '{}' manually asked by {}", questionArg.getQuestion(), causeIdentifier);
             this.askManager.askQuestion(questionArg);
         }

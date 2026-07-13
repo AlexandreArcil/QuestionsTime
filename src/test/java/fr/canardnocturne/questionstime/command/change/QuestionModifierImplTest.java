@@ -288,6 +288,30 @@ class QuestionModifierImplTest {
     }
 
     @Test
+    void addIncludePermissions() {
+        final String addIncludePermissionsCommand = "perm.ision per.mision permi.sion";
+        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1).build();
+
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.INCLUDE_PERMISSIONS, addIncludePermissionsCommand);
+
+        assertEquals(3, modifiedQuestion.getIncludePermissions().size());
+        assertTrue(modifiedQuestion.getIncludePermissions().containsAll(Set.of("perm.ision", "per.mision", "permi.sion")));
+    }
+
+    @Test
+    void addExcludePermissions() {
+        final String addExcludePermissionsCommand = "perm.ision per.mision permi.sion";
+        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1).build();
+
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.EXCLUDE_PERMISSIONS, addExcludePermissionsCommand);
+
+        assertEquals(3, modifiedQuestion.getExcludePermissions().size());
+        assertTrue(modifiedQuestion.getExcludePermissions().containsAll(Set.of("perm.ision", "per.mision", "permi.sion")));
+    }
+
+    @Test
     void removeAnswer() {
         final String answerToRemove = "wow";
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of(answerToRemove, "test")).setWeight(1).build();
@@ -408,6 +432,56 @@ class QuestionModifierImplTest {
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->questionModifier.remove(question, QuestionComponent.TAGS, removeTagsCommand));
 
         assertEquals("Tag(s) 'tag1, tag4' is/are not present in the question", exception.getMessage());
+    }
+
+    @Test
+    void removeIncludePermissions() {
+        final String removeIncludePermissionsCommand = "perm.ision per.mision";
+        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
+                .setIncludePermissions(Set.of("perm.ision", "per.mision", "permi.sion")).build();
+
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.INCLUDE_PERMISSIONS, removeIncludePermissionsCommand);
+
+        assertEquals(1, modifiedQuestion.getIncludePermissions().size());
+        assertTrue(modifiedQuestion.getIncludePermissions().contains("permi.sion"));
+    }
+
+    @Test
+    void removeInexistentIncludePermissions() {
+        final String removeIncludePermissionsCommand = "perm.ision per.mision";
+        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
+                .setIncludePermissions(Set.of("permi.sion")).build();
+
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->questionModifier.remove(question, QuestionComponent.INCLUDE_PERMISSIONS, removeIncludePermissionsCommand));
+
+        assertEquals("Include permission(s) 'perm.ision, per.mision' is/are not present in the question", exception.getMessage());
+    }
+
+    @Test
+    void removeExcludePermissions() {
+        final String removeExcludePermissionsCommand = "perm.ision per.mision";
+        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
+                .setExcludePermissions(Set.of("perm.ision", "per.mision", "permi.sion")).build();
+
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.EXCLUDE_PERMISSIONS, removeExcludePermissionsCommand);
+
+        assertEquals(1, modifiedQuestion.getExcludePermissions().size());
+        assertTrue(modifiedQuestion.getExcludePermissions().contains("permi.sion"));
+    }
+
+    @Test
+    void removeInexistentExcludePermissions() {
+        final String removeExcludePermissionsCommand = "perm.ision per.mision";
+        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
+                .setExcludePermissions(Set.of("permi.sion")).build();
+
+        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->questionModifier.remove(question, QuestionComponent.EXCLUDE_PERMISSIONS, removeExcludePermissionsCommand));
+
+        assertEquals("Exclude permission(s) 'perm.ision, per.mision' is/are not present in the question", exception.getMessage());
     }
 
     @Test

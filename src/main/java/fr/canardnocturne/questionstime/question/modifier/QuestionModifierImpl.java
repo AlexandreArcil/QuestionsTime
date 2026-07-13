@@ -250,6 +250,28 @@ public class QuestionModifierImpl implements QuestionModifier {
                 }
                 builder.setTags(tags);
                 break;
+            case EXCLUDE_PERMISSIONS:
+                final Set<String> excludePermissions = new HashSet<>(question.getExcludePermissions());
+                final String[] excludePermissionsArray = Stream.of(value.split(" ")).filter(StringUtils::isNotBlank).toArray(String[]::new);
+                final int initialExcludePermissionsSize = excludePermissions.size();
+                Stream.of(excludePermissionsArray).forEach(excludePermissions::remove);
+                final int expectedExcludePermissionsSize = initialExcludePermissionsSize - excludePermissionsArray.length;
+                if(excludePermissions.size() != expectedExcludePermissionsSize) {
+                    throw new IllegalArgumentException("Exclude permission(s) '" + String.join(", ", excludePermissionsArray) + "' is/are not present in the question");
+                }
+                builder.setExcludePermissions(excludePermissions);
+                break;
+            case INCLUDE_PERMISSIONS:
+                final Set<String> includePermissions = new HashSet<>(question.getIncludePermissions());
+                final String[] includePermissionsArray = Stream.of(value.split(" ")).filter(StringUtils::isNotBlank).toArray(String[]::new);
+                final int initialIncludePermissionsSize = includePermissions.size();
+                Stream.of(includePermissionsArray).forEach(includePermissions::remove);
+                final int expectedIncludePermissionsSize = initialIncludePermissionsSize - includePermissionsArray.length;
+                if(includePermissions.size() != expectedIncludePermissionsSize) {
+                    throw new IllegalArgumentException("Include permission(s) '" + String.join(", ", includePermissionsArray) + "' is/are not present in the question");
+                }
+                builder.setIncludePermissions(includePermissions);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown type '" + component + "' for remove string");
         }

@@ -21,6 +21,11 @@
       {
         "id": "spongeapi",
         "version": "12.0.0"
+      },
+      {
+        "id": "luckperms",
+        "version": "5.5",
+        "optional": true
       }
     ]
   },

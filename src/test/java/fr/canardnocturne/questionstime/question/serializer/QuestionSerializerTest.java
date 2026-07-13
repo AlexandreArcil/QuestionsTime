@@ -5,23 +5,27 @@ import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.Question;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class QuestionSerializerTest {
 
     @Test
-    void deserializeSimpleQuestion() throws SerializationException {
+    void deserializeQuestion() throws SerializationException {
         final String questionText = "What does a duck make?";
         final int timer = 30;
         final int timeBetweenAnswer = 60;
@@ -29,6 +33,7 @@ class QuestionSerializerTest {
         final List<String> answers = List.of("quack");
         final List<String> propositions = List.of("quack", "green", "white", "red", "yellow");
         final List<String> tags = List.of("tag1", "tag2", "tag3");
+        final List<String> includePermissions = List.of("perm.ision", "per.mision", "permi.sion");
         final Prize prize = Mockito.mock(Prize.class);
         final Malus malus = Mockito.mock(Malus.class);
         final ConfigurationNode node = Mockito.mock(ConfigurationNode.class);
@@ -42,11 +47,12 @@ class QuestionSerializerTest {
         Mockito.when(node.node("proposition")).thenReturn(node);
         Mockito.when(node.node("reveal-answer")).thenReturn(node);
         Mockito.when(node.node("tags")).thenReturn(node);
+        Mockito.when(node.node("include-permissions")).thenReturn(node);
+        Mockito.when(node.node("exclude-permissions")).thenReturn(node);
         Mockito.when(node.empty()).thenReturn(false, false, true);
         Mockito.when(node.getString()).thenReturn(questionText);
-        Mockito.when(node.getList(Mockito.eq(String.class), Mockito.anyList())).thenReturn(answers);
         Mockito.when(node.getInt(Mockito.anyInt())).thenReturn(timer, timeBetweenAnswer, weight);
-        Mockito.when(node.getList(Mockito.eq(String.class), Mockito.anyList())).thenReturn(answers, propositions, tags);
+        Mockito.when(node.getList(Mockito.eq(String.class), Mockito.anyList())).thenReturn(answers, propositions, tags, includePermissions, Collections.emptyList());
         Mockito.when(node.getList(Mockito.eq(Prize.class), Mockito.anyList())).thenReturn(List.of(prize));
         Mockito.when(node.get(Malus.class)).thenReturn(malus);
         Mockito.when(node.getBoolean(Mockito.anyBoolean())).thenReturn(true);
@@ -64,6 +70,8 @@ class QuestionSerializerTest {
         assertTrue(question.getPropositions().containsAll(propositions));
         assertTrue(question.getTags().containsAll(tags));
         assertTrue(question.isRevealAnswer());
+        assertTrue(question.getIncludePermissions().containsAll(includePermissions));
+        assertTrue(question.getExcludePermissions().isEmpty());
     }
     
     @Test
@@ -72,7 +80,6 @@ class QuestionSerializerTest {
         final NodePath path = Mockito.mock(NodePath.class);
         Mockito.when(path.toString()).thenReturn("questions.question1");
         Mockito.when(node.node("question")).thenReturn(node);
-        Mockito.when(node.node("answer")).thenReturn(node);
         Mockito.when(node.key()).thenReturn("question1");
         Mockito.when(node.empty()).thenReturn(true);
         Mockito.when(node.path()).thenReturn(path);
@@ -96,6 +103,8 @@ class QuestionSerializerTest {
         Mockito.when(node.node("malus")).thenReturn(node);
         Mockito.when(node.node("reveal-answer")).thenReturn(node);
         Mockito.when(node.node("tags")).thenReturn(node);
+        Mockito.when(node.node("include-permissions")).thenReturn(node);
+        Mockito.when(node.node("exclude-permissions")).thenReturn(node);
         Mockito.when(node.getString()).thenReturn("");
         Mockito.when(node.empty()).thenReturn(false, false, true);
 
@@ -112,11 +121,13 @@ class QuestionSerializerTest {
         final Set<String> answers = Set.of("quack");
         final List<String> propositions = List.of("quack", "green", "white", "red", "yellow");
         final Set<String> tags = Set.of("tag1", "tag2", "tag3");
+        final Set<String> includePermissions = Set.of("perm.ision", "per.mision", "permi.sion");
+        final Set<String> excludePermissions = Set.of();
         final Prize prize = Mockito.mock(Prize.class);
         final Malus malus = Mockito.mock(Malus.class);
         final Question question = Question.builder().setQuestion(questionText).setPropositions(propositions).setAnswers(answers).setWeight(weight)
                 .setPrizes(Set.of(prize)).setMalus(malus).setTimer(timer).setTimeBetweenAnswer(timeBetweenAnswer)
-                .setRevealAnswer(true).setTags(tags).build();
+                .setRevealAnswer(true).setTags(tags).setIncludePermissions(includePermissions).setExcludePermissions(excludePermissions).build();
 
         final ConfigurationNode rootNode = Mockito.mock(ConfigurationNode.class);
         final ConfigurationNode node = Mockito.mock(ConfigurationNode.class);
@@ -130,6 +141,7 @@ class QuestionSerializerTest {
         Mockito.when(rootNode.node("proposition")).thenReturn(node);
         Mockito.when(rootNode.node("reveal-answer")).thenReturn(node);
         Mockito.when(rootNode.node("tags")).thenReturn(node);
+        Mockito.when(rootNode.node("include-permissions")).thenReturn(node);
 
         final QuestionSerializer serializer = new QuestionSerializer();
         serializer.serialize(Object.class, question, rootNode);
@@ -147,6 +159,8 @@ class QuestionSerializerTest {
         Mockito.verify(node).set(Malus.class, malus);
         Mockito.verify(node).setList(String.class, new ArrayList<>(propositions));
         Mockito.verify(node).setList(Mockito.eq(String.class), Mockito.argThat(list -> list.containsAll(tags)));
+        Mockito.verify(node).setList(Mockito.eq(String.class), Mockito.argThat(list -> list.containsAll(includePermissions)));
+        Mockito.verify(rootNode, Mockito.never()).node("exclude-permissions");
     }
 
 }

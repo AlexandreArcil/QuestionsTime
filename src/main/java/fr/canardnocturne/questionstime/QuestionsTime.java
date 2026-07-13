@@ -9,6 +9,13 @@ import fr.canardnocturne.questionstime.command.set.config.SetConfigMinimumCooldo
 import fr.canardnocturne.questionstime.command.set.config.SetConfigModeExecutor;
 import fr.canardnocturne.questionstime.command.set.config.SetConfigPersonalAnswerExecutor;
 import fr.canardnocturne.questionstime.command.set.question.SetQuestionRevealAnswerExecutor;
+import fr.canardnocturne.questionstime.command.set.question.permissions.LuckPermsPermissionsParameter;
+import fr.canardnocturne.questionstime.command.set.question.permissions.exclude.SetQuestionAddExcludePermissionsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.permissions.exclude.SetQuestionExcludePermissionsListExecutor;
+import fr.canardnocturne.questionstime.command.set.question.permissions.exclude.SetQuestionRemoveExcludePermissionsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.permissions.include.SetQuestionAddIncludePermissionsExecutor;
+import fr.canardnocturne.questionstime.command.set.question.permissions.include.SetQuestionIncludePermissionsListExecutor;
+import fr.canardnocturne.questionstime.command.set.question.permissions.include.SetQuestionRemoveIncludePermissionsExecutor;
 import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionAddTagsExecutor;
 import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionRemoveTagsExecutor;
 import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionTagsListExecutor;
@@ -240,7 +247,9 @@ public class QuestionsTime {
                 s -> s,
                 () -> this.questionPool.getAll().stream().flatMap(question -> question.getTags().stream()).collect(Collectors.toSet()))
                 .key("tags").optional().consumeAllRemaining().build();
-        final Parameter questionParameter = Parameter.firstOf(ManualAskQuestionCommand.RANDOM_QUESTION_ARG, specificQuestionParameter);
+        final Parameter.Value<String> permissionsParameter = Sponge.pluginManager().plugin("luckperms")
+                .map(luckPerms -> LuckPermsPermissionsParameter.create())
+                .orElseGet(() -> Parameter.string().consumeAllRemaining().key("permissions").build());
         final Parameter questionParameter = Parameter.firstOf(Parameter.seq(ManualAskQuestionCommand.RANDOM_QUESTION_ARG, tagsParameter),specificQuestionParameter);
         final Command.Parameterized commandQTAskQuestion = Command.builder()
                 .shortDescription(Component.text("Ask a question").color(NamedTextColor.YELLOW))
@@ -468,6 +477,54 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionRemoveTags, "remove")
                 .build();
 
+        final Command.Parameterized commandQTSetQuestionExcludePermissionsList = Command.builder()
+                .shortDescription(Component.text("List the question exclude permissions").color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionExcludePermissionsListExecutor(specificQuestionParameter))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionAddExcludePermissions = Command.builder()
+                .shortDescription(Component.text("Add exclude permissions to the question").color(NamedTextColor.YELLOW))
+                .addParameters(permissionsParameter)
+                .executor(new SetQuestionAddExcludePermissionsExecutor(specificQuestionParameter, permissionsParameter, questionModifier, questionPool, questionRegister))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionRemoveExcludePermissions = Command.builder()
+                .shortDescription(Component.text("Remove exclude permissions from the question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionRemoveExcludePermissionsExecutor.PERMISSIONS)
+                .executor(new SetQuestionRemoveExcludePermissionsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionExcludePermissions = Command.builder()
+                .shortDescription(Component.text("Set the question exclude permissions").color(NamedTextColor.YELLOW))
+                .addChild(commandQTSetQuestionExcludePermissionsList, "list")
+                .addChild(commandQTSetQuestionAddExcludePermissions, "add")
+                .addChild(commandQTSetQuestionRemoveExcludePermissions, "remove")
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionIncludePermissionsList = Command.builder()
+                .shortDescription(Component.text("List the question include permissions").color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionIncludePermissionsListExecutor(specificQuestionParameter))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionAddIncludePermissions = Command.builder()
+                .shortDescription(Component.text("Add include permissions to the question").color(NamedTextColor.YELLOW))
+                .addParameters(permissionsParameter)
+                .executor(new SetQuestionAddIncludePermissionsExecutor(specificQuestionParameter, permissionsParameter, questionModifier, questionPool, questionRegister))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionRemoveIncludePermissions = Command.builder()
+                .shortDescription(Component.text("Remove include permissions from the question").color(NamedTextColor.YELLOW))
+                .addParameters(SetQuestionRemoveIncludePermissionsExecutor.PERMISSIONS)
+                .executor(new SetQuestionRemoveIncludePermissionsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionIncludePermissions = Command.builder()
+                .shortDescription(Component.text("Set the question include permissions").color(NamedTextColor.YELLOW))
+                .addChild(commandQTSetQuestionIncludePermissionsList, "list")
+                .addChild(commandQTSetQuestionAddIncludePermissions, "add")
+                .addChild(commandQTSetQuestionRemoveIncludePermissions, "remove")
+                .build();
+
         final Command.Parameterized commandQTSetQuestion = Command.builder()
                 .shortDescription(Component.text("Change a value of a question").color(NamedTextColor.YELLOW))
                 .permission("questionstime.command.set")
@@ -481,7 +538,9 @@ public class QuestionsTime {
                         Parameter.subcommand(commandQTSetWeight, "weight"),
                         Parameter.subcommand(commandQTSetTimeBetweenAnswer, "time_between_answer"),
                         Parameter.subcommand(commandQTSetQuestionRevealAnswer, "reveal_answer"),
-                        Parameter.subcommand(commandQTSetQuestionTags, "tags")))
+                        Parameter.subcommand(commandQTSetQuestionTags, "tags"),
+                        Parameter.subcommand(commandQTSetQuestionExcludePermissions, "exclude_permissions"),
+                        Parameter.subcommand(commandQTSetQuestionIncludePermissions, "include_permissions")))
                 .executor(context -> CommandResult.error(TextUtils.errorWithPrefix("Select a question")))
                 .build();
 

@@ -5,6 +5,8 @@ import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.question.component.Prize;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.spongepowered.api.service.permission.Subject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -12,7 +14,9 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class QuestionTest {
 
@@ -43,7 +47,7 @@ class QuestionTest {
                 .setPrizes(Set.of(new Prize(50, false, null, null, 1),
                         new Prize(50, false, null, null, 5)))
                 .build());
-        Assertions.assertEquals("The following prize positions are missing: 2, 3, 4. You can't have holes in the prize positions. If you want to remove a prize, you need to remove all prizes after it.",
+        Assertions.assertEquals("The following prize positions are missing: 2, 3, 4. You can't have holes in the prize positions. If you want to remove a prize, you need to remove all prizes after it",
                 exception.getMessage());
     }
 
@@ -92,6 +96,91 @@ class QuestionTest {
                 .setWeight(1)
                 .build();
         Assertions.assertDoesNotThrow(() -> question.toBuilder().build());
+    }
+
+    @Test
+    void excludeAndIncludePermissionsBothSet() {
+        final Question.QuestionBuilder builder = Question.builder()
+                .setQuestion("What sound a duck does?")
+                .setAnswers(new LinkedHashSet<>(List.of("Beeee")))
+                .setWeight(1)
+                .setIncludePermissions(Set.of("perm.ision"))
+                .setExcludePermissions(Set.of("perm.ision"));
+        final Exception exception = assertThrows(QuestionException.class, builder::build);
+        assertEquals("You can't have both include and exclude permissions. You need to choose one or the other", exception.getMessage());
+    }
+
+    @Test
+    void playerCanRespondWithNoIncludeAndExcludePermissions() {
+        final Subject subject = Mockito.mock(Subject.class);
+
+        final Question question = Question.builder()
+                .setQuestion("What sound a duck does?")
+                .setAnswers(new LinkedHashSet<>(List.of("Beeee")))
+                .setWeight(1)
+                .build();
+
+        assertTrue(question.canPlayerRespond(subject));
+    }
+
+    @Test
+    void playerCanRespondWithIncludePermissions() {
+        final Subject subject = Mockito.mock(Subject.class);
+        Mockito.when(subject.hasPermission(Mockito.any())).thenReturn(true);
+
+        final Question question = Question.builder()
+                .setQuestion("What sound a duck does?")
+                .setAnswers(new LinkedHashSet<>(List.of("Beeee")))
+                .setWeight(1)
+                .setIncludePermissions(Set.of("perm.ision"))
+                .build();
+
+        assertTrue(question.canPlayerRespond(subject));
+    }
+
+    @Test
+    void playerCantRespondWithIncludePermissions() {
+        final Subject subject = Mockito.mock(Subject.class);
+        Mockito.when(subject.hasPermission(Mockito.any())).thenReturn(false);
+
+        final Question question = Question.builder()
+                .setQuestion("What sound a duck does?")
+                .setAnswers(new LinkedHashSet<>(List.of("Beeee")))
+                .setWeight(1)
+                .setIncludePermissions(Set.of("perm.ision"))
+                .build();
+
+        assertFalse(question.canPlayerRespond(subject));
+    }
+
+    @Test
+    void playerCanRespondWithExcludePermissions() {
+        final Subject subject = Mockito.mock(Subject.class);
+        Mockito.when(subject.hasPermission(Mockito.any())).thenReturn(false);
+
+        final Question question = Question.builder()
+                .setQuestion("What sound a duck does?")
+                .setAnswers(new LinkedHashSet<>(List.of("Beeee")))
+                .setWeight(1)
+                .setExcludePermissions(Set.of("perm.ision"))
+                .build();
+
+        assertTrue(question.canPlayerRespond(subject));
+    }
+
+    @Test
+    void playerCantRespondWithExcludePermissions() {
+        final Subject subject = Mockito.mock(Subject.class);
+        Mockito.when(subject.hasPermission(Mockito.any())).thenReturn(true);
+
+        final Question question = Question.builder()
+                .setQuestion("What sound a duck does?")
+                .setAnswers(new LinkedHashSet<>(List.of("Beeee")))
+                .setWeight(1)
+                .setExcludePermissions(Set.of("perm.ision"))
+                .build();
+
+        assertFalse(question.canPlayerRespond(subject));
     }
 
 }
