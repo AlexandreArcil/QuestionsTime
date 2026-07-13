@@ -241,10 +241,11 @@ public class QuestionsTime {
                 () -> this.questionPool.getAll().stream().flatMap(question -> question.getTags().stream()).collect(Collectors.toSet()))
                 .key("tags").optional().consumeAllRemaining().build();
         final Parameter questionParameter = Parameter.firstOf(ManualAskQuestionCommand.RANDOM_QUESTION_ARG, specificQuestionParameter);
+        final Parameter questionParameter = Parameter.firstOf(Parameter.seq(ManualAskQuestionCommand.RANDOM_QUESTION_ARG, tagsParameter),specificQuestionParameter);
         final Command.Parameterized commandQTAskQuestion = Command.builder()
                 .shortDescription(Component.text("Ask a question").color(NamedTextColor.YELLOW))
                 .permission("questionstime.command.ask")
-                .addParameters(questionParameter, tagsParameter)
+                .addParameter(questionParameter)
                 .executor(new ManualAskQuestionCommand(questionAskManager, this.questionLauncher, specificQuestionParameter, tagsParameter, this.logger))
                 .build();
 
