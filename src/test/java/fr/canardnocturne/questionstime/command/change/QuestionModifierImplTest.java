@@ -9,7 +9,9 @@ import fr.canardnocturne.questionstime.question.modifier.QuestionModifier;
 import fr.canardnocturne.questionstime.question.modifier.QuestionModifierImpl;
 import fr.canardnocturne.questionstime.question.serializer.ItemStackSerializer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class QuestionModifierImplTest {
 
     @Test
@@ -313,35 +316,40 @@ class QuestionModifierImplTest {
 
     @Test
     void removeAnswer() {
-        final String answerToRemove = "wow";
-        final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of(answerToRemove, "test")).setWeight(1).build();
+        final List<String> answersToRemove = List.of("wow", "oh");
+        final Question question = Question.builder().setQuestion("test ?")
+                .setAnswers(Set.of(answersToRemove.getFirst(), answersToRemove.get(1), "test")).setWeight(1).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.ANSWERS, answerToRemove);
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.ANSWERS, answersToRemove);
 
-        assertFalse(modifiedQuestion.getAnswers().contains(answerToRemove));
+        assertEquals(1, modifiedQuestion.getAnswers().size());
+        assertFalse(modifiedQuestion.getAnswers().contains(answersToRemove.getFirst()));
+        assertFalse(modifiedQuestion.getAnswers().contains(answersToRemove.get(1)));
     }
 
     @Test
     void removeAnswerNotInQuestion() {
-        final String answerToRemove = "wow";
+        final List<String> answersToRemove = List.of("wow");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("test")).setWeight(1).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.ANSWERS, answerToRemove));
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> questionModifier.remove(question, QuestionComponent.ANSWERS, answersToRemove));
 
-        assertEquals("Answer 'wow' is not present in the question", exception.getMessage());
+        assertEquals("Answer(s) 'wow' is not present in the question", exception.getMessage());
     }
 
     @Test
     void removePropositions() {
-        final String propositionsToRemove = "proposition1;proposition2";
+        final List<String> propositionsToRemove = List.of("proposition1", "proposition2");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("proposition3")).setWeight(1)
                 .setPropositions(List.of("proposition1", "proposition2", "proposition3", "proposition4")).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.PROPOSITIONS, propositionsToRemove);
 
+        assertEquals(2, modifiedQuestion.getPropositions().size());
         assertFalse(modifiedQuestion.getPropositions().contains("proposition1"));
         assertFalse(modifiedQuestion.getPropositions().contains("proposition2"));
         assertTrue(modifiedQuestion.getPropositions().contains("proposition3"));
@@ -350,36 +358,39 @@ class QuestionModifierImplTest {
 
     @Test
     void removePropositionsNotInQuestion() {
-        final String propositionsToRemove = "proposition1;proposition2";
+        final List<String> propositionsToRemove = List.of("proposition1", "proposition2");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("proposition3")).setWeight(1)
                 .setPropositions(List.of("proposition3", "proposition4")).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.PROPOSITIONS, propositionsToRemove));
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> questionModifier.remove(question, QuestionComponent.PROPOSITIONS, propositionsToRemove));
 
         assertEquals("Proposition(s) 'proposition1, proposition2' is/are not present in the question", exception.getMessage());
     }
 
     @Test
     void removeMalusCommandsDeleteMalus() {
-        final String malusCommand = "malusCommand;cmd";
+        final List<String> malusCommands = List.of("malusCommand;cmd", "coincoin;cmd2");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setMalus(new Malus(0, false, new OutcomeCommand[] {new OutcomeCommand("malusCommand", "cmd")})).build();
+                .setMalus(new Malus(0, false, new OutcomeCommand[]
+                        {new OutcomeCommand("malusCommand", "cmd"), new OutcomeCommand("coincoin", "cmd2")})).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommand);
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommands);
 
         assertFalse(modifiedQuestion.getMalus().isPresent());
     }
 
     @Test
     void removeMalusCommands() {
-        final String malusCommand = "malusCommand;cmd";
+        final List<String> malusCommands = List.of("malusCommand;cmd", "coincoin;cmd2");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setMalus(new Malus(50, false, new OutcomeCommand[] {new OutcomeCommand("malusCommand", "cmd")})).build();
+                .setMalus(new Malus(50, false, new OutcomeCommand[]
+                        {new OutcomeCommand("malusCommand", "cmd"), new OutcomeCommand("coincoin", "cmd2")})).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommand);
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommands);
 
         assertTrue(modifiedQuestion.getMalus().isPresent());
         assertEquals(0, modifiedQuestion.getMalus().get().getCommands().length);
@@ -387,36 +398,38 @@ class QuestionModifierImplTest {
 
     @Test
     void removeMalusCommandsInexistentMalus() {
-        final String malusCommand = "malusCommand;cmd";
+        final List<String> malusCommands = List.of("malusCommand;cmd");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommand));
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommands));
 
         assertEquals("No malus is present in the question", exception.getMessage());
     }
 
     @Test
     void removeInexistentMalusCommand() {
-        final String malusCommand = "malusCommand;cmd";
+        final List<String> malusCommands = List.of("malusCommand;cmd");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setMalus(new Malus(50, false, new OutcomeCommand[0])).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommand));
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommands));
 
         assertEquals("Command 'malusCommand;cmd' not found in malus", exception.getMessage());
     }
 
     @Test
     void removeTags() {
-        final String removeTagsCommand = "tag1; tag2";
+        final List<String> removeTagsCommands = List.of("tag1", "tag2");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setTags(Set.of("tag1", "tag2", "tag3")).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.TAGS, removeTagsCommand);
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.TAGS, removeTagsCommands);
 
+        assertEquals(1, modifiedQuestion.getTags().size());
         assertTrue(modifiedQuestion.getTags().contains("tag3"));
         assertFalse(modifiedQuestion.getTags().contains("tag2"));
         assertFalse(modifiedQuestion.getTags().contains("tag1"));
@@ -424,24 +437,25 @@ class QuestionModifierImplTest {
 
     @Test
     void removeInexistentTags() {
-        final String removeTagsCommand = "tag1; tag4";
+        final List<String> removeTagsCommands = List.of("tag1", "tag4");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setTags(Set.of("tag1", "tag2", "tag3")).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->questionModifier.remove(question, QuestionComponent.TAGS, removeTagsCommand));
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> questionModifier.remove(question, QuestionComponent.TAGS, removeTagsCommands));
 
         assertEquals("Tag(s) 'tag1, tag4' is/are not present in the question", exception.getMessage());
     }
 
     @Test
     void removeIncludePermissions() {
-        final String removeIncludePermissionsCommand = "perm.ision per.mision";
+        final List<String> removeIncludePermissionsCommands = List.of("perm.ision", "per.mision");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setIncludePermissions(Set.of("perm.ision", "per.mision", "permi.sion")).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.INCLUDE_PERMISSIONS, removeIncludePermissionsCommand);
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.INCLUDE_PERMISSIONS, removeIncludePermissionsCommands);
 
         assertEquals(1, modifiedQuestion.getIncludePermissions().size());
         assertTrue(modifiedQuestion.getIncludePermissions().contains("permi.sion"));
@@ -449,24 +463,24 @@ class QuestionModifierImplTest {
 
     @Test
     void removeInexistentIncludePermissions() {
-        final String removeIncludePermissionsCommand = "perm.ision per.mision";
+        final List<String> removeIncludePermissionsCommands = List.of("perm.ision", "per.mision");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setIncludePermissions(Set.of("permi.sion")).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->questionModifier.remove(question, QuestionComponent.INCLUDE_PERMISSIONS, removeIncludePermissionsCommand));
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->questionModifier.remove(question, QuestionComponent.INCLUDE_PERMISSIONS, removeIncludePermissionsCommands));
 
         assertEquals("Include permission(s) 'perm.ision, per.mision' is/are not present in the question", exception.getMessage());
     }
 
     @Test
     void removeExcludePermissions() {
-        final String removeExcludePermissionsCommand = "perm.ision per.mision";
+        final List<String> removeExcludePermissionsCommands = List.of("perm.ision", "per.mision");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setExcludePermissions(Set.of("perm.ision", "per.mision", "permi.sion")).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.EXCLUDE_PERMISSIONS, removeExcludePermissionsCommand);
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.EXCLUDE_PERMISSIONS, removeExcludePermissionsCommands);
 
         assertEquals(1, modifiedQuestion.getExcludePermissions().size());
         assertTrue(modifiedQuestion.getExcludePermissions().contains("permi.sion"));
@@ -474,28 +488,36 @@ class QuestionModifierImplTest {
 
     @Test
     void removeInexistentExcludePermissions() {
-        final String removeExcludePermissionsCommand = "perm.ision per.mision";
+        final List<String> removeExcludePermissionsCommands = List.of("perm.ision", "per.mision");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setExcludePermissions(Set.of("permi.sion")).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->questionModifier.remove(question, QuestionComponent.EXCLUDE_PERMISSIONS, removeExcludePermissionsCommand));
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->questionModifier.remove(question, QuestionComponent.EXCLUDE_PERMISSIONS, removeExcludePermissionsCommands));
 
         assertEquals("Exclude permission(s) 'perm.ision, per.mision' is/are not present in the question", exception.getMessage());
     }
 
     @Test
     void removePrizeItems() {
-        final String removePrizeItems = "stone";
+        final List<String> removePrizeItems = List.of("stone", "sand");
+        final ItemStack isSerialized = Mockito.mock(ItemStack.class);
+        final ItemStack isSerialized2 = Mockito.mock(ItemStack.class);
         final ItemStack is = Mockito.mock(ItemStack.class);
-        Mockito.when(is.equalTo(Mockito.any())).thenReturn(true);
+        Mockito.when(is.equalTo(isSerialized)).thenReturn(true);
         Mockito.when(is.copy()).thenReturn(is);
+        final ItemStack is2 = Mockito.mock(ItemStack.class);
+        Mockito.when(is2.equalTo(isSerialized2)).thenReturn(true);
+        Mockito.when(is2.equalTo(isSerialized)).thenReturn(false);
+        Mockito.when(is2.copy()).thenReturn(is2);
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[] {is}, new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, new ItemStack[] {is, is2}, new OutcomeCommand[0], 1))).build();
 
         try(final var itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
-            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(removePrizeItems))
-                    .thenReturn(Mockito.mock(ItemStack.class));
+            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString("stone"))
+                    .thenReturn(isSerialized);
+            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString("sand"))
+                    .thenReturn(isSerialized2);
 
             final QuestionModifier questionModifier = new QuestionModifierImpl();
             final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.PRIZE_ITEMS, 1, removePrizeItems);
@@ -507,7 +529,7 @@ class QuestionModifierImplTest {
 
     @Test
     void removePrizeItemsRemovePrize() {
-        final String removePrizeItems = "stone";
+        final List<String> removePrizeItems = List.of("stone");
         final ItemStack is = Mockito.mock(ItemStack.class);
         Mockito.when(is.equalTo(Mockito.any())).thenReturn(true);
         Mockito.when(is.copy()).thenReturn(is);
@@ -515,7 +537,7 @@ class QuestionModifierImplTest {
                 .setPrizes(Set.of(new Prize(0, false, new ItemStack[] {is}, new OutcomeCommand[0], 1))).build();
 
         try(final var itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
-            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(removePrizeItems))
+            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(Mockito.anyString()))
                     .thenReturn(Mockito.mock(ItemStack.class));
 
             final QuestionModifier questionModifier = new QuestionModifierImpl();
@@ -527,13 +549,13 @@ class QuestionModifierImplTest {
 
     @Test
     void removePrizeItemsInexistentPosition() {
-        final String removePrizeItems = "stone";
+        final List<String> removePrizeItems = List.of("stone");
         final ItemStack is = Mockito.mock(ItemStack.class);
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setPrizes(Set.of(new Prize(50, false, new ItemStack[] {is}, new OutcomeCommand[0], 1))).build();
 
         try(final var itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
-            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(removePrizeItems))
+            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(Mockito.anyString()))
                     .thenReturn(Mockito.mock(ItemStack.class));
 
             final QuestionModifier questionModifier = new QuestionModifierImpl();
@@ -545,7 +567,7 @@ class QuestionModifierImplTest {
 
     @Test
     void removeInexistentPrizeItems() {
-        final String removePrizeItems = "stone";
+        final List<String> removePrizeItems = List.of("stone");
         final ItemStack is = Mockito.mock(ItemStack.class);
         Mockito.when(is.equalTo(Mockito.any())).thenReturn(false);
         Mockito.when(is.copy()).thenReturn(is);
@@ -553,7 +575,7 @@ class QuestionModifierImplTest {
                 .setPrizes(Set.of(new Prize(50, false, new ItemStack[] {is}, new OutcomeCommand[0], 1))).build();
 
         try(final var itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
-            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(removePrizeItems))
+            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(Mockito.anyString()))
                     .thenReturn(Mockito.mock(ItemStack.class));
 
             final QuestionModifier questionModifier = new QuestionModifierImpl();
@@ -565,12 +587,13 @@ class QuestionModifierImplTest {
 
     @Test
     void removePrizeCommands() {
-        final String removePrizeCommand = "message;cmd";
+        final List<String> removePrizeCommands = List.of("message;cmd", "coincoin;cmd2");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[] {new OutcomeCommand("message", "cmd")}, 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[]
+                        {new OutcomeCommand("message", "cmd"), new OutcomeCommand("coincoin", "cmd2")}, 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 1, removePrizeCommand);
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 1, removePrizeCommands);
 
         assertEquals(1, modifiedQuestion.getPrizes().size());
         assertEquals(0, modifiedQuestion.getPrizes().getFirst().getCommands().length);
@@ -578,36 +601,36 @@ class QuestionModifierImplTest {
 
     @Test
     void removePrizeCommandsRemovePrize() {
-        final String removePrizeCommand = "message;cmd";
+        final List<String> removePrizeCommands = List.of("message;cmd");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setPrizes(Set.of(new Prize(0, false, new ItemStack[0], new OutcomeCommand[] {new OutcomeCommand("message", "cmd")}, 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 1, removePrizeCommand);
+        final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 1, removePrizeCommands);
 
         assertTrue(modifiedQuestion.getPrizes().isEmpty());
     }
 
     @Test
     void removePrizeCommandsInexistentPosition() {
-        final String removePrizeCommand = "message;cmd";
+        final List<String> removePrizeCommands = List.of("message;cmd");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 2, removePrizeCommand));
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 2, removePrizeCommands));
 
         assertEquals("Prize with position 2 not found", exception.getMessage());
     }
 
     @Test
     void removeInexistentPrizeCommands() {
-        final String removePrizeCommand = "message;cmd";
+        final List<String> removePrizeCommands = List.of("message;cmd");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
                 .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 1, removePrizeCommand));
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 1, removePrizeCommands));
 
         assertEquals("Command 'message;cmd' not found in prize with position 1", exception.getMessage());
     }

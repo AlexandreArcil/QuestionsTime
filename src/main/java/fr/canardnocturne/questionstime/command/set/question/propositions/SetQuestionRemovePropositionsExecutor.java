@@ -14,18 +14,20 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 
 public class SetQuestionRemovePropositionsExecutor implements CommandExecutor  {
 
-    public static final Parameter.Value<String> PROPOSITION = Parameter.remainingJoinedStrings().key("proposition").build();
-
     private final Parameter.Value<Question> specificQuestionParameter;
+    private final Parameter.Value<String> propositionParam;
     private final QuestionModifier questionModifier;
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
 
-    public SetQuestionRemovePropositionsExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
+    public SetQuestionRemovePropositionsExecutor(final Parameter.Value<Question> specificQuestionParameter, final Parameter.Value<String> propositionParam, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
         this.specificQuestionParameter = specificQuestionParameter;
+        this.propositionParam = propositionParam;
         this.questionModifier = questionModifier;
         this.questionPool = questionPool;
         this.questionRegister = questionRegister;
@@ -33,15 +35,14 @@ public class SetQuestionRemovePropositionsExecutor implements CommandExecutor  {
 
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
-        final String proposition = context.requireOne(PROPOSITION);
         final Question question = context.requireOne(this.specificQuestionParameter);
+        final Collection<String> propositions = Collections.unmodifiableCollection(context.all(this.propositionParam));
         try {
-            final Question modifiedQuestion = this.questionModifier.remove(question, QuestionComponent.PROPOSITIONS, proposition);
+            final Question modifiedQuestion = this.questionModifier.remove(question, QuestionComponent.PROPOSITIONS, propositions);
             this.questionRegister.replace(question, modifiedQuestion);
             this.questionPool.replace(question, modifiedQuestion);
-            final String[] propositions = proposition.split(";");
-            if(propositions.length == 1) {
-                context.sendMessage(TextUtils.composed("Proposition ", proposition, " removed !"));
+            if(propositions.size() == 1) {
+                context.sendMessage(TextUtils.composed("Proposition ", propositions.iterator().next(), " removed !"));
             } else {
                 context.sendMessage(TextUtils.composed("Propositions ", String.join(", ", propositions), " removed !"));
             }

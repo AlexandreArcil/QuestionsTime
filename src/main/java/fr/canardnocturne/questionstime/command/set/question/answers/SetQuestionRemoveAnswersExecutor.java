@@ -14,18 +14,23 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 
 public class SetQuestionRemoveAnswersExecutor implements CommandExecutor {
 
-    public static final Parameter.Value<String> ANSWER = Parameter.remainingJoinedStrings().key("answer").build();
-
     private final Parameter.Value<Question> specificQuestionParameter;
+    private final Parameter.Value<String> specificQuestionAnswers;
     private final QuestionModifier questionModifier;
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
 
-    public SetQuestionRemoveAnswersExecutor(final Parameter.Value<Question> specificQuestionParameter, final QuestionModifier questionModifier, final QuestionPool questionPool, final QuestionRegister questionRegister) {
+    public SetQuestionRemoveAnswersExecutor(final Parameter.Value<Question> specificQuestionParameter,
+                                            final Parameter.Value<String> specificQuestionAnswers,
+                                            final QuestionModifier questionModifier, final QuestionPool questionPool,
+                                            final QuestionRegister questionRegister) {
         this.specificQuestionParameter = specificQuestionParameter;
+        this.specificQuestionAnswers = specificQuestionAnswers;
         this.questionModifier = questionModifier;
         this.questionPool = questionPool;
         this.questionRegister = questionRegister;
@@ -33,13 +38,17 @@ public class SetQuestionRemoveAnswersExecutor implements CommandExecutor {
 
     @Override
      public CommandResult execute(final CommandContext context) throws CommandException {
-         final String answer = context.requireOne(ANSWER);
          final Question question = context.requireOne(this.specificQuestionParameter);
-         try {
-             final Question modifiedQuestion = this.questionModifier.remove(question, QuestionComponent.ANSWERS, answer);
+        final Collection<String> answers = Collections.unmodifiableCollection(context.all(this.specificQuestionAnswers));
+        try {
+             final Question modifiedQuestion = this.questionModifier.remove(question, QuestionComponent.ANSWERS, answers);
              this.questionRegister.replace(question, modifiedQuestion);
              this.questionPool.replace(question, modifiedQuestion);
-             context.sendMessage(TextUtils.composed("Answer ", answer, " removed !"));
+             if(answers.size() == 1) {
+                 context.sendMessage(TextUtils.composed("Answer ", answers.iterator().next(), " removed !"));
+             } else {
+                 context.sendMessage(TextUtils.composed("Answers ", String.join(", ", answers), " removed !"));
+             }
              return CommandResult.success();
          } catch (final QuestionException | IllegalArgumentException e) {
              return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));

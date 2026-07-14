@@ -13,6 +13,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -199,130 +200,97 @@ public class QuestionModifierImpl implements QuestionModifier {
     }
 
     @Override
-    public Question remove(final Question question, final QuestionComponent component, final String value) {
+    public Question remove(final Question question, final QuestionComponent component, final Collection<String> values) {
         final Question.QuestionBuilder builder = question.toBuilder();
-        switch (component) {
-            case ANSWERS:
-                final HashSet<String> answers = new HashSet<>(question.getAnswers());
-                final boolean removed = answers.remove(value);
-                if(!removed) {
-                    throw new IllegalArgumentException("Answer '" + value + "' is not present in the question");
-                }
-                builder.setAnswers(answers);
-                break;
-            case PROPOSITIONS:
-                final List<String> propositions = new ArrayList<>(question.getPropositions());
-                final int initialSize = propositions.size();
-                final String[] propositionArray = value.split(";");
-                propositions.removeAll(Arrays.asList(propositionArray));
-                final int expectedSize = initialSize - propositionArray.length;
-                if(propositions.size() != expectedSize) {
-                    throw new IllegalArgumentException("Proposition(s) '" + String.join(", ", propositionArray) + "' is/are not present in the question");
-                }
-                builder.setPropositions(propositions);
-                break;
-            case MALUS_COMMANDS:
+        if(component == QuestionComponent.MALUS_COMMANDS) {
+            final Malus.Builder malusBuilder = question.getMalus()
+                    .map(Malus::toBuilder)
+                    .orElseThrow(() -> new IllegalArgumentException("No malus is present in the question"));
+            final int[] outcomeCommandPositions = new int[values.size()];
+            int position = 0;
+            for (final String value : values) {
                 final OutcomeCommand outcomeCommand = OutcomeCommandSerializer.deserialize(value);
-                final Malus.Builder malusBuilder = question.getMalus()
-                        .map(Malus::toBuilder)
-                        .orElseThrow(() -> new IllegalArgumentException("No malus is present in the question"));
-                final int position = ArrayUtils.indexOf(malusBuilder.getCommands(), outcomeCommand);
-                if (position == ArrayUtils.INDEX_NOT_FOUND) {
+                final int outcomeCommandPosition = ArrayUtils.indexOf(malusBuilder.getCommands(), outcomeCommand);
+                if (outcomeCommandPosition == ArrayUtils.INDEX_NOT_FOUND) {
                     throw new IllegalArgumentException("Command '" + value + "' not found in malus");
                 }
-                final OutcomeCommand[] result = ArrayUtils.remove(malusBuilder.getCommands(), position);
-                malusBuilder.setCommands(result);
-                final Malus malus = malusBuilder.build();
-                if (!malus.isEmpty()) {
-                    builder.setMalus(malus);
-                } else {
-                    builder.setMalus(null);
-                }
-                break;
-            case TAGS:
-                final Set<String> tags = new HashSet<>(question.getTags());
-                final String[] tagsArray = value.split("; ");
-                final int initialTagsSize = tags.size();
-                Stream.of(tagsArray).map(String::trim).forEach(tags::remove);
-                final int expectedTagsSize = initialTagsSize - tagsArray.length;
-                if(tags.size() != expectedTagsSize) {
-                    throw new IllegalArgumentException("Tag(s) '" + String.join(", ", tagsArray) + "' is/are not present in the question");
-                }
-                builder.setTags(tags);
-                break;
-            case EXCLUDE_PERMISSIONS:
-                final Set<String> excludePermissions = new HashSet<>(question.getExcludePermissions());
-                final String[] excludePermissionsArray = Stream.of(value.split(" ")).filter(StringUtils::isNotBlank).toArray(String[]::new);
-                final int initialExcludePermissionsSize = excludePermissions.size();
-                Stream.of(excludePermissionsArray).forEach(excludePermissions::remove);
-                final int expectedExcludePermissionsSize = initialExcludePermissionsSize - excludePermissionsArray.length;
-                if(excludePermissions.size() != expectedExcludePermissionsSize) {
-                    throw new IllegalArgumentException("Exclude permission(s) '" + String.join(", ", excludePermissionsArray) + "' is/are not present in the question");
-                }
-                builder.setExcludePermissions(excludePermissions);
-                break;
-            case INCLUDE_PERMISSIONS:
-                final Set<String> includePermissions = new HashSet<>(question.getIncludePermissions());
-                final String[] includePermissionsArray = Stream.of(value.split(" ")).filter(StringUtils::isNotBlank).toArray(String[]::new);
-                final int initialIncludePermissionsSize = includePermissions.size();
-                Stream.of(includePermissionsArray).forEach(includePermissions::remove);
-                final int expectedIncludePermissionsSize = initialIncludePermissionsSize - includePermissionsArray.length;
-                if(includePermissions.size() != expectedIncludePermissionsSize) {
-                    throw new IllegalArgumentException("Include permission(s) '" + String.join(", ", includePermissionsArray) + "' is/are not present in the question");
-                }
-                builder.setIncludePermissions(includePermissions);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown type '" + component + "' for remove string");
+                outcomeCommandPositions[position] = outcomeCommandPosition;
+                position++;
+            }
+            final OutcomeCommand[] result = ArrayUtils.removeAll(malusBuilder.getCommands(), outcomeCommandPositions);
+            malusBuilder.setCommands(result);
+            final Malus malus = malusBuilder.build();
+            if (!malus.isEmpty()) {
+                builder.setMalus(malus);
+            } else {
+                builder.setMalus(null);
+            }
+        } else {
+            final Collection<String> components = switch (component) {
+                case ANSWERS ->  new HashSet<>(question.getAnswers());
+                case PROPOSITIONS ->  new ArrayList<>(question.getPropositions());
+                case TAGS ->  new HashSet<>(question.getTags());
+                case EXCLUDE_PERMISSIONS ->  new HashSet<>(question.getExcludePermissions());
+                case INCLUDE_PERMISSIONS ->  new HashSet<>(question.getIncludePermissions());
+                default -> throw new IllegalArgumentException("Unknown type '" + component + "' for remove");
+            };
+            final int initialSize = components.size();
+            components.removeAll(values);
+            final int expectedSize = initialSize - values.size();
+            if (components.size() != expectedSize) {
+                final String componentName = component.name().toLowerCase().replace("_", " ");
+                final String componentNameError = StringUtils.capitalize(componentName.substring(0, componentName.length() - 1)) + "(s)";
+                throw new IllegalArgumentException(componentNameError + " '"
+                        + String.join(", ", values) + "' is/are not present in the question");
+            }
+            switch (component) {
+                case ANSWERS -> builder.setAnswers((Set<String>) components);
+                case PROPOSITIONS -> builder.setPropositions((List<String>) components);
+                case TAGS -> builder.setTags((Set<String>) components);
+                case EXCLUDE_PERMISSIONS -> builder.setExcludePermissions((Set<String>) components);
+                case INCLUDE_PERMISSIONS -> builder.setIncludePermissions((Set<String>) components);
+                default -> throw new IllegalArgumentException("Unknown type '" + component + "' for remove");
+            }
         }
         return builder.build();
     }
 
     @Override
-    public Question remove(final Question question, final QuestionComponent component, final int position, final String value) {
+    public Question remove(final Question question, final QuestionComponent component, final int position, final Collection<String> values) {
         final Question.QuestionBuilder builder = question.toBuilder();
+        final SortedSet<Prize> prizes = new TreeSet<>(question.getPrizes());
+        final Prize oldPrize = prizes.stream()
+                .filter(prize1 -> prize1.getPosition() == position)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Prize with position " + position + " not found"));
+        final Prize.Builder newPrizeBuilder = oldPrize.toBuilder();
         switch (component) {
             case PRIZE_ITEMS -> {
-                final SortedSet<Prize> prizes = new TreeSet<>(question.getPrizes());
-                final Prize oldPrize = prizes.stream()
-                        .filter(prize1 -> prize1.getPosition() == position)
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("Prize with position " + position + " not found"));
-                final Prize.Builder newPrizeBuilder = oldPrize.toBuilder();
-                final ItemStack itemStack = ItemStackSerializer.fromString(value);
-                final boolean removed = newPrizeBuilder.getItems().removeIf(item -> item.equalTo(itemStack));
-                if (!removed) {
-                    throw new IllegalArgumentException("Item '" + value + "' not found in prize with position " + position);
+                for (final String value : values) {
+                    final ItemStack itemStack = ItemStackSerializer.fromString(value);
+                    final boolean removed = newPrizeBuilder.getItems().removeIf(item -> item.equalTo(itemStack));
+                    if (!removed) {
+                        throw new IllegalArgumentException("Item '" + value + "' not found in prize with position " + position);
+                    }
                 }
-                prizes.remove(oldPrize);
-                final Prize newPrize = newPrizeBuilder.build();
-                if(!newPrize.isEmpty()) {
-                    prizes.add(newPrize);
-                }
-                builder.setPrizes(prizes);
-
             }
             case PRIZE_COMMANDS -> {
-                final SortedSet<Prize> prizes = new TreeSet<>(question.getPrizes());
-                final Prize oldPrize = prizes.stream()
-                        .filter(prize1 -> prize1.getPosition() == position)
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("Prize with position " + position + " not found"));
-                final Prize.Builder newPrizeBuilder = oldPrize.toBuilder();
-                final OutcomeCommand outcomeCommand = OutcomeCommandSerializer.deserialize(value);
-                final boolean removed = newPrizeBuilder.getCommands().remove(outcomeCommand);
-                if (!removed) {
-                    throw new IllegalArgumentException("Command '" + value + "' not found in prize with position " + position);
+                for (final String value : values) {
+                    final OutcomeCommand outcomeCommand = OutcomeCommandSerializer.deserialize(value);
+                    final boolean removed = newPrizeBuilder.getCommands().remove(outcomeCommand);
+                    if (!removed) {
+                        throw new IllegalArgumentException("Command '" + value + "' not found in prize with position " + position);
+                    }
                 }
-                prizes.remove(oldPrize);
-                final Prize newPrize = newPrizeBuilder.build();
-                if(!newPrize.isEmpty()) {
-                    prizes.add(newPrize);
-                }
-                builder.setPrizes(prizes);
             }
             default -> throw new IllegalArgumentException("Unknown type '" + component + "' for remove string with position");
         }
+        prizes.remove(oldPrize);
+        final Prize newPrize = newPrizeBuilder.build();
+        if(!newPrize.isEmpty()) {
+            prizes.add(newPrize);
+        }
+        builder.setPrizes(prizes);
         return builder.build();
     }
 

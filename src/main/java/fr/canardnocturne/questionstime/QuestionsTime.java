@@ -8,6 +8,7 @@ import fr.canardnocturne.questionstime.command.set.config.SetConfigMinimumConnec
 import fr.canardnocturne.questionstime.command.set.config.SetConfigMinimumCooldownExecutor;
 import fr.canardnocturne.questionstime.command.set.config.SetConfigModeExecutor;
 import fr.canardnocturne.questionstime.command.set.config.SetConfigPersonalAnswerExecutor;
+import fr.canardnocturne.questionstime.command.set.question.QuestionComponentParameter;
 import fr.canardnocturne.questionstime.command.set.question.SetQuestionRevealAnswerExecutor;
 import fr.canardnocturne.questionstime.command.set.question.permissions.LuckPermsPermissionsParameter;
 import fr.canardnocturne.questionstime.command.set.question.permissions.exclude.SetQuestionAddExcludePermissionsExecutor;
@@ -89,7 +90,9 @@ import fr.canardnocturne.questionstime.question.creation.QuestionCreationManager
 import fr.canardnocturne.questionstime.question.creation.orchestrator.StoppableQuestionCreationOrchestrator;
 import fr.canardnocturne.questionstime.question.save.HoconQuestionRegister;
 import fr.canardnocturne.questionstime.question.save.QuestionRegister;
+import fr.canardnocturne.questionstime.question.serializer.ItemStackSerializer;
 import fr.canardnocturne.questionstime.question.serializer.MalusTypeSerializer;
+import fr.canardnocturne.questionstime.question.serializer.OutcomeCommandSerializer;
 import fr.canardnocturne.questionstime.question.serializer.OutcomeCommandTypeSerializer;
 import fr.canardnocturne.questionstime.question.serializer.PrizeTypeSerializer;
 import fr.canardnocturne.questionstime.question.serializer.QuestionSerializer;
@@ -125,6 +128,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Plugin("questionstime")
 public class QuestionsTime {
@@ -277,10 +281,14 @@ public class QuestionsTime {
                 .executor(new SetQuestionMalusAddCommandsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
+        final Parameter.Value<String> malusCommandParameter = QuestionComponentParameter.create("command", specificQuestionParameter,
+                question -> question.getMalus().stream()
+                        .flatMap(malus -> Stream.of(malus.getCommands()))
+                        .map(OutcomeCommandSerializer::serialize).toList());
         final Command.Parameterized commandQTSetQuestionMalusRemoveCommands = Command.builder()
                 .shortDescription(Component.text("Remove a malus command for a question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionMalusRemoveCommandsExecutor.COMMAND)
-                .executor(new SetQuestionMalusRemoveCommandsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(malusCommandParameter)
+                .executor(new SetQuestionMalusRemoveCommandsExecutor(specificQuestionParameter, malusCommandParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionMalusCommands = Command.builder()
@@ -331,10 +339,14 @@ public class QuestionsTime {
                 .executor(new SetQuestionPrizesAddCommandsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
+        final Parameter.Value<String> prizeCommandParameter = QuestionComponentParameter.create("command", specificQuestionParameter,
+                question -> question.getPrizes().stream()
+                .flatMap(prize -> Stream.of(prize.getCommands()))
+                .map(OutcomeCommandSerializer::serialize).toList());
         final Command.Parameterized commandQTSetQuestionPrizesRemoveCommands = Command.builder()
                 .shortDescription(Component.text("Remove a command prize from the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionPrizesRemoveCommandsExecutor.POSITION, SetQuestionPrizesRemoveCommandsExecutor.COMMAND)
-                .executor(new SetQuestionPrizesRemoveCommandsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(SetQuestionPrizesRemoveCommandsExecutor.POSITION, prizeCommandParameter)
+                .executor(new SetQuestionPrizesRemoveCommandsExecutor(specificQuestionParameter, prizeCommandParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionPrizesCommands = Command.builder()
@@ -355,10 +367,14 @@ public class QuestionsTime {
                 .executor(new SetQuestionPrizesAddItemsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
+        final Parameter.Value<String> prizeItemsParam = QuestionComponentParameter.create("item", specificQuestionParameter,
+                question -> question.getPrizes().stream()
+                        .flatMap(prize -> Stream.of(prize.getItemStacks()))
+                        .map(ItemStackSerializer::fromItemStack).toList());
         final Command.Parameterized commandQTSetQuestionPrizesRemoveItems = Command.builder()
                 .shortDescription(Component.text("Remove an item prize from the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionPrizesRemoveItemsExecutor.POSITION, SetQuestionPrizesRemoveItemsExecutor.ITEM)
-                .executor(new SetQuestionPrizesRemoveItemsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(SetQuestionPrizesRemoveItemsExecutor.POSITION, prizeItemsParam)
+                .executor(new SetQuestionPrizesRemoveItemsExecutor(specificQuestionParameter, prizeItemsParam, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionPrizesItems = Command.builder()
@@ -410,10 +426,11 @@ public class QuestionsTime {
                 .executor(new SetQuestionAddAnswersExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
+        final Parameter.Value<String> specificQuestionAnswers = QuestionComponentParameter.create("answers", specificQuestionParameter, Question::getAnswers);
         final Command.Parameterized commandQTSetQuestionRemoveAnswers = Command.builder()
                 .shortDescription(Component.text("Remove an answer from the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionRemoveAnswersExecutor.ANSWER)
-                .executor(new SetQuestionRemoveAnswersExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(specificQuestionAnswers)
+                .executor(new SetQuestionRemoveAnswersExecutor(specificQuestionParameter, specificQuestionAnswers, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionAnswers = Command.builder()
@@ -434,10 +451,11 @@ public class QuestionsTime {
                 .executor(new SetQuestionAddPropositionsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
+        final Parameter.Value<String> propositionParam = QuestionComponentParameter.create("proposition", specificQuestionParameter, Question::getPropositions);
         final Command.Parameterized commandQTSetQuestionRemovePropositions = Command.builder()
                 .shortDescription(Component.text("Remove a proposition from the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionRemovePropositionsExecutor.PROPOSITION)
-                .executor(new SetQuestionRemovePropositionsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(propositionParam)
+                .executor(new SetQuestionRemovePropositionsExecutor(specificQuestionParameter, propositionParam, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionPropositions = Command.builder()
@@ -464,10 +482,11 @@ public class QuestionsTime {
                 .executor(new SetQuestionAddTagsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
+        final Parameter.Value<String> specificQuestionTags = QuestionComponentParameter.create("tags", specificQuestionParameter, Question::getTags);
         final Command.Parameterized commandQTSetQuestionRemoveTags = Command.builder()
                 .shortDescription(Component.text("Remove tags from the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionRemoveTagsExecutor.TAGS)
-                .executor(new SetQuestionRemoveTagsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameter(specificQuestionTags)
+                .executor(new SetQuestionRemoveTagsExecutor(specificQuestionParameter, specificQuestionTags, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionTags = Command.builder()
@@ -488,10 +507,11 @@ public class QuestionsTime {
                 .executor(new SetQuestionAddExcludePermissionsExecutor(specificQuestionParameter, permissionsParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
+        final Parameter.Value<String> excludePermissionsParameter = QuestionComponentParameter.create("include-permission", specificQuestionParameter, Question::getExcludePermissions);
         final Command.Parameterized commandQTSetQuestionRemoveExcludePermissions = Command.builder()
                 .shortDescription(Component.text("Remove exclude permissions from the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionRemoveExcludePermissionsExecutor.PERMISSIONS)
-                .executor(new SetQuestionRemoveExcludePermissionsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(excludePermissionsParameter)
+                .executor(new SetQuestionRemoveExcludePermissionsExecutor(specificQuestionParameter, excludePermissionsParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionExcludePermissions = Command.builder()
@@ -512,10 +532,11 @@ public class QuestionsTime {
                 .executor(new SetQuestionAddIncludePermissionsExecutor(specificQuestionParameter, permissionsParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
+        final Parameter.Value<String> includePermissionsParameter = QuestionComponentParameter.create("include-permission", specificQuestionParameter, Question::getIncludePermissions);
         final Command.Parameterized commandQTSetQuestionRemoveIncludePermissions = Command.builder()
                 .shortDescription(Component.text("Remove include permissions from the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionRemoveIncludePermissionsExecutor.PERMISSIONS)
-                .executor(new SetQuestionRemoveIncludePermissionsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
+                .addParameters(includePermissionsParameter)
+                .executor(new SetQuestionRemoveIncludePermissionsExecutor(specificQuestionParameter, includePermissionsParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionIncludePermissions = Command.builder()

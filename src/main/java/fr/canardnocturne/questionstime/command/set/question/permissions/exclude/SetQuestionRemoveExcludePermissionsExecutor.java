@@ -14,20 +14,22 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 
 public class SetQuestionRemoveExcludePermissionsExecutor implements CommandExecutor  {
 
-    public static final Parameter.Value<String> PERMISSIONS = Parameter.remainingJoinedStrings().key("permissions").build();
-
     private final Parameter.Value<Question> specificQuestionParameter;
+    private final Parameter.Value<String> excludePermissionsParameter;
     private final QuestionModifier questionModifier;
     private final QuestionPool questionPool;
     private final QuestionRegister questionRegister;
 
     public SetQuestionRemoveExcludePermissionsExecutor(final Parameter.Value<Question> specificQuestionParameter,
-                                                       final QuestionModifier questionModifier, final QuestionPool questionPool,
+                                                       final Parameter.Value<String> excludePermissionsParameter, final QuestionModifier questionModifier, final QuestionPool questionPool,
                                                        final QuestionRegister questionRegister) {
         this.specificQuestionParameter = specificQuestionParameter;
+        this.excludePermissionsParameter = excludePermissionsParameter;
         this.questionModifier = questionModifier;
         this.questionPool = questionPool;
         this.questionRegister = questionRegister;
@@ -36,16 +38,15 @@ public class SetQuestionRemoveExcludePermissionsExecutor implements CommandExecu
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
         final Question question = context.requireOne(this.specificQuestionParameter);
-        final String permissions = context.requireOne(PERMISSIONS);
+        final Collection<String> permissions = Collections.unmodifiableCollection(context.all(this.excludePermissionsParameter));
         try {
             final Question modifiedQuestion = this.questionModifier.remove(question, QuestionComponent.EXCLUDE_PERMISSIONS, permissions);
             this.questionRegister.replace(question, modifiedQuestion);
             this.questionPool.replace(question, modifiedQuestion);
-            final String[] permissionsSeparated = permissions.split(" ");
-            if(permissionsSeparated.length == 1) {
-                context.sendMessage(TextUtils.composed("Exclude permission ", permissions, " removed !"));
+            if(permissions.size() == 1) {
+                context.sendMessage(TextUtils.composed("Exclude permission ", permissions.iterator().next(), " removed !"));
             } else {
-                context.sendMessage(TextUtils.composed("Exclude permissions ", String.join(", ", permissionsSeparated), " removed !"));
+                context.sendMessage(TextUtils.composed("Exclude permissions ", String.join(", ", permissions), " removed !"));
             }
             return CommandResult.success();
         } catch (final QuestionException | IllegalArgumentException e) {
