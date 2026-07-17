@@ -38,7 +38,7 @@ public class SetQuestionAddExcludePermissionsExecutor implements CommandExecutor
 
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
-        final String permissions = String.join(" ", context.all(this.permissionsParameter));
+        /*final String permissions = String.join(" ", context.all(this.permissionsParameter));
         final Question question = context.requireOne(this.specificQuestionParameter);
         try {
             final Set<String> existingPermissions = question.getExcludePermissions();
@@ -61,6 +61,7 @@ public class SetQuestionAddExcludePermissionsExecutor implements CommandExecutor
             return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));
         } catch (final IOException e) {
             return CommandResult.error(TextUtils.errorWithPrefix("An error occurred while trying to save the question. See the log for details."));
-        }
+        }*/
+        return CommandResult.success();
     }
 }

@@ -20,10 +20,12 @@ import fr.canardnocturne.questionstime.command.set.question.permissions.include.
 import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionAddTagsExecutor;
 import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionRemoveTagsExecutor;
 import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionTagsListExecutor;
+import fr.canardnocturne.questionstime.command.set.question.tmp.SetQuestionAddListRemoveComponentFactory;
 import fr.canardnocturne.questionstime.config.ConfigField;
 import fr.canardnocturne.questionstime.config.ConfigMutable;
 import fr.canardnocturne.questionstime.config.save.HoconPluginConfigurationSave;
 import fr.canardnocturne.questionstime.config.save.PluginConfigurationSave;
+import fr.canardnocturne.questionstime.question.QuestionComponent;
 import fr.canardnocturne.questionstime.question.ask.announcer.AskQuestionOnPlayerJoinEventHandler;
 import fr.canardnocturne.questionstime.question.modifier.QuestionModifier;
 import fr.canardnocturne.questionstime.question.modifier.QuestionModifierImpl;
@@ -263,13 +265,16 @@ public class QuestionsTime {
                 .build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
+        final SetQuestionAddListRemoveComponentFactory setQuestionAddListRemoveComponentFactory =
+                new SetQuestionAddListRemoveComponentFactory(specificQuestionParameter, questionModifier, questionPool, questionRegister);
+
 
         final Command.Parameterized commandQTSetQuestionMalusAnnounce = Command.builder()
                 .shortDescription(Component.text("Set the malus announce for a question").color(NamedTextColor.YELLOW))
                 .addParameters(SetQuestionMalusAnnounceExecutor.VALUE)
                 .executor(new SetQuestionMalusAnnounceExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
-
+/*
         final Command.Parameterized commandQTSetQuestionMalusCommandsList = Command.builder()
                 .shortDescription(Component.text("List the malus commands for a question").color(NamedTextColor.YELLOW))
                 .executor(new SetQuestionMalusCommandsListExecutor(specificQuestionParameter))
@@ -297,6 +302,13 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionMalusAddCommands, "add")
                 .addChild(commandQTSetQuestionMalusRemoveCommands, "remove")
                 .build();
+                */
+
+        final Command.Parameterized commandQTSetQuestionMalusCommands = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.MALUS_COMMANDS,
+                question -> question.getMalus().stream()
+                                    .flatMap(malus -> Stream.of(malus.getCommands()))
+                                    .map(OutcomeCommandSerializer::serialize).toList(), true);
+
 
         final Command.Parameterized commandQTSetQuestionMalusMoney = Command.builder()
                 .shortDescription(Component.text("Set the malus money for a question").color(NamedTextColor.YELLOW))
@@ -422,7 +434,7 @@ public class QuestionsTime {
 
         final Command.Parameterized commandQTSetQuestionAddAnswers = Command.builder()
                 .shortDescription(Component.text("Add an answer to the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionAddAnswersExecutor.ANSWER)
+                .addParameters(SetQuestionAddAnswersExecutor.ANSWERS)
                 .executor(new SetQuestionAddAnswersExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
@@ -496,7 +508,8 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionRemoveTags, "remove")
                 .build();
 
-        final Command.Parameterized commandQTSetQuestionExcludePermissionsList = Command.builder()
+        final Command.Parameterized commandQTSetQuestionExcludePermissions = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.EXCLUDE_PERMISSIONS, Question::getExcludePermissions, permissionsParameter, false);
+        /*final Command.Parameterized commandQTSetQuestionExcludePermissionsList = Command.builder()
                 .shortDescription(Component.text("List the question exclude permissions").color(NamedTextColor.YELLOW))
                 .executor(new SetQuestionExcludePermissionsListExecutor(specificQuestionParameter))
                 .build();
@@ -519,7 +532,7 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionExcludePermissionsList, "list")
                 .addChild(commandQTSetQuestionAddExcludePermissions, "add")
                 .addChild(commandQTSetQuestionRemoveExcludePermissions, "remove")
-                .build();
+                .build();*/
 
         final Command.Parameterized commandQTSetQuestionIncludePermissionsList = Command.builder()
                 .shortDescription(Component.text("List the question include permissions").color(NamedTextColor.YELLOW))

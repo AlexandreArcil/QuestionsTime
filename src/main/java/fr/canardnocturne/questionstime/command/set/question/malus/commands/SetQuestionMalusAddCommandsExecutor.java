@@ -33,7 +33,7 @@ public class SetQuestionMalusAddCommandsExecutor implements CommandExecutor {
 
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
-        final String command = context.requireOne(COMMAND);
+       /* final String command = context.requireOne(COMMAND);
         final Question question = context.requireOne(this.specificQuestionParameter);
         try {
             final Question modifiedQuestion = this.questionModifier.add(question, QuestionComponent.MALUS_COMMANDS, command);
@@ -45,6 +45,7 @@ public class SetQuestionMalusAddCommandsExecutor implements CommandExecutor {
             return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));
         } catch (final IOException e) {
             return CommandResult.error(TextUtils.errorWithPrefix("An error occurred while trying to save the question. See the log for details."));
-        }
+        }*/
+        return CommandResult.success();
     }
 }

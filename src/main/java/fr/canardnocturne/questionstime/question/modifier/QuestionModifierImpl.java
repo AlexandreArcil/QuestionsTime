@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.stream.Stream;
 
 public class QuestionModifierImpl implements QuestionModifier {
 
@@ -156,45 +155,42 @@ public class QuestionModifierImpl implements QuestionModifier {
     }
 
     @Override
-    public Question add(final Question question, final QuestionComponent component, final String value) {
+    public Question add(final Question question, final QuestionComponent component, final Collection<String> values) {
         final Question.QuestionBuilder builder = question.toBuilder();
-        switch (component) {
-            case ANSWERS:
-                final HashSet<String> answers = new HashSet<>(question.getAnswers());
-                answers.add(value);
-                builder.setAnswers(answers);
-                break;
-            case PROPOSITIONS:
-                final List<String> propositions = new ArrayList<>(question.getPropositions());
-                final String[] propositionArray = value.split(";");
-                propositions.addAll(Arrays.asList(propositionArray));
-                builder.setPropositions(propositions);
-                break;
-            case MALUS_COMMANDS:
+        if(component == QuestionComponent.MALUS_COMMANDS) {
+            final Malus.Builder malus = question.getMalus()
+                    .map(Malus::toBuilder)
+                    .orElseGet(Malus::builder);
+            for (final String value : values) {
                 final OutcomeCommand outcomeCommand = OutcomeCommandSerializer.deserialize(value);
-                final Malus.Builder malus = question.getMalus()
-                        .map(Malus::toBuilder)
-                        .orElseGet(Malus::builder);
                 malus.addCommand(outcomeCommand);
-                builder.setMalus(malus.build());
-                break;
-            case TAGS:
-                final Set<String> tags = new HashSet<>(question.getTags());
-                Stream.of(value.split(";")).map(String::trim).forEach(tags::add);
-                builder.setTags(tags);
-                break;
-            case EXCLUDE_PERMISSIONS:
-                final Set<String> excludePermissions = new HashSet<>(question.getExcludePermissions());
-                Stream.of(value.split(" ")).filter(StringUtils::isNotBlank).forEach(excludePermissions::add);
-                builder.setExcludePermissions(excludePermissions);
-                break;
-            case INCLUDE_PERMISSIONS:
-                final Set<String> includePermissions = new HashSet<>(question.getIncludePermissions());
-                Stream.of(value.split(" ")).filter(StringUtils::isNotBlank).forEach(includePermissions::add);
-                builder.setIncludePermissions(includePermissions);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown type '" + component + "' for add string");
+            }
+            builder.setMalus(malus.build());
+        } else {
+            final Collection<String> components = switch (component) {
+                case ANSWERS ->  new HashSet<>(question.getAnswers());
+                case PROPOSITIONS ->  new ArrayList<>(question.getPropositions());
+                case TAGS ->  new HashSet<>(question.getTags());
+                case EXCLUDE_PERMISSIONS ->  new HashSet<>(question.getExcludePermissions());
+                case INCLUDE_PERMISSIONS ->  new HashSet<>(question.getIncludePermissions());
+                default -> throw new IllegalArgumentException("Unknown type '" + component + "' for remove");
+            };
+            final int initialSize = components.size();
+            components.addAll(values);
+            final int expectedSize = initialSize + values.size();
+            if (components.size() != expectedSize) {
+                final String componentNameError = StringUtils.capitalize(component.getSingular()) + "(s)";
+                throw new IllegalArgumentException(componentNameError + " '"
+                        + String.join(", ", values) + "' is/are already present in the question");
+            }
+            switch (component) {
+                case ANSWERS -> builder.setAnswers((Set<String>) components);
+                case PROPOSITIONS -> builder.setPropositions((List<String>) components);
+                case TAGS -> builder.setTags((Set<String>) components);
+                case EXCLUDE_PERMISSIONS -> builder.setExcludePermissions((Set<String>) components);
+                case INCLUDE_PERMISSIONS -> builder.setIncludePermissions((Set<String>) components);
+                default -> throw new IllegalArgumentException("Unknown type '" + component + "' for remove");
+            }
         }
         return builder.build();
     }
@@ -238,8 +234,7 @@ public class QuestionModifierImpl implements QuestionModifier {
             components.removeAll(values);
             final int expectedSize = initialSize - values.size();
             if (components.size() != expectedSize) {
-                final String componentName = component.name().toLowerCase().replace("_", " ");
-                final String componentNameError = StringUtils.capitalize(componentName.substring(0, componentName.length() - 1)) + "(s)";
+                final String componentNameError = StringUtils.capitalize(component.getSingular()) + "(s)";
                 throw new IllegalArgumentException(componentNameError + " '"
                         + String.join(", ", values) + "' is/are not present in the question");
             }

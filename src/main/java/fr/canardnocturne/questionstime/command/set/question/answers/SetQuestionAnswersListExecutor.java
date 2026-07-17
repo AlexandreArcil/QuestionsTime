@@ -34,6 +34,8 @@ public class SetQuestionAnswersListExecutor implements CommandExecutor {
                                         .hoverEvent(HoverEvent.showText(Component.text("Delete the answer '" + answer + "'"))))
                                 .append(TextUtils.composedWithoutPrefix(" ", answer))
                 ).toList()));
+        message.append(TextUtils.normalWithPrefix("You can add answers with the command ")
+                .append(TextUtils.commandSuggestion("set question \"" + question.getQuestion() + "\" answers add answer1;answer2;answer3...")));
         context.sendMessage(message.build());
         return CommandResult.success();
     }

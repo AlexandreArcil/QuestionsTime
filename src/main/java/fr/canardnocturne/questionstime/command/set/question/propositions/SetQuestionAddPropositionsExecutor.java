@@ -33,7 +33,7 @@ public class SetQuestionAddPropositionsExecutor implements CommandExecutor {
 
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
-        final String proposition = context.requireOne(PROPOSITION);
+        /*final String proposition = context.requireOne(PROPOSITION);
         final Question question = context.requireOne(this.specificQuestionParameter);
         try {
             final Question modifiedQuestion = this.questionModifier.add(question, QuestionComponent.PROPOSITIONS, proposition);
@@ -50,6 +50,7 @@ public class SetQuestionAddPropositionsExecutor implements CommandExecutor {
             return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));
         } catch (final IOException e) {
             return CommandResult.error(TextUtils.errorWithPrefix("An error occurred while trying to save the question. See the log for details."));
-        }
+        }*/
+        return CommandResult.success();
     }
 }

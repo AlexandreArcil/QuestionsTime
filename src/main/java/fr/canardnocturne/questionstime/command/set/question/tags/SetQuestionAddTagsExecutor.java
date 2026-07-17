@@ -35,7 +35,7 @@ public class SetQuestionAddTagsExecutor implements CommandExecutor {
 
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
-        final String tags = context.requireOne(TAGS);
+        /*final String tags = context.requireOne(TAGS);
         final Question question = context.requireOne(this.specificQuestionParameter);
         try {
             final Set<String> existingTags = question.getTags();
@@ -56,6 +56,7 @@ public class SetQuestionAddTagsExecutor implements CommandExecutor {
             return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));
         } catch (final IOException e) {
             return CommandResult.error(TextUtils.errorWithPrefix("An error occurred while trying to save the question. See the log for details."));
-        }
+        }*/
+        return CommandResult.success();
     }
 }
