@@ -7,6 +7,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
@@ -118,6 +119,10 @@ public final class TextUtils {
         } else{
             return new AnswerPosition(answer, 1);
         }
+    }
+
+    public static boolean shouldBeDoubleQuote(final String value) {
+        return StringUtils.containsAny(value, " ", ";", ":");
     }
 
 }

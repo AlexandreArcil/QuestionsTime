@@ -10,8 +10,9 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PrizeTypeSerializer implements TypeSerializer<Prize> {
 
@@ -20,14 +21,14 @@ public class PrizeTypeSerializer implements TypeSerializer<Prize> {
     public Prize deserialize(final Type type, final ConfigurationNode node) throws SerializationException {
         final int money = node.node("money").getInt(-1);
         final boolean announce = node.node("announce").getBoolean(false);
-        final List<OutcomeCommand> commandPrizes = node.node("commands").getList(OutcomeCommand.class, new ArrayList<>());
+        final Set<OutcomeCommand> commandPrizes = new HashSet<>(node.node("commands").getList(OutcomeCommand.class, new ArrayList<>()));
 
         final int position = node.node("position").getInt(1);
         if(position <= 0) {
             throw new SerializationException("Position must be greater than 0");
         }
 
-        final ArrayList<ItemStack> itemPrizes = new ArrayList<>();
+        final Set<ItemStack> itemPrizes = new HashSet<>();
         final ConfigurationNode items = node.node("items");
         if (!items.isNull()) {
             for (final ConfigurationNode itemNode : items.childrenList()) {
@@ -45,7 +46,7 @@ public class PrizeTypeSerializer implements TypeSerializer<Prize> {
             }
         }
 
-        return new Prize(money, announce, itemPrizes.toArray(new ItemStack[0]), commandPrizes.toArray(new OutcomeCommand[0]), position);
+        return new Prize(money, announce, itemPrizes, commandPrizes, position);
     }
 
     @Override
@@ -54,20 +55,20 @@ public class PrizeTypeSerializer implements TypeSerializer<Prize> {
             node.node("announce").set(prize.isAnnounce());
             node.node("money").set(prize.getMoney());
             node.node("position").set(prize.getPosition());
-            if (prize.getItemStacks().length > 0) {
-                final List<String> isList = Arrays.stream(prize.getItemStacks())
+            if (!prize.getItemStacks().isEmpty()) {
+                final List<String> isList = prize.getItemStacks().stream()
                         .map(ItemStackSerializer::fromItemStack)
                         .toList();
                 node.node("items").set(isList);
             }
-            if(prize.getCommands().length > 0) {
-                node.node("commands").setList(OutcomeCommand.class, Arrays.asList(prize.getCommands()));
+            if(!prize.getCommands().isEmpty()) {
+                node.node("commands").setList(OutcomeCommand.class, prize.getCommands().stream().toList());
             }
         }
     }
 
     private boolean needToSerialize(final Prize prize) {
-        return prize != null && (prize.getMoney() > 0 || prize.getItemStacks().length > 0 || prize.getCommands().length > 0);
+        return prize != null && (prize.getMoney() > 0 || !prize.getItemStacks().isEmpty() || !prize.getCommands().isEmpty());
     }
 
 }

@@ -9,7 +9,10 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,17 +25,19 @@ class PrizeTypeSerializerTest {
     @Test
     void deserializeWithValidData() throws SerializationException {
         try(final MockedStatic<ItemStackSerializer> itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
-            final List<ItemStack> itemStacks = List.of(Mockito.mock(ItemStack.class), Mockito.mock(ItemStack.class));
-            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString("sand")).thenReturn(itemStacks.get(0));
-            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString("stone")).thenReturn(itemStacks.get(1));
-            final List<OutcomeCommand> outcomeCommands = List.of(new OutcomeCommand("testCommand", "testArgs"),
+            final ItemStack is1 = Mockito.mock(ItemStack.class);
+            final ItemStack is2 = Mockito.mock(ItemStack.class);
+            final Set<ItemStack> itemStacks = Set.of(is1, is2);
+            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString("sand")).thenReturn(is1);
+            itemStackSerializerMock.when(() -> ItemStackSerializer.fromString("stone")).thenReturn(is2);
+            final Set<OutcomeCommand> outcomeCommands = Set.of(new OutcomeCommand("testCommand", "testArgs"),
                     new OutcomeCommand("anotherCommand", "anotherArgs"));
             final ConfigurationNode root = Mockito.mock(ConfigurationNode.class);
             final ConfigurationNode node = Mockito.mock(ConfigurationNode.class);
             Mockito.when(root.node(Mockito.anyString())).thenReturn(node);
             Mockito.when(node.getBoolean(Mockito.anyBoolean())).thenReturn(true);
             Mockito.when(node.getInt(Mockito.anyInt())).thenReturn(100, 1);
-            Mockito.when(node.getList(Mockito.eq(OutcomeCommand.class), Mockito.anyList())).thenReturn(outcomeCommands);
+            Mockito.when(node.getList(Mockito.eq(OutcomeCommand.class), Mockito.anyList())).thenReturn(new ArrayList<>(outcomeCommands));
             Mockito.when(node.getString()).thenReturn("sand", "stone");
             Mockito.<List<? extends ConfigurationNode>>when(node.childrenList()).thenReturn(List.of(node, node));
 
@@ -41,8 +46,8 @@ class PrizeTypeSerializerTest {
             assertNotNull(prize);
             assertEquals(100, prize.getMoney());
             assertTrue(prize.isAnnounce());
-            assertArrayEquals(outcomeCommands.toArray(new OutcomeCommand[0]), prize.getCommands());
-            assertArrayEquals(itemStacks.toArray(new ItemStack[0]), prize.getItemStacks());
+            assertEquals(outcomeCommands, prize.getCommands());
+            assertEquals(itemStacks, prize.getItemStacks());
             assertEquals(1, prize.getPosition());
         }
     }
@@ -97,7 +102,7 @@ class PrizeTypeSerializerTest {
             final ItemStack itemStack = Mockito.mock(ItemStack.class);
             itemStackSerializerMock.when(() -> ItemStackSerializer.fromItemStack(itemStack)).thenReturn("sand");
             final OutcomeCommand command = new OutcomeCommand("testCommand", "testArgs");
-            final Prize prize = new Prize(100, true, new ItemStack[]{itemStack, itemStack}, new OutcomeCommand[]{command, command}, 1);
+            final Prize prize = new Prize(100, true, Set.of(itemStack), Set.of(command), 1);
             final ConfigurationNode root = Mockito.mock(ConfigurationNode.class);
             final ConfigurationNode node = Mockito.mock(ConfigurationNode.class);
             Mockito.when(root.node(Mockito.anyString())).thenReturn(node);
@@ -120,7 +125,7 @@ class PrizeTypeSerializerTest {
 
     @Test
     void serializeWithEmptyPrize() throws SerializationException {
-        final Prize prize = new Prize(0, false, new ItemStack[0], new OutcomeCommand[0], 1);
+        final Prize prize = new Prize(0, false, new HashSet<>(), new HashSet<>(), 1);
         final ConfigurationNode root = Mockito.mock(ConfigurationNode.class);
         final ConfigurationNode node = Mockito.mock(ConfigurationNode.class);
         Mockito.when(root.node(Mockito.anyString())).thenReturn(node);
@@ -133,7 +138,7 @@ class PrizeTypeSerializerTest {
 
     @Test
     void serializeWithOnlyMoneyPrize() throws SerializationException {
-        final Prize prize = new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1);
+        final Prize prize = new Prize(50, false, new HashSet<>(), new HashSet<>(), 1);
         final ConfigurationNode root = Mockito.mock(ConfigurationNode.class);
         final ConfigurationNode node = Mockito.mock(ConfigurationNode.class);
         Mockito.when(root.node(Mockito.anyString())).thenReturn(node);

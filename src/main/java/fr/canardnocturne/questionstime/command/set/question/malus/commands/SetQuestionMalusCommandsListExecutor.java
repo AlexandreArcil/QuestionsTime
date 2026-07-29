@@ -30,11 +30,11 @@ public class SetQuestionMalusCommandsListExecutor implements CommandExecutor {
     public CommandResult execute(final CommandContext context) throws CommandException {
         final Question question = context.requireOne(specificQuestionParameter);
         final TextComponent.Builder message = Component.text();
-        if (question.getMalus().isEmpty() || question.getMalus().get().getCommands().length == 0) {
+        if (question.getMalus().isEmpty() || question.getMalus().get().getCommands().isEmpty()) {
             message.append(TextUtils.normalWithPrefix("No commands"));
         } else {
             message.append(TextUtils.normalWithPrefix("Malus commands: ")).appendNewline()
-            .append(Component.join(JoinConfiguration.newlines(), Stream.of(question.getMalus().get().getCommands()).map(command ->
+            .append(Component.join(JoinConfiguration.newlines(), question.getMalus().get().getCommands().stream().map(command ->
                     QuestionsTime.PREFIX.append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
                                     .clickEvent(ClickEvent.runCommand("/qt set question \"" + question.getQuestion() + "\" malus commands remove " + command.toString()))
                                     .hoverEvent(HoverEvent.showText(Component.text("Delete the command"))))

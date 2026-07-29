@@ -25,8 +25,8 @@ class MissingPrizePositionTest {
     @Test
     void verifyNoGaps() {
         Mockito.when(questionCreator.getMoneyPrize()).thenReturn(Map.of(1, 100, 2, 200));
-        Mockito.when(questionCreator.getItemsPrize()).thenReturn(Map.of(3, Collections.emptyList()));
-        Mockito.when(questionCreator.getCommandsPrize()).thenReturn(Map.of(4, Collections.emptyList()));
+        Mockito.when(questionCreator.getItemsPrize()).thenReturn(Map.of(3, Collections.emptySet()));
+        Mockito.when(questionCreator.getCommandsPrize()).thenReturn(Map.of(4, Collections.emptySet()));
 
         final boolean verified = MissingPrizePosition.INSTANCE.verify(questionCreator);
 
@@ -47,7 +47,7 @@ class MissingPrizePositionTest {
     @Test
     void verifyItemsPrizeGap() {
         Mockito.when(questionCreator.getMoneyPrize()).thenReturn(Map.of(1, 100));
-        Mockito.when(questionCreator.getItemsPrize()).thenReturn(Map.of(3, Collections.emptyList()));
+        Mockito.when(questionCreator.getItemsPrize()).thenReturn(Map.of(3, Collections.emptySet()));
         Mockito.when(questionCreator.getCommandsPrize()).thenReturn(Map.of());
 
         final boolean verified = MissingPrizePosition.INSTANCE.verify(questionCreator);
@@ -59,7 +59,7 @@ class MissingPrizePositionTest {
     void verifyCommandsPrizeGap() {
         Mockito.when(questionCreator.getMoneyPrize()).thenReturn(Map.of(1, 100));
         Mockito.when(questionCreator.getItemsPrize()).thenReturn(Map.of());
-        Mockito.when(questionCreator.getCommandsPrize()).thenReturn(Map.of(3, Collections.emptyList()));
+        Mockito.when(questionCreator.getCommandsPrize()).thenReturn(Map.of(3, Collections.emptySet()));
 
         final boolean verified = MissingPrizePosition.INSTANCE.verify(questionCreator);
 
@@ -80,8 +80,8 @@ class MissingPrizePositionTest {
     @Test
     void mistakeMessageDefinedMultipleGaps() {
         Mockito.when(questionCreator.getMoneyPrize()).thenReturn(Map.of(1, 100));
-        Mockito.when(questionCreator.getItemsPrize()).thenReturn(Map.of(4, Collections.emptyList()));
-        Mockito.when(questionCreator.getCommandsPrize()).thenReturn(Map.of(6, Collections.emptyList()));
+        Mockito.when(questionCreator.getItemsPrize()).thenReturn(Map.of(4, Collections.emptySet()));
+        Mockito.when(questionCreator.getCommandsPrize()).thenReturn(Map.of(6, Collections.emptySet()));
 
         final Component mistake = MissingPrizePosition.INSTANCE.mistake(questionCreator);
 

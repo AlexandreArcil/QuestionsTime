@@ -6,45 +6,42 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Prize {
 
     private final int money;
     private final boolean announce;
-    private final ItemStack[] items;
-    private final OutcomeCommand[] commands;
+    private final Set<ItemStack> items;
+    private final Set<OutcomeCommand> commands;
     private final int position;
 
-    public Prize(final int money, final boolean announce, final ItemStack[] is, final OutcomeCommand[] commands, final int position) {
+    public Prize(final int money, final boolean announce, final Set<ItemStack> is, final Set<OutcomeCommand> commands, final int position) {
         this.money = Math.max(money, 0);
         this.announce = announce;
-        this.items = is != null ? is : new ItemStack[0];
-        this.commands = commands != null ? commands : new OutcomeCommand[0];
+        this.items = Collections.unmodifiableSet(is);
+        this.commands = Collections.unmodifiableSet(commands);
         this.position = position;
     }
 
     public Prize(final Builder builder) {
         this.money = builder.money;
         this.announce = builder.announce;
-        this.items = builder.items.toArray(new ItemStack[0]);
-        this.commands = builder.commands.toArray(new OutcomeCommand[0]);
+        this.items = Collections.unmodifiableSet(builder.items);
+        this.commands = Collections.unmodifiableSet(builder.commands);
         this.position = builder.position;
     }
 
     public Prize(final Prize prize) {
         this.money = prize.money;
         this.announce = prize.announce;
-        this.items = new ItemStack[prize.items.length];
-        for (int i = 0; i < prize.items.length; i++) {
-            final ItemStack item = prize.items[i];
-            this.items[i] = item.copy();
-        }
-        this.commands = new OutcomeCommand[prize.commands.length];
-        for (int i = 0; i < prize.commands.length; i++) {
-            final OutcomeCommand command = prize.commands[i];
-            this.commands[i] = new OutcomeCommand(command.message(), command.command());
-        }
+        this.items = prize.items.stream().map(ItemStack::copy).collect(Collectors.toSet());
+        this.commands = prize.commands.stream().map(outcomeCommand -> new OutcomeCommand(outcomeCommand.message(), outcomeCommand.command())).collect(Collectors.toSet());
         this.position = prize.position;
     }
 
@@ -52,11 +49,11 @@ public class Prize {
         return money;
     }
 
-    public ItemStack[] getItemStacks() {
+    public Set<ItemStack> getItemStacks() {
         return this.items;
     }
 
-    public OutcomeCommand[] getCommands() {
+    public Set<OutcomeCommand> getCommands() {
         return commands;
     }
 
@@ -69,7 +66,7 @@ public class Prize {
     }
 
     public boolean isEmpty() {
-        return this.money <= 0 && this.items.length == 0 && this.commands.length == 0;
+        return this.money <= 0 && this.items.isEmpty() && this.commands.isEmpty();
     }
 
     @Override
@@ -77,8 +74,8 @@ public class Prize {
         return "Prize{" +
                 "money=" + money +
                 ", announce=" + announce +
-                ", items=" + Arrays.toString(items) +
-                ", commands=" + Arrays.toString(commands) +
+                ", items=" + items +
+                ", commands=" + commands +
                 ", position=" + position +
                 '}';
     }
@@ -107,25 +104,25 @@ public class Prize {
 
         private int money;
         private boolean announce;
-        private final List<ItemStack> items;
-        private final List<OutcomeCommand> commands;
+        private final Set<ItemStack> items;
+        private final Set<OutcomeCommand> commands;
         private final int position;
 
         private Builder(final int position) {
             this.position = position;
-            this.items = new ArrayList<>();
-            this.commands = new ArrayList<>();
+            this.items = new HashSet<>();
+            this.commands = new HashSet<>();
         }
 
         private Builder(final Prize prize) {
             this.money = prize.money;
             this.announce = prize.announce;
             this.position = prize.position;
-            this.items = new ArrayList<>();
+            this.items = new HashSet<>();
             for (final ItemStack item : prize.items) {
                 this.items.add(item.copy());
             }
-            this.commands = new ArrayList<>();
+            this.commands = new HashSet<>();
             for (final OutcomeCommand command : prize.commands) {
                 this.commands.add(new OutcomeCommand(command.message(), command.command()));
             }
@@ -162,12 +159,18 @@ public class Prize {
             return this;
         }
 
-        public List<OutcomeCommand> getCommands() {
+        public Set<OutcomeCommand> getCommands() {
             return commands;
         }
 
-        public List<ItemStack> getItems() {
+        public Set<ItemStack> getItems() {
             return items;
+        }
+
+        public Builder setItems(final Set<ItemStack> items) {
+            this.items.clear();
+            this.items.addAll(items);
+            return this;
         }
 
         public Builder addItem(final ItemStack is) {
@@ -198,6 +201,12 @@ public class Prize {
 
         public boolean hasRewards() {
             return !this.items.isEmpty() || !this.commands.isEmpty() || this.money > 0;
+        }
+
+        public Builder setCommands(Set<OutcomeCommand> outcomeCommands) {
+            this.commands.clear();
+            this.commands.addAll(outcomeCommands);
+            return this;
         }
     }
 }

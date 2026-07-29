@@ -14,8 +14,8 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class PrizeCommandsStep implements CreationStep {
 
@@ -90,7 +90,7 @@ public class PrizeCommandsStep implements CreationStep {
     }
 
     private void listCommandPrizes(final QuestionCreator questionCreator, final Audience sender) {
-        final Map<Integer, List<OutcomeCommand>> commandsPrize = questionCreator.getCommandsPrize();
+        final Map<Integer, Set<OutcomeCommand>> commandsPrize = questionCreator.getCommandsPrize();
         if (commandsPrize.isEmpty()) {
             sender.sendMessage(TextUtils.normalWithPrefix("No command prizes added yet."));
             return;
@@ -98,7 +98,7 @@ public class PrizeCommandsStep implements CreationStep {
         final TextComponent.Builder listCommandPrizesBuilder = Component.text().append(TextUtils.normalWithPrefix("Command prizes:")).appendNewline();
         listCommandPrizesBuilder.append(Component.join(JoinConfiguration.newlines(), commandsPrize.entrySet().stream().map(entry -> {
             final int position = entry.getKey();
-            final List<OutcomeCommand> commands = entry.getValue();
+            final Set<OutcomeCommand> commands = entry.getValue();
             return Component.text()
                     .append(TextUtils.specialWithPrefix(NumberUtils.toOrdinal(position)))
                     .append(TextUtils.normal(": "))

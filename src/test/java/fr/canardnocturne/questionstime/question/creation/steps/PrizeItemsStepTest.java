@@ -16,6 +16,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -78,8 +79,8 @@ class PrizeItemsStepTest {
     void listItemPrizes() {
         try(final MockedStatic<TextUtils> textutilsMock = Mockito.mockStatic(TextUtils.class);
                 final MockedStatic<ItemStackSerializer> itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
-            Mockito.when(qc.getItemsPrize()).thenReturn(Map.of(1, List.of(Mockito.mock(ItemStack.class), Mockito.mock(ItemStack.class)),
-                    2, List.of(Mockito.mock(ItemStack.class))));
+            Mockito.when(qc.getItemsPrize()).thenReturn(Map.of(1, Set.of(Mockito.mock(ItemStack.class), Mockito.mock(ItemStack.class)),
+                    2, Set.of(Mockito.mock(ItemStack.class))));
             this.mockTestUtilsFunctions(textutilsMock);
 
             itemStackSerializerMock.when(() -> ItemStackSerializer.fromItemStack(Mockito.any(ItemStack.class))).thenReturn("is");

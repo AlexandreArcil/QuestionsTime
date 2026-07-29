@@ -79,7 +79,7 @@ class AnnouncePrizeStepTest {
     @Test
     void shouldNotSkipWhenHasItemPrizes() {
         Mockito.when(qc.getMoneyPrize()).thenReturn(Collections.emptyMap());
-        Mockito.when(qc.getItemsPrize()).thenReturn(Map.of(1, Collections.emptyList()));
+        Mockito.when(qc.getItemsPrize()).thenReturn(Map.of(1, Collections.emptySet()));
 
         final boolean result = AnnouncePrizeStep.INSTANCE.shouldSkip(qc);
 
@@ -90,7 +90,7 @@ class AnnouncePrizeStepTest {
     void shouldNotSkipWhenHasCommandPrizes() {
         Mockito.when(qc.getMoneyPrize()).thenReturn(Collections.emptyMap());
         Mockito.when(qc.getItemsPrize()).thenReturn(Collections.emptyMap());
-        Mockito.when(qc.getCommandsPrize()).thenReturn(Map.of(1, Collections.emptyList()));
+        Mockito.when(qc.getCommandsPrize()).thenReturn(Map.of(1, Collections.emptySet()));
 
         final boolean result = AnnouncePrizeStep.INSTANCE.shouldSkip(qc);
 

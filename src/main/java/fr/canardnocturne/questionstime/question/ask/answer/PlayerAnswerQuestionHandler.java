@@ -127,7 +127,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
                             winner.inventory().offer(item.copy());
                         }
 
-                        final List<String> commands = Arrays.stream(prize.getCommands()).map(OutcomeCommand::command).toList();
+                        final List<String> commands = prize.getCommands().stream().map(OutcomeCommand::command).toList();
                         this.executeCommands(commands, winner, "@winner");
 
                         if (prize.getMoney() > 0 && economyService != null) {
@@ -188,7 +188,7 @@ public class PlayerAnswerQuestionHandler implements AnswerHandler {
                     this.logger.error("The economy account for {} ({}) can't be found or created.", loser.name(), loser.uniqueId());
                 }
             }
-            final List<String> commands = Arrays.stream(malus.getCommands()).map(OutcomeCommand::command).toList();
+            final List<String> commands = malus.getCommands().stream().map(OutcomeCommand::command).toList();
             this.executeCommands(commands, loser, "@loser");
         });
     }

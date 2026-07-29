@@ -14,8 +14,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.spongepowered.api.item.inventory.ItemStack;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class PrizeItemsStep implements CreationStep {
 
@@ -91,7 +91,7 @@ public class PrizeItemsStep implements CreationStep {
     }
 
     private void listItemPrizes(final QuestionCreator questionCreator, final Audience sender) {
-        final Map<Integer, List<ItemStack>> itemsPrize = questionCreator.getItemsPrize();
+        final Map<Integer, Set<ItemStack>> itemsPrize = questionCreator.getItemsPrize();
         if (itemsPrize.isEmpty()) {
             sender.sendMessage(TextUtils.normalWithPrefix("No item prizes added yet."));
             return;
@@ -99,7 +99,7 @@ public class PrizeItemsStep implements CreationStep {
         final TextComponent.Builder listItemPrizesBuilder = Component.text().append(TextUtils.normalWithPrefix("Item prizes:")).appendNewline();
         listItemPrizesBuilder.append(Component.join(JoinConfiguration.newlines(), itemsPrize.entrySet().stream().map(entry -> {
             final int position = entry.getKey();
-            final List<ItemStack> items = entry.getValue();
+            final Set<ItemStack> items = entry.getValue();
             return Component.text()
                     .append(TextUtils.specialWithPrefix(NumberUtils.toOrdinal(position)))
                     .append(TextUtils.normal(": "))

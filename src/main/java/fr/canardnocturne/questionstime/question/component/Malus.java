@@ -1,16 +1,16 @@
 package fr.canardnocturne.questionstime.question.component;
 
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Malus {
 
     private final boolean announce;
     private final int money;
-    private final OutcomeCommand[] commands;
+    private final Set<OutcomeCommand> commands;
 
-    public Malus(final int money, final boolean announce, final OutcomeCommand[] commands) {
+    public Malus(final int money, final boolean announce, final Set<OutcomeCommand> commands) {
         this.money = Math.max(money, 0);
         this.announce = announce;
         this.commands = commands;
@@ -19,17 +19,13 @@ public class Malus {
     public Malus(final Malus malus)  {
         this.announce = malus.announce;
         this.money = malus.money;
-        this.commands = new OutcomeCommand[malus.commands.length];
-        for (int i = 0; i < malus.commands.length; i++) {
-            final OutcomeCommand command = malus.commands[i];
-            this.commands[i] = new OutcomeCommand(command.message(), command.command());
-        }
+        this.commands = Collections.unmodifiableSet(malus.commands);
     }
 
     public Malus(final Builder builder) {
         this.announce = builder.announce;
         this.money = builder.money;
-        this.commands = builder.commands != null ? builder.commands : new OutcomeCommand[0];
+        this.commands = Collections.unmodifiableSet(builder.commands);
     }
 
     public int getMoney() {
@@ -40,12 +36,12 @@ public class Malus {
         return announce;
     }
 
-    public OutcomeCommand[] getCommands() {
+    public Set<OutcomeCommand> getCommands() {
         return this.commands;
     }
 
     public boolean isEmpty() {
-        return ArrayUtils.isEmpty(this.commands) && this.money == 0;
+        return this.commands.isEmpty() && this.money == 0;
     }
 
     @Override
@@ -53,7 +49,7 @@ public class Malus {
         return "Malus{" +
                 "announce=" + announce +
                 ", money=" + money +
-                ", commands=" + Arrays.toString(commands) +
+                ", commands=" + this.commands +
                 '}';
     }
 
@@ -68,14 +64,16 @@ public class Malus {
     public static class Builder {
         private boolean announce;
         private int money;
-        private OutcomeCommand[] commands;
+        private Set<OutcomeCommand> commands;
 
-        private Builder() {}
+        private Builder() {
+            this.commands = new HashSet<>();
+        }
 
         private Builder(final Malus malus) {
             this.announce = malus.announce;
             this.money = malus.money;
-            this.commands = malus.commands;
+            this.commands = new HashSet<>(malus.commands);
         }
 
         public Builder setAnnounce(final boolean announce) {
@@ -88,17 +86,17 @@ public class Malus {
             return this;
         }
 
-        public Builder setCommands(final OutcomeCommand[] commands) {
+        public Builder setCommands(final Set<OutcomeCommand> commands) {
             this.commands = commands;
             return this;
         }
 
         public Builder addCommand(final OutcomeCommand command) {
-            this.commands = ArrayUtils.add(this.commands, command);
+            this.commands.add(command);
             return this;
         }
 
-        public OutcomeCommand[] getCommands() {
+        public Set<OutcomeCommand> getCommands() {
             return commands;
         }
 

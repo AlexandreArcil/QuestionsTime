@@ -49,7 +49,7 @@ public class SimpleQuestionAnnouncer implements QuestionAnnouncer {
 
                         final SortedSet<Prize> prizes = question.getPrizes();
                         for (final Prize prize : prizes) {
-                            if (prize.isAnnounce() && (prize.getItemStacks().length > 0 || prize.getCommands().length > 0 || economyService != null)) {
+                            if (prize.isAnnounce() && (!prize.getItemStacks().isEmpty() || !prize.getCommands().isEmpty() || economyService != null)) {
                                 if(prizes.size() == 1) {
                                     player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.PRIZE_ANNOUNCE.getMessage())));
                                 } else {
@@ -76,7 +76,7 @@ public class SimpleQuestionAnnouncer implements QuestionAnnouncer {
                         }
 
                         question.getMalus().ifPresent(malus -> {
-                            if (malus.isAnnounce() && ((malus.getMoney() > 0 && economyService != null) || malus.getCommands().length > 0)) {
+                            if (malus.isAnnounce() && ((malus.getMoney() > 0 && economyService != null) || !malus.getCommands().isEmpty())) {
                                 player.sendMessage(QuestionsTime.PREFIX.append(Component.text(Messages.MALUS_ANNOUNCE.getMessage())));
                                 if(malus.getMoney() > 0 && economyService != null) {
                                     player.sendMessage(QuestionsTime.PREFIX.append(Messages.MALUS_MONEY.format()

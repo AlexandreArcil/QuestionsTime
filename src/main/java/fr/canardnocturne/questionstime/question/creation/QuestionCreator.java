@@ -1,16 +1,15 @@
 package fr.canardnocturne.questionstime.question.creation;
 
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.question.component.Malus;
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
 import fr.canardnocturne.questionstime.question.component.Prize;
-import fr.canardnocturne.questionstime.question.Question;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +45,7 @@ public class QuestionCreator {
                 .map(Prize.Builder::build)
                 .collect(Collectors.toSet());
         final Malus malus = this.moneyMalus > 0 || !this.commandsMalus.isEmpty() ?
-                new Malus(this.moneyMalus, this.announceMalus, this.commandsMalus.toArray(new OutcomeCommand[0])) : null;
+                new Malus(this.moneyMalus, this.announceMalus, new HashSet<>(this.commandsMalus)) : null;
         final Question.QuestionBuilder questionBuilder = Question.builder();
         return questionBuilder.setQuestion(this.question).setPropositions(this.propositions).setAnswers(new HashSet<>(this.answers))
                 .setPrizes(prizes).setMalus(malus).setTimer(this.duration).setTimeBetweenAnswer(this.timeBetweenAnswer).setWeight(this.weight)
@@ -68,7 +67,7 @@ public class QuestionCreator {
         prizeBuilder.addItem(is);
     }
 
-    public Map<Integer, List<ItemStack>> getItemsPrize() {
+    public Map<Integer, Set<ItemStack>> getItemsPrize() {
         return this.prizeBuilders.entrySet().stream()
                 .filter(entry -> !entry.getValue().getItems().isEmpty())
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getItems()));
@@ -79,7 +78,7 @@ public class QuestionCreator {
         prizeBuilder.addCommand(outcomeCommand);
     }
 
-    public Map<Integer, List<OutcomeCommand>> getCommandsPrize() {
+    public Map<Integer, Set<OutcomeCommand>> getCommandsPrize() {
         return this.prizeBuilders.entrySet().stream()
                 .filter(entry -> !entry.getValue().getCommands().isEmpty())
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getCommands()));

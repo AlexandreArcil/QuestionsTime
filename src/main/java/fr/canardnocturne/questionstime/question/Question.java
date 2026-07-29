@@ -207,9 +207,17 @@ public class Question {
             return this;
         }
 
+        public Optional<Malus> getMalus() {
+            return Optional.ofNullable(this.malus);
+        }
+
         public QuestionBuilder setMalus(final Malus malus) {
             this.malus = malus;
             return this;
+        }
+
+        public Set<Prize> getPrizes() {
+            return this.prizes;
         }
 
         public QuestionBuilder setPrizes(final Set<Prize> prizes) {

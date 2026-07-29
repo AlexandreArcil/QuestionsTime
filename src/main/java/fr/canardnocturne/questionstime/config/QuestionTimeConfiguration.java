@@ -45,21 +45,21 @@ public class QuestionTimeConfiguration {
                     .setAnswers(Set.of("CanardNocturne"))
                     .setWeight(5)
                     .setTimer(600)
-                    .setPrizes(Set.of(new Prize(0, true, new ItemStack[]{ItemStack.builder()
+                    .setPrizes(Set.of(new Prize(0, true, Set.of(ItemStack.builder()
                             .itemType(ItemTypes.SAND)
                             .quantity(64)
                             .add(Keys.CUSTOM_NAME, Component.text("Sandy", NamedTextColor.YELLOW))
                             .add(Keys.LORE, Arrays.asList(Component.text("It's just a sand block with a cool name"), Component.text("What did you expect")))
-                            .build()}, null, 1)))
-                    .setMalus(new Malus(100, true, new OutcomeCommand[]{new OutcomeCommand("Teleport to Hell", "tp @loser 0 -64 0")}))
+                            .build()), null, 1)))
+                    .setMalus(new Malus(100, true, Set.of(new OutcomeCommand("Teleport to Hell", "tp @loser 0 -64 0"))))
                     .build(),
             Question.builder()
                     .setQuestion("Among these propositions, who created the QuestionsTime plugin ?")
                     .setPropositions(Arrays.asList("CanardNocturne", "Notch", "Pewdiepie", "Donald Trump", "Chicky the chicken"))
                     .setAnswers(Set.of("CanardNocturne"))
                     .setPrizes(Set.of(new Prize(500, true, null,
-                            new OutcomeCommand[]{new OutcomeCommand("A secret about the plugin's creator",
-                                    "msg @winner Here is the secret about the plugin's creator: he's not a real duck")},
+                            Set.of(new OutcomeCommand("A secret about the plugin's creator",
+                                    "msg @winner Here is the secret about the plugin's creator: he's not a real duck")),
                             1)))
                     .setTimer(1800)
                     .setTimeBetweenAnswer(300)

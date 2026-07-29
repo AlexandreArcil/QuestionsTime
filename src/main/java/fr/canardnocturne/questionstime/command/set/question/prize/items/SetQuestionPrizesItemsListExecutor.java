@@ -38,10 +38,10 @@ public class SetQuestionPrizesItemsListExecutor implements CommandExecutor {
                     .append(Component.join(JoinConfiguration.newlines(), question.getPrizes().stream().map(prize -> {
                 final TextComponent.Builder prizeMessage = Component.text().append(TextUtils.normalWithPrefix("Position " + prize.getPosition() + ":"))
                         .appendNewline();
-                if (prize.getItemStacks().length == 0) {
+                if (prize.getItemStacks().isEmpty()) {
                     prizeMessage.append(TextUtils.normalWithPrefix("  No items"));
                 } else {
-                    prizeMessage.append(Component.join(JoinConfiguration.newlines(),  Stream.of(prize.getItemStacks()).map(item -> {
+                    prizeMessage.append(Component.join(JoinConfiguration.newlines(),  prize.getItemStacks().stream().map(item -> {
                         final String itemSerialized = ItemStackSerializer.fromItemStack(item);
                         return QuestionsTime.PREFIX.appendSpace().appendSpace()
                                 .append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
