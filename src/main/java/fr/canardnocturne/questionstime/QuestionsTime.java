@@ -8,53 +8,16 @@ import fr.canardnocturne.questionstime.command.set.config.SetConfigMinimumConnec
 import fr.canardnocturne.questionstime.command.set.config.SetConfigMinimumCooldownExecutor;
 import fr.canardnocturne.questionstime.command.set.config.SetConfigModeExecutor;
 import fr.canardnocturne.questionstime.command.set.config.SetConfigPersonalAnswerExecutor;
-import fr.canardnocturne.questionstime.command.set.question.QuestionComponentParameter;
-import fr.canardnocturne.questionstime.command.set.question.SetQuestionRevealAnswerExecutor;
 import fr.canardnocturne.questionstime.command.set.question.permissions.LuckPermsPermissionsParameter;
-import fr.canardnocturne.questionstime.command.set.question.permissions.exclude.SetQuestionAddExcludePermissionsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.permissions.exclude.SetQuestionExcludePermissionsListExecutor;
-import fr.canardnocturne.questionstime.command.set.question.permissions.exclude.SetQuestionRemoveExcludePermissionsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.permissions.include.SetQuestionAddIncludePermissionsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.permissions.include.SetQuestionIncludePermissionsListExecutor;
-import fr.canardnocturne.questionstime.command.set.question.permissions.include.SetQuestionRemoveIncludePermissionsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionAddTagsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionRemoveTagsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.tags.SetQuestionTagsListExecutor;
-import fr.canardnocturne.questionstime.command.set.question.tmp.SetQuestionAddListRemoveComponentFactory;
+import fr.canardnocturne.questionstime.command.set.question.tmp.qc3.QuestionComponents;
+import fr.canardnocturne.questionstime.command.set.question.tmp.qc3.set.creator.SetCommandCreator;
 import fr.canardnocturne.questionstime.config.ConfigField;
 import fr.canardnocturne.questionstime.config.ConfigMutable;
-import fr.canardnocturne.questionstime.config.save.HoconPluginConfigurationSave;
-import fr.canardnocturne.questionstime.config.save.PluginConfigurationSave;
-import fr.canardnocturne.questionstime.question.QuestionComponent;
-import fr.canardnocturne.questionstime.question.ask.announcer.AskQuestionOnPlayerJoinEventHandler;
-import fr.canardnocturne.questionstime.question.modifier.QuestionModifier;
-import fr.canardnocturne.questionstime.question.modifier.QuestionModifierImpl;
-import fr.canardnocturne.questionstime.command.set.question.answers.SetQuestionAddAnswersExecutor;
-import fr.canardnocturne.questionstime.command.set.question.answers.SetQuestionAnswersListExecutor;
-import fr.canardnocturne.questionstime.command.set.question.SetQuestionExecutor;
-import fr.canardnocturne.questionstime.command.set.question.SetQuestionTimeBetweenAnswerExecutor;
-import fr.canardnocturne.questionstime.command.set.question.SetQuestionTimerExecutor;
-import fr.canardnocturne.questionstime.command.set.question.SetQuestionWeightExecutor;
-import fr.canardnocturne.questionstime.command.set.question.answers.SetQuestionRemoveAnswersExecutor;
-import fr.canardnocturne.questionstime.command.set.question.malus.SetQuestionMalusAnnounceExecutor;
-import fr.canardnocturne.questionstime.command.set.question.malus.commands.SetQuestionMalusAddCommandsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.malus.commands.SetQuestionMalusCommandsListExecutor;
-import fr.canardnocturne.questionstime.command.set.question.malus.SetQuestionMalusMoneyExecutor;
-import fr.canardnocturne.questionstime.command.set.question.malus.commands.SetQuestionMalusRemoveCommandsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.prize.commands.SetQuestionPrizesAddCommandsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.prize.commands.SetQuestionPrizesCommandsListExecutor;
-import fr.canardnocturne.questionstime.command.set.question.prize.commands.SetQuestionPrizesRemoveCommandsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.prize.items.SetQuestionPrizesAddItemsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.prize.items.SetQuestionPrizesItemsListExecutor;
-import fr.canardnocturne.questionstime.command.set.question.prize.SetQuestionPrizesMoneyExecutor;
-import fr.canardnocturne.questionstime.command.set.question.prize.SetQuestionPrizesMoneyListExecutor;
-import fr.canardnocturne.questionstime.command.set.question.prize.items.SetQuestionPrizesRemoveItemsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.propositions.SetQuestionAddPropositionsExecutor;
-import fr.canardnocturne.questionstime.command.set.question.propositions.SetQuestionPropositionsListExecutor;
-import fr.canardnocturne.questionstime.command.set.question.propositions.SetQuestionRemovePropositionsExecutor;
 import fr.canardnocturne.questionstime.config.QuestionTimeConfiguration;
 import fr.canardnocturne.questionstime.config.loader.PluginConfigurationLoader;
 import fr.canardnocturne.questionstime.config.loader.SafePluginConfigurationLoader;
+import fr.canardnocturne.questionstime.config.save.HoconPluginConfigurationSave;
+import fr.canardnocturne.questionstime.config.save.PluginConfigurationSave;
 import fr.canardnocturne.questionstime.config.serializer.ModeTypeSerializer;
 import fr.canardnocturne.questionstime.config.upgrade.ConfigurationUpgrade;
 import fr.canardnocturne.questionstime.config.upgrade.ConfigurationUpgradeException;
@@ -62,8 +25,8 @@ import fr.canardnocturne.questionstime.config.upgrade.ConfigurationUpgradeOrches
 import fr.canardnocturne.questionstime.config.upgrade.update.FirstVersionConfigurationUpdate;
 import fr.canardnocturne.questionstime.config.upgrade.update.NoVersionConfigurationUpdate;
 import fr.canardnocturne.questionstime.config.upgrade.update.SecondVersionConfigurationUpdate;
-import fr.canardnocturne.questionstime.config.verificator.VerifyConfigurationValuesImpl;
 import fr.canardnocturne.questionstime.config.verificator.VerifyConfigurationValues;
+import fr.canardnocturne.questionstime.config.verificator.VerifyConfigurationValuesImpl;
 import fr.canardnocturne.questionstime.message.Messages;
 import fr.canardnocturne.questionstime.message.SimpleMessage;
 import fr.canardnocturne.questionstime.message.reader.HoconMessageReader;
@@ -72,7 +35,9 @@ import fr.canardnocturne.questionstime.message.updater.MessageUpdater;
 import fr.canardnocturne.questionstime.message.updater.SafeMessageUpdater;
 import fr.canardnocturne.questionstime.message.updater.config.AddMissingMessageConfiguration;
 import fr.canardnocturne.questionstime.message.updater.config.MessageConfigurationUpdater;
+import fr.canardnocturne.questionstime.question.Question;
 import fr.canardnocturne.questionstime.question.ask.QuestionAskManager;
+import fr.canardnocturne.questionstime.question.ask.announcer.AskQuestionOnPlayerJoinEventHandler;
 import fr.canardnocturne.questionstime.question.ask.announcer.QuestionAnnouncer;
 import fr.canardnocturne.questionstime.question.ask.announcer.SimpleQuestionAnnouncer;
 import fr.canardnocturne.questionstime.question.ask.answer.PlayerAnswerQuestionEventHandler;
@@ -84,24 +49,25 @@ import fr.canardnocturne.questionstime.question.ask.picker.WeightedRandomnessQue
 import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
 import fr.canardnocturne.questionstime.question.ask.pool.WeightSortedQuestionPool;
 import fr.canardnocturne.questionstime.question.component.Malus;
-import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.component.OutcomeCommand;
+import fr.canardnocturne.questionstime.question.component.Prize;
 import fr.canardnocturne.questionstime.question.creation.CreateQuestionCommand;
 import fr.canardnocturne.questionstime.question.creation.CreatorLeftServerEventHandler;
 import fr.canardnocturne.questionstime.question.creation.QuestionCreationManager;
 import fr.canardnocturne.questionstime.question.creation.orchestrator.StoppableQuestionCreationOrchestrator;
 import fr.canardnocturne.questionstime.question.save.HoconQuestionRegister;
 import fr.canardnocturne.questionstime.question.save.QuestionRegister;
-import fr.canardnocturne.questionstime.question.serializer.ItemStackSerializer;
 import fr.canardnocturne.questionstime.question.serializer.MalusTypeSerializer;
-import fr.canardnocturne.questionstime.question.serializer.OutcomeCommandSerializer;
 import fr.canardnocturne.questionstime.question.serializer.OutcomeCommandTypeSerializer;
 import fr.canardnocturne.questionstime.question.serializer.PrizeTypeSerializer;
 import fr.canardnocturne.questionstime.question.serializer.QuestionSerializer;
-import fr.canardnocturne.questionstime.question.Question;
+import fr.canardnocturne.questionstime.question.serializer.tmp.MalusTypeSerializerNew;
+import fr.canardnocturne.questionstime.question.serializer.tmp.PrizeTypeSerializerNew;
+import fr.canardnocturne.questionstime.question.serializer.tmp.QuestionSerializerNew;
 import fr.canardnocturne.questionstime.util.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
@@ -127,10 +93,12 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Plugin("questionstime")
 public class QuestionsTime {
@@ -187,9 +155,12 @@ public class QuestionsTime {
         final ConfigurationLoader<CommentedConfigurationNode> configLoader = HoconConfigurationLoader.builder()
                 .defaultOptions(ConfigurationOptions.defaults()
                         .serializers(ConfigurationOptions.defaults().serializers().childBuilder()
-                                .register(Question.class, new QuestionSerializer())
-                                .register(Prize.class, new PrizeTypeSerializer())
-                                .register(Malus.class, new MalusTypeSerializer())
+//                                .register(Question.class, new QuestionSerializer())
+//                                .register(Prize.class, new PrizeTypeSerializer())
+//                                .register(Malus.class, new MalusTypeSerializer())
+                                .register(Question.class, new QuestionSerializerNew(QuestionComponents.getSections()))
+                                .register(Prize.class, new PrizeTypeSerializerNew(QuestionComponents.getSections()))
+                                .register(Malus.class, new MalusTypeSerializerNew(QuestionComponents.getSections()))
                                 .register(OutcomeCommand.class, new OutcomeCommandTypeSerializer())
                                 .register(QuestionTimeConfiguration.Mode.class, new ModeTypeSerializer())
                                 .build()))
@@ -264,16 +235,15 @@ public class QuestionsTime {
                 .executor(new ManualAskQuestionCommand(questionAskManager, this.questionLauncher, specificQuestionParameter, tagsParameter, this.logger))
                 .build();
 
-        final QuestionModifier questionModifier = new QuestionModifierImpl();
+        /*final QuestionModifier questionModifier = new QuestionModifierImpl();
         final SetQuestionAddListRemoveComponentFactory setQuestionAddListRemoveComponentFactory =
                 new SetQuestionAddListRemoveComponentFactory(specificQuestionParameter, questionModifier, questionPool, questionRegister);
-
 
         final Command.Parameterized commandQTSetQuestionMalusAnnounce = Command.builder()
                 .shortDescription(Component.text("Set the malus announce for a question").color(NamedTextColor.YELLOW))
                 .addParameters(SetQuestionMalusAnnounceExecutor.VALUE)
                 .executor(new SetQuestionMalusAnnounceExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
-                .build();
+                .build();*/
 /*
         final Command.Parameterized commandQTSetQuestionMalusCommandsList = Command.builder()
                 .shortDescription(Component.text("List the malus commands for a question").color(NamedTextColor.YELLOW))
@@ -304,11 +274,10 @@ public class QuestionsTime {
                 .build();
                 */
 
-        final Command.Parameterized commandQTSetQuestionMalusCommands = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.MALUS_COMMANDS,
+        /*final Command.Parameterized commandQTSetQuestionMalusCommands = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.MALUS_COMMANDS,
                 question -> question.getMalus().stream()
-                                    .flatMap(malus -> Stream.of(malus.getCommands()))
+                                    .flatMap(malus -> malus.getCommands().stream())
                                     .map(OutcomeCommandSerializer::serialize).toList(), true);
-
 
         final Command.Parameterized commandQTSetQuestionMalusMoney = Command.builder()
                 .shortDescription(Component.text("Set the malus money for a question").color(NamedTextColor.YELLOW))
@@ -338,9 +307,9 @@ public class QuestionsTime {
                 .shortDescription(Component.text("Set or list the prizes money for a question").color(NamedTextColor.YELLOW))
                 .addChild(commandQTSetQuestionPrizesMoneySet, "set")
                 .addChild(commandQTSetQuestionPrizesMoneyList, "list")
-                .build();
+                .build();*/
 
-        final Command.Parameterized commandQTSetQuestionPrizesCommandsList = Command.builder()
+        /*final Command.Parameterized commandQTSetQuestionPrizesCommandsList = Command.builder()
                 .shortDescription(Component.text("List the question commands prizes").color(NamedTextColor.YELLOW))
                 .executor(new SetQuestionPrizesCommandsListExecutor(specificQuestionParameter))
                 .build();
@@ -366,16 +335,23 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionPrizesCommandsList, "list")
                 .addChild(commandQTSetQuestionPrizesAddCommands, "add")
                 .addChild(commandQTSetQuestionPrizesRemoveCommands, "remove")
-                .build();
+                .build();*/
 
-        final Command.Parameterized commandQTSetQuestionPrizesItemsList = Command.builder()
+
+        /*final Command.Parameterized commandQTSetQuestionPrizesCommands = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.PRIZE_COMMANDS,
+                question -> question.getPrizes().stream().collect(Collectors.toMap(
+                        Prize::getPosition,
+                        prize -> prize.getCommands().stream().map(OutcomeCommandSerializer::serialize).toList()
+                        )));*/
+
+        /*final Command.Parameterized commandQTSetQuestionPrizesItemsList = Command.builder()
                 .shortDescription(Component.text("List the question items prizes").color(NamedTextColor.YELLOW))
                 .executor(new SetQuestionPrizesItemsListExecutor(specificQuestionParameter))
                 .build();
 
         final Command.Parameterized commandQTSetQuestionPrizesAddItems = Command.builder()
                 .shortDescription(Component.text("Add an item prize to the question").color(NamedTextColor.YELLOW))
-                .addParameters(SetQuestionPrizesAddItemsExecutor.POSITION, SetQuestionPrizesAddItemsExecutor.ITEM)
+                .addParameters(SetQuestionPrizesAddItemsExecutor.POSITION, SetQuestionPrizesAddItemsExecutor.ITEMS)
                 .executor(new SetQuestionPrizesAddItemsExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
                 .build();
 
@@ -394,7 +370,14 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionPrizesItemsList, "list")
                 .addChild(commandQTSetQuestionPrizesAddItems, "add")
                 .addChild(commandQTSetQuestionPrizesRemoveItems, "remove")
-                .build();
+                .build();*/
+
+        /*final Command.Parameterized commandQTSetQuestionPrizesItems = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.PRIZE_COMMANDS,
+                question -> question.getPrizes().stream().collect(Collectors.toMap(
+                        Prize::getPosition,
+                        prize -> prize.getItemStacks().stream().map(ItemStackSerializer::fromItemStack).toList()
+                )));
+
 
         final Command.Parameterized commandQTSetQuestionPrizes = Command.builder()
                 .shortDescription(Component.text("Set the prizes for a question").color(NamedTextColor.YELLOW))
@@ -425,9 +408,9 @@ public class QuestionsTime {
                 .shortDescription(Component.text("Set the question").color(NamedTextColor.YELLOW))
                 .addParameters(SetQuestionExecutor.QUESTION)
                 .executor(new SetQuestionExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
-                .build();
+                .build();*/
 
-        final Command.Parameterized commandQTSetQuestionAnswersList = Command.builder()
+        /*final Command.Parameterized commandQTSetQuestionAnswersList = Command.builder()
                 .shortDescription(Component.text("List the question answers").color(NamedTextColor.YELLOW))
                 .executor(new SetQuestionAnswersListExecutor(specificQuestionParameter))
                 .build();
@@ -450,9 +433,13 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionAnswersList, "list")
                 .addChild(commandQTSetQuestionAddAnswers, "add")
                 .addChild(commandQTSetQuestionRemoveAnswers, "remove")
-                .build();
+                .build();*/
 
-        final Command.Parameterized commandQTSetQuestionPropositionsList = Command.builder()
+        /*final Command.Parameterized commandQTSetQuestionAnswers = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.ANSWERS,
+            Question::getAnswers, false);*/
+
+
+        /*final Command.Parameterized commandQTSetQuestionPropositionsList = Command.builder()
                 .shortDescription(Component.text("List the question propositions").color(NamedTextColor.YELLOW))
                 .executor(new SetQuestionPropositionsListExecutor(specificQuestionParameter))
                 .build();
@@ -475,15 +462,18 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionPropositionsList, "list")
                 .addChild(commandQTSetQuestionAddPropositions, "add")
                 .addChild(commandQTSetQuestionRemovePropositions, "remove")
-                .build();
+                .build();*/
+
+        /*final Command.Parameterized commandQTSetQuestionPropositions = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.PROPOSITIONS,
+                Question::getPropositions, false);
 
         final Command.Parameterized commandQTSetQuestionRevealAnswer = Command.builder()
                 .shortDescription(Component.text("Set if the answer should be revealed at the end of the question").color(NamedTextColor.YELLOW))
                 .addParameters(SetQuestionRevealAnswerExecutor.REVEAL_ANSWER)
                 .executor(new SetQuestionRevealAnswerExecutor(specificQuestionParameter, questionModifier, questionPool, questionRegister))
-                .build();
+                .build();*/
 
-        final Command.Parameterized commandQTSetQuestionTagsList = Command.builder()
+        /*final Command.Parameterized commandQTSetQuestionTagsList = Command.builder()
                 .shortDescription(Component.text("List the question tags").color(NamedTextColor.YELLOW))
                 .executor(new SetQuestionTagsListExecutor(specificQuestionParameter))
                 .build();
@@ -506,9 +496,13 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionTagsList, "list")
                 .addChild(commandQTSetQuestionAddTags, "add")
                 .addChild(commandQTSetQuestionRemoveTags, "remove")
-                .build();
+                .build();*/
 
-        final Command.Parameterized commandQTSetQuestionExcludePermissions = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.EXCLUDE_PERMISSIONS, Question::getExcludePermissions, permissionsParameter, false);
+        /*final Command.Parameterized commandQTSetQuestionTags = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.TAGS,
+                Question::getTags, false);
+
+
+        final Command.Parameterized commandQTSetQuestionExcludePermissions = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.EXCLUDE_PERMISSIONS, Question::getExcludePermissions, permissionsParameter, false);*/
         /*final Command.Parameterized commandQTSetQuestionExcludePermissionsList = Command.builder()
                 .shortDescription(Component.text("List the question exclude permissions").color(NamedTextColor.YELLOW))
                 .executor(new SetQuestionExcludePermissionsListExecutor(specificQuestionParameter))
@@ -534,7 +528,7 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionRemoveExcludePermissions, "remove")
                 .build();*/
 
-        final Command.Parameterized commandQTSetQuestionIncludePermissionsList = Command.builder()
+        /*final Command.Parameterized commandQTSetQuestionIncludePermissionsList = Command.builder()
                 .shortDescription(Component.text("List the question include permissions").color(NamedTextColor.YELLOW))
                 .executor(new SetQuestionIncludePermissionsListExecutor(specificQuestionParameter))
                 .build();
@@ -557,7 +551,8 @@ public class QuestionsTime {
                 .addChild(commandQTSetQuestionIncludePermissionsList, "list")
                 .addChild(commandQTSetQuestionAddIncludePermissions, "add")
                 .addChild(commandQTSetQuestionRemoveIncludePermissions, "remove")
-                .build();
+                .build();*/
+        /*final Command.Parameterized commandQTSetQuestionIncludePermissions = setQuestionAddListRemoveComponentFactory.create(QuestionComponent.EXCLUDE_PERMISSIONS, Question::getIncludePermissions, permissionsParameter, false);
 
         final Command.Parameterized commandQTSetQuestion = Command.builder()
                 .shortDescription(Component.text("Change a value of a question").color(NamedTextColor.YELLOW))
@@ -576,7 +571,9 @@ public class QuestionsTime {
                         Parameter.subcommand(commandQTSetQuestionExcludePermissions, "exclude_permissions"),
                         Parameter.subcommand(commandQTSetQuestionIncludePermissions, "include_permissions")))
                 .executor(context -> CommandResult.error(TextUtils.errorWithPrefix("Select a question")))
-                .build();
+                .build();*/
+        final Command.Parameterized commandQTSetQuestion = createSetQuestionCommand(specificQuestionParameter,
+                questionRegister, questionPool);
 
         final Command.Parameterized commandQTSetConfigMaximumCooldown = Command.builder()
                 .shortDescription(Component.text("Set the maximum cooldown").color(NamedTextColor.YELLOW))
@@ -742,6 +739,39 @@ public class QuestionsTime {
                 this.messageConfigurationUpdater.updateConfig(readMessages, messagesConfig);
             }
         }
+    }
+
+    private Command.Parameterized createSetQuestionCommand(final Parameter.Value<Question> specificQuestionParameter,
+                                                     final QuestionRegister questionRegister, final QuestionPool questionPool) {
+        final Set<Parameter> subcommands = new HashSet<>();
+        final Map<String, Set<Pair<Command.Parameterized, String>>> sectionSubcommands = new HashMap<>();
+        for (final SetCommandCreator<?, ?, ?> commandCreator : QuestionComponents.getCommandCreators()) {
+            if(commandCreator.getSection().isEmpty()) {
+                final Command.Parameterized command = commandCreator.create(specificQuestionParameter, questionRegister, questionPool);
+                final Parameter.Subcommand subcommand = Parameter.subcommand(command, commandCreator.getAlias());
+                subcommands.add(subcommand);
+            } else {
+                sectionSubcommands.computeIfAbsent(commandCreator.getSection(), k -> new HashSet<>())
+                        .add(Pair.of(commandCreator.create(specificQuestionParameter, questionRegister, questionPool), commandCreator.getAlias()));
+            }
+        }
+
+        for (final Map.Entry<String, Set<Pair<Command.Parameterized, String>>> sectionEntry : sectionSubcommands.entrySet()) {
+            final Command.Builder commandBuilder = Command.builder()
+                    .shortDescription(Component.text("Set the "+sectionEntry.getKey()+" for a question").color(NamedTextColor.YELLOW));
+            for (final Pair<Command.Parameterized, String> subCommandPair : sectionEntry.getValue()) {
+                commandBuilder.addChild(subCommandPair.getLeft(), subCommandPair.getRight());
+            }
+            final Command.Parameterized subCommand = commandBuilder.build();
+            subcommands.add(Parameter.subcommand(subCommand, sectionEntry.getKey()));
+        }
+
+        return Command.builder()
+                .shortDescription(Component.text("Change a value of a question").color(NamedTextColor.YELLOW))
+                .permission("questionstime.command.set")
+                .addParameters(specificQuestionParameter, Parameter.firstOf(subcommands))
+                .executor(context -> CommandResult.error(TextUtils.errorWithPrefix("Select a question")))
+                .build();
     }
 
 }

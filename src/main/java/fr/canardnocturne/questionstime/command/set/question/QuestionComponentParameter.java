@@ -41,4 +41,33 @@ public class QuestionComponentParameter {
                 .build();
     }
 
+    public static Parameter.Value<String> create(final String key, final Parameter.Value<Question> questionParam,
+                                                             final Parameter.Value<Integer> positionParameter,
+                                                             final Function<Question, Map<Integer, Collection<String>>> componentFunction) {
+        return Parameter.builder(String.class)
+                .addParser((parameterKey, reader, context) -> {
+                    final Question question = context.requireOne(questionParam);
+                    final int position = context.requireOne(positionParameter);
+                    final String input = reader.parseString();
+                    if (componentFunction.apply(question).get(position).contains(input)) {
+                        return Optional.ofNullable(input);
+                    } else {
+                        throw reader.createException(Component.text(input + " is not a valid choice!"));
+                    }
+                })
+                .completer((context, input) -> {
+                    final Question question = context.requireOne(questionParam);
+                    final int position = context.requireOne(positionParameter);
+                    return componentFunction.apply(question).get(position).stream()
+                                    .filter(component -> component.startsWith(input))
+                                    .map(component -> StringUtils.containsAny(component, " ", ";", ":")
+                                            ? "\"" + component + "\"" : component)
+                                    .map(CommandCompletion::of)
+                                    .toList();
+                })
+                .key(key)
+                .consumeAllRemaining()
+                .build();
+    }
+
 }

@@ -1,0 +1,63 @@
+package fr.canardnocturne.questionstime.command.set.question.tmp.qc3.set.creator;
+
+import fr.canardnocturne.questionstime.command.set.question.permissions.LuckPermsPermissionsParameter;
+import fr.canardnocturne.questionstime.command.set.question.tmp.qc3.component.QuestionComponentCollection;
+import fr.canardnocturne.questionstime.command.set.question.tmp.qc3.section.QuestionSectionBase;
+import fr.canardnocturne.questionstime.command.set.question.tmp.qc3.set.QuestionRemoveComponentParameter;
+import fr.canardnocturne.questionstime.command.set.question.tmp.qc3.set.SetQuestionComponentAddExecutor;
+import fr.canardnocturne.questionstime.command.set.question.tmp.qc3.set.SetQuestionComponentListExecutor;
+import fr.canardnocturne.questionstime.command.set.question.tmp.qc3.set.SetQuestionComponentRemoveExecutor;
+import fr.canardnocturne.questionstime.question.Question;
+import fr.canardnocturne.questionstime.question.ask.pool.QuestionPool;
+import fr.canardnocturne.questionstime.question.save.QuestionRegister;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.parameter.Parameter;
+
+import java.util.Collection;
+
+public class SetCommandCreatorLuckPermsCollection<T, B, W, V extends Collection<W>> extends SetCommandCreator<T, B, V> {
+
+    private final QuestionSectionBase<T, B, V> section;
+    private final QuestionComponentCollection<W, V> component;
+
+    public SetCommandCreatorLuckPermsCollection(final QuestionSectionBase<T, B, V> section, final QuestionComponentCollection<W, V> component) {
+        super(section, component);
+        this.section = section;
+        this.component = component;
+    }
+
+    @Override
+    public Command.Parameterized create(final Parameter.Value<Question> specificQuestionParameter,
+                                        final QuestionRegister questionRegister, final QuestionPool questionPool) {
+        final Command.Parameterized commandQTSetQuestionListComponents = Command.builder()
+                .shortDescription(Component.text("List the question " + component.getPlural()).color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionComponentListExecutor<>(specificQuestionParameter, section))
+                .build();
+
+        final Parameter.Value<String> permissionsParameter = Sponge.pluginManager().plugin("luckperms")
+                .map(luckPerms -> LuckPermsPermissionsParameter.create())
+                .orElse(null);
+        final Command.Parameterized commandQTSetQuestionAddComponents = Command.builder()
+                .shortDescription(Component.text("Add " + component.getPlural() + " to the question").color(NamedTextColor.YELLOW))
+                .addParameter(permissionsParameter == null ? component.getParameter() : permissionsParameter)
+                .executor(new SetQuestionComponentAddExecutor<>(specificQuestionParameter, permissionsParameter, questionPool, questionRegister, component, section))
+                .build();
+
+        final Parameter.Value<String> removeComponentParameter = QuestionRemoveComponentParameter.create(specificQuestionParameter, section, component);
+        final Command.Parameterized commandQTSetQuestionRemoveComponents = Command.builder()
+                .shortDescription(Component.text("Remove " + component.getPlural() + " from the question").color(NamedTextColor.YELLOW))
+                .addParameter(removeComponentParameter)
+                .executor(new SetQuestionComponentRemoveExecutor<>(specificQuestionParameter, removeComponentParameter, questionPool, questionRegister, component, section))
+                .build();
+
+        return Command.builder()
+                .shortDescription(Component.text("Set the question " + component.getPlural()).color(NamedTextColor.YELLOW))
+                .addChild(commandQTSetQuestionListComponents, "list")
+                .addChild(commandQTSetQuestionAddComponents, "add")
+                .addChild(commandQTSetQuestionRemoveComponents, "remove")
+                .build();
+    }
+}

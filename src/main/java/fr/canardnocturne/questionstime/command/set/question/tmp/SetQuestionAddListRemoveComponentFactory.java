@@ -13,6 +13,7 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.parameter.Parameter;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.Function;
 
 public class SetQuestionAddListRemoveComponentFactory {
@@ -54,6 +55,34 @@ public class SetQuestionAddListRemoveComponentFactory {
                 .shortDescription(Component.text("Remove " + component.getPlural() + " from the question").color(NamedTextColor.YELLOW))
                 .addParameters(removeComponentParameter)
                 .executor(new SetQuestionRemoveComponentExecutor(specificQuestionParameter, removeComponentParameter, questionModifier, questionPool, questionRegister, componentExtractor, component))
+                .build();
+
+        return Command.builder()
+                .shortDescription(Component.text("Set the question " + component.getPlural()).color(NamedTextColor.YELLOW))
+                .addChild(commandQTSetQuestionListComponents, "list")
+                .addChild(commandQTSetQuestionAddComponents, "add")
+                .addChild(commandQTSetQuestionRemoveComponents, "remove")
+                .build();
+    }
+
+    public Command.Parameterized create(final QuestionComponent component, final Function<Question, Map<Integer, Collection<String>>> componentExtractor) {
+        final Parameter.Value<Integer> positionParameter = Parameter.integerNumber().key("position").build();
+        final Command.Parameterized commandQTSetQuestionListComponents = Command.builder()
+                .shortDescription(Component.text("List the question " + component.getPlural()).color(NamedTextColor.YELLOW))
+                .executor(new SetQuestionListComponentAtPositionExecutor(this.specificQuestionParameter, positionParameter, componentExtractor, component))
+                .build();
+
+        final Command.Parameterized commandQTSetQuestionAddComponents = Command.builder()
+                .shortDescription(Component.text("Add " + component.getPlural() + " to the question").color(NamedTextColor.YELLOW))
+                .addParameters(positionParameter, SetQuestionAddComponentExecutor.COMPONENT)
+                .executor(new SetQuestionAddComponentAtPositionExecutor(specificQuestionParameter, positionParameter, questionModifier, questionPool, questionRegister, componentExtractor, component))
+                .build();
+
+        final Parameter.Value<String> removeComponentParameter = QuestionComponentParameter.create("remove-component", specificQuestionParameter, positionParameter, componentExtractor);
+        final Command.Parameterized commandQTSetQuestionRemoveComponents = Command.builder()
+                .shortDescription(Component.text("Remove " + component.getPlural() + " from the question").color(NamedTextColor.YELLOW))
+                .addParameters(positionParameter, removeComponentParameter)
+                .executor(new SetQuestionRemoveComponentAtPositionExecutor(specificQuestionParameter, positionParameter, removeComponentParameter, questionModifier, questionPool, questionRegister, componentExtractor, component))
                 .build();
 
         return Command.builder()
