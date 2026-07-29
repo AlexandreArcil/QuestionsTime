@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.spongepowered.api.item.inventory.ItemStack;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -71,7 +72,7 @@ class QuestionModifierImplTest {
     void setMalusMoneyToExistentMalus() {
         final int newMalusMoney = 10;
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow"))
-                .setMalus(new Malus(50, false, new OutcomeCommand[0])).setWeight(1).build();
+                .setMalus(new Malus(50, false, Set.of())).setWeight(1).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final Question modifiedQuestion = questionModifier.set(question, QuestionComponent.MALUS_MONEY, newMalusMoney);
@@ -95,7 +96,7 @@ class QuestionModifierImplTest {
     void setPrizeMoneyExistentPrize() {
         final int newPrizeMoney = 10;
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(), Set.of(), 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final Question modifiedQuestion = questionModifier.set(question, QuestionComponent.PRIZE_MONEY, 1, newPrizeMoney);
@@ -107,7 +108,7 @@ class QuestionModifierImplTest {
     void setPrizeMoneyRemovePrize() {
         final int newPrizeMoney = 0;
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(), Set.of(), 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final Question modifiedQuestion = questionModifier.set(question, QuestionComponent.PRIZE_MONEY, 1, newPrizeMoney);
@@ -130,7 +131,7 @@ class QuestionModifierImplTest {
     void setPrizeAnnounceExistentPrize() {
         final boolean newPrizeAnnounce = true;
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(), Set.of(), 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final Question modifiedQuestion = questionModifier.set(question, QuestionComponent.PRIZE_ANNOUNCE, 1, newPrizeAnnounce);
@@ -148,7 +149,7 @@ class QuestionModifierImplTest {
                     .thenReturn(Mockito.mock(ItemStack.class));
 
             final QuestionModifier questionModifier = new QuestionModifierImpl();
-            final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, 1, , newPrizeItems);
+            final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, 1, Collections.singleton(newPrizeItems));
 
             assertFalse(modifiedQuestion.getPrizes().isEmpty());
         }
@@ -158,14 +159,14 @@ class QuestionModifierImplTest {
     void addPrizeItemsExistentPrize() {
         final String newPrizeItems = "stone";
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(), Set.of(), 1))).build();
 
         try(final var itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
             itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(newPrizeItems))
                     .thenReturn(Mockito.mock(ItemStack.class));
 
             final QuestionModifier questionModifier = new QuestionModifierImpl();
-            final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, 1, , newPrizeItems);
+            final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, 1, Collections.singleton(newPrizeItems));
 
             assertFalse(modifiedQuestion.getPrizes().isEmpty());
         }
@@ -177,21 +178,21 @@ class QuestionModifierImplTest {
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, 1, , newCommand);
+        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, 1, Collections.singleton(newCommand));
 
-        assertEquals(newCommand, modifiedQuestion.getPrizes().getFirst().getCommands()[0].toString());
+        assertEquals(newCommand, modifiedQuestion.getPrizes().getFirst().getCommands().iterator().next().toString());
     }
 
     @Test
     void addPrizeCommandsExistentPrize() {
         final String newCommand = "message;cmd";
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(), Set.of(), 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, 1, , newCommand);
+        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, 1, Collections.singleton(newCommand));
 
-        assertEquals(newCommand, modifiedQuestion.getPrizes().getFirst().getCommands()[0].toString());
+        assertEquals(newCommand, modifiedQuestion.getPrizes().getFirst().getCommands().iterator().next().toString());
     }
 
     @Test
@@ -210,7 +211,7 @@ class QuestionModifierImplTest {
     void setMalusAnnounceExistentMalus() {
         final boolean newMalusAnnounce = true;
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setMalus(new Malus(50, false, new OutcomeCommand[0])).build();
+                .setMalus(new Malus(50, false, Set.of())).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final Question modifiedQuestion = questionModifier.set(question, QuestionComponent.MALUS_ANNOUNCE, newMalusAnnounce);
@@ -270,7 +271,7 @@ class QuestionModifierImplTest {
     void addMalusCommandsExistentMalus() {
         final String newMalusCommand = "malusCommand1;cmd";
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setMalus(new Malus(50, false, new OutcomeCommand[0])).build();
+                .setMalus(new Malus(50, false, Set.of())).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
 //        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.MALUS_COMMANDS, newMalusCommand);
@@ -373,8 +374,8 @@ class QuestionModifierImplTest {
     void removeMalusCommandsDeleteMalus() {
         final List<String> malusCommands = List.of("malusCommand;cmd", "coincoin;cmd2");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setMalus(new Malus(0, false, new OutcomeCommand[]
-                        {new OutcomeCommand("malusCommand", "cmd"), new OutcomeCommand("coincoin", "cmd2")})).build();
+                .setMalus(new Malus(0, false, Set.of(
+                        new OutcomeCommand("malusCommand", "cmd"), new OutcomeCommand("coincoin", "cmd2")))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommands);
@@ -386,14 +387,14 @@ class QuestionModifierImplTest {
     void removeMalusCommands() {
         final List<String> malusCommands = List.of("malusCommand;cmd", "coincoin;cmd2");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setMalus(new Malus(50, false, new OutcomeCommand[]
-                        {new OutcomeCommand("malusCommand", "cmd"), new OutcomeCommand("coincoin", "cmd2")})).build();
+                .setMalus(new Malus(50, false, Set.of(
+                        new OutcomeCommand("malusCommand", "cmd"), new OutcomeCommand("coincoin", "cmd2")))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommands);
 
         assertTrue(modifiedQuestion.getMalus().isPresent());
-        assertEquals(0, modifiedQuestion.getMalus().get().getCommands().length);
+        assertEquals(0, modifiedQuestion.getMalus().get().getCommands().size());
     }
 
     @Test
@@ -412,7 +413,7 @@ class QuestionModifierImplTest {
     void removeInexistentMalusCommand() {
         final List<String> malusCommands = List.of("malusCommand;cmd");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setMalus(new Malus(50, false, new OutcomeCommand[0])).build();
+                .setMalus(new Malus(50, false, Set.of())).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.MALUS_COMMANDS, malusCommands));
@@ -511,7 +512,7 @@ class QuestionModifierImplTest {
         Mockito.when(is2.equalTo(isSerialized)).thenReturn(false);
         Mockito.when(is2.copy()).thenReturn(is2);
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[] {is, is2}, new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(is, is2), Set.of(), 1))).build();
 
         try(final var itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
             itemStackSerializerMock.when(() -> ItemStackSerializer.fromString("stone"))
@@ -534,7 +535,7 @@ class QuestionModifierImplTest {
         Mockito.when(is.equalTo(Mockito.any())).thenReturn(true);
         Mockito.when(is.copy()).thenReturn(is);
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(0, false, new ItemStack[] {is}, new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(0, false, Set.of(is), Set.of(), 1))).build();
 
         try(final var itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
             itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(Mockito.anyString()))
@@ -552,7 +553,7 @@ class QuestionModifierImplTest {
         final List<String> removePrizeItems = List.of("stone");
         final ItemStack is = Mockito.mock(ItemStack.class);
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[] {is}, new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(is), Set.of(), 1))).build();
 
         try(final var itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
             itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(Mockito.anyString()))
@@ -572,7 +573,7 @@ class QuestionModifierImplTest {
         Mockito.when(is.equalTo(Mockito.any())).thenReturn(false);
         Mockito.when(is.copy()).thenReturn(is);
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[] {is}, new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(is), Set.of(), 1))).build();
 
         try(final var itemStackSerializerMock = Mockito.mockStatic(ItemStackSerializer.class)) {
             itemStackSerializerMock.when(() -> ItemStackSerializer.fromString(Mockito.anyString()))
@@ -589,21 +590,21 @@ class QuestionModifierImplTest {
     void removePrizeCommands() {
         final List<String> removePrizeCommands = List.of("message;cmd", "coincoin;cmd2");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[]
-                        {new OutcomeCommand("message", "cmd"), new OutcomeCommand("coincoin", "cmd2")}, 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(), Set.of(
+                        new OutcomeCommand("message", "cmd"), new OutcomeCommand("coincoin", "cmd2")), 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 1, removePrizeCommands);
 
         assertEquals(1, modifiedQuestion.getPrizes().size());
-        assertEquals(0, modifiedQuestion.getPrizes().getFirst().getCommands().length);
+        assertEquals(0, modifiedQuestion.getPrizes().getFirst().getCommands().size());
     }
 
     @Test
     void removePrizeCommandsRemovePrize() {
         final List<String> removePrizeCommands = List.of("message;cmd");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(0, false, new ItemStack[0], new OutcomeCommand[] {new OutcomeCommand("message", "cmd")}, 1))).build();
+                .setPrizes(Set.of(new Prize(0, false, Set.of(), Set.of(new OutcomeCommand("message", "cmd")), 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 1, removePrizeCommands);
@@ -615,7 +616,7 @@ class QuestionModifierImplTest {
     void removePrizeCommandsInexistentPosition() {
         final List<String> removePrizeCommands = List.of("message;cmd");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(), Set.of(), 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 2, removePrizeCommands));
@@ -627,7 +628,7 @@ class QuestionModifierImplTest {
     void removeInexistentPrizeCommands() {
         final List<String> removePrizeCommands = List.of("message;cmd");
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1)
-                .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1))).build();
+                .setPrizes(Set.of(new Prize(50, false, Set.of(), Set.of(), 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> questionModifier.remove(question, QuestionComponent.PRIZE_COMMANDS, 1, removePrizeCommands));
