@@ -14,11 +14,13 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 
 public class SetQuestionPrizesAddItemsExecutor implements CommandExecutor {
 
     public static final Parameter.Value<Integer> POSITION = Parameter.integerNumber().key("position").build();
-    public static final Parameter.Value<String> ITEM = Parameter.remainingJoinedStrings().key("item").build();
+    public static final Parameter.Value<String> ITEMS = Parameter.string().consumeAllRemaining().key("items").build();
 
     private final Parameter.Value<Question> specificQuestionParameter;
     private final QuestionModifier questionModifier;
@@ -35,10 +37,10 @@ public class SetQuestionPrizesAddItemsExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
         final Integer position = context.requireOne(POSITION);
-        final String item = context.requireOne(ITEM);
+        final Collection<String> items = Collections.unmodifiableCollection(context.all(ITEMS));
         final Question question = context.requireOne(this.specificQuestionParameter);
         try {
-            final Question modifiedQuestion = this.questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, position, item);
+            final Question modifiedQuestion = this.questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, position, items);
             this.questionRegister.replace(question, modifiedQuestion);
             this.questionPool.replace(question, modifiedQuestion);
             context.sendMessage(TextUtils.composed("Item added to position ", String.valueOf(position), " !"));

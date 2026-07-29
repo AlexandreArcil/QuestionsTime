@@ -19,7 +19,7 @@ public interface QuestionModifier {
 
     Question add(final Question question, final QuestionComponent component, final Collection<String> values);
 
-    Question add(final Question question, final QuestionComponent component, final int position, final String value);
+    Question add(final Question question, final QuestionComponent component, final int position, final Collection<String> values);
 
     Question remove(final Question question, final QuestionComponent component, final Collection<String> values);
 

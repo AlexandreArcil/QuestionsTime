@@ -148,7 +148,7 @@ class QuestionModifierImplTest {
                     .thenReturn(Mockito.mock(ItemStack.class));
 
             final QuestionModifier questionModifier = new QuestionModifierImpl();
-            final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, 1, newPrizeItems);
+            final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, 1, , newPrizeItems);
 
             assertFalse(modifiedQuestion.getPrizes().isEmpty());
         }
@@ -165,7 +165,7 @@ class QuestionModifierImplTest {
                     .thenReturn(Mockito.mock(ItemStack.class));
 
             final QuestionModifier questionModifier = new QuestionModifierImpl();
-            final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, 1, newPrizeItems);
+            final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_ITEMS, 1, , newPrizeItems);
 
             assertFalse(modifiedQuestion.getPrizes().isEmpty());
         }
@@ -177,7 +177,7 @@ class QuestionModifierImplTest {
         final Question question = Question.builder().setQuestion("test ?").setAnswers(Set.of("wow")).setWeight(1).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, 1, newCommand);
+        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, 1, , newCommand);
 
         assertEquals(newCommand, modifiedQuestion.getPrizes().getFirst().getCommands()[0].toString());
     }
@@ -189,7 +189,7 @@ class QuestionModifierImplTest {
                 .setPrizes(Set.of(new Prize(50, false, new ItemStack[0], new OutcomeCommand[0], 1))).build();
 
         final QuestionModifier questionModifier = new QuestionModifierImpl();
-        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, 1, newCommand);
+        final Question modifiedQuestion = questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, 1, , newCommand);
 
         assertEquals(newCommand, modifiedQuestion.getPrizes().getFirst().getCommands()[0].toString());
     }
@@ -523,7 +523,7 @@ class QuestionModifierImplTest {
             final Question modifiedQuestion = questionModifier.remove(question, QuestionComponent.PRIZE_ITEMS, 1, removePrizeItems);
 
             assertEquals(1, modifiedQuestion.getPrizes().size());
-            assertEquals(0, modifiedQuestion.getPrizes().getFirst().getItemStacks().length);
+            assertTrue(modifiedQuestion.getPrizes().getFirst().getItemStacks().isEmpty());
         }
     }
 

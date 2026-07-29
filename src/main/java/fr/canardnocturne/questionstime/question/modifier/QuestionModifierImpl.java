@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -103,31 +102,35 @@ public class QuestionModifierImpl implements QuestionModifier {
     }
 
     @Override
-    public Question add(final Question question, final QuestionComponent component, final int position, final String value) {
+    public Question add(final Question question, final QuestionComponent component, final int position, final Collection<String> values) {
         final Question.QuestionBuilder builder = question.toBuilder();
         switch (component) {
             case PRIZE_ITEMS -> {
-                final ItemStack itemStack = ItemStackSerializer.fromString(value);
                 final TreeSet<Prize> prizes = new TreeSet<>(question.getPrizes());
                 final Prize.Builder prize = prizes.stream()
                         .filter(prize1 -> prize1.getPosition() == position)
                         .findFirst()
                         .map(Prize::toBuilder)
                         .orElseGet(() -> Prize.builder(position));
-                prize.addItem(itemStack);
+                for (final String value : values) {
+                    final ItemStack itemStack = ItemStackSerializer.fromString(value);
+                    prize.addItem(itemStack);
+                }
                 prizes.removeIf(prize1 -> prize1.getPosition() == position);
                 prizes.add(prize.build());
                 builder.setPrizes(prizes);
             }
             case PRIZE_COMMANDS -> {
-                final OutcomeCommand outcomeCommand = OutcomeCommandSerializer.deserialize(value);
                 final TreeSet<Prize> prizes = new TreeSet<>(question.getPrizes());
                 final Prize.Builder prize = prizes.stream()
                         .filter(prize1 -> prize1.getPosition() == position)
                         .findFirst()
                         .map(Prize::toBuilder)
                         .orElseGet(() -> Prize.builder(position));
-                prize.addCommand(outcomeCommand);
+                for (final String value : values) {
+                    final OutcomeCommand outcomeCommand = OutcomeCommandSerializer.deserialize(value);
+                    prize.addCommand(outcomeCommand);
+                }
                 prizes.removeIf(prize1 -> prize1.getPosition() == position);
                 prizes.add(prize.build());
                 builder.setPrizes(prizes);
@@ -202,19 +205,14 @@ public class QuestionModifierImpl implements QuestionModifier {
             final Malus.Builder malusBuilder = question.getMalus()
                     .map(Malus::toBuilder)
                     .orElseThrow(() -> new IllegalArgumentException("No malus is present in the question"));
-            final int[] outcomeCommandPositions = new int[values.size()];
-            int position = 0;
+            final Set<OutcomeCommand> commandsToRemove = new HashSet<>();
             for (final String value : values) {
                 final OutcomeCommand outcomeCommand = OutcomeCommandSerializer.deserialize(value);
-                final int outcomeCommandPosition = ArrayUtils.indexOf(malusBuilder.getCommands(), outcomeCommand);
-                if (outcomeCommandPosition == ArrayUtils.INDEX_NOT_FOUND) {
-                    throw new IllegalArgumentException("Command '" + value + "' not found in malus");
-                }
-                outcomeCommandPositions[position] = outcomeCommandPosition;
-                position++;
+                commandsToRemove.add(outcomeCommand);
             }
-            final OutcomeCommand[] result = ArrayUtils.removeAll(malusBuilder.getCommands(), outcomeCommandPositions);
-            malusBuilder.setCommands(result);
+            final Set<OutcomeCommand> commands = new HashSet<>(malusBuilder.getCommands());
+            commands.removeAll(commandsToRemove);
+            malusBuilder.setCommands(commands);
             final Malus malus = malusBuilder.build();
             if (!malus.isEmpty()) {
                 builder.setMalus(malus);

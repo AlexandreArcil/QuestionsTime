@@ -14,11 +14,13 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 
 public class SetQuestionPrizesAddCommandsExecutor implements CommandExecutor {
 
     public static final Parameter.Value<Integer> POSITION = Parameter.integerNumber().key("position").build();
-    public static final Parameter.Value<String> COMMAND = Parameter.remainingJoinedStrings().key("command").build();
+    public static final Parameter.Value<String> COMMANDS = Parameter.string().consumeAllRemaining().key("commands").build();
 
     private final Parameter.Value<Question> specificQuestionParameter;
     private final QuestionModifier questionModifier;
@@ -35,13 +37,13 @@ public class SetQuestionPrizesAddCommandsExecutor implements CommandExecutor {
     @Override
     public CommandResult execute(final CommandContext context) throws CommandException {
         final Integer position = context.requireOne(POSITION);
-        final String command = context.requireOne(COMMAND);
+        final Collection<String> commands = Collections.unmodifiableCollection(context.all(COMMANDS));
         final Question question = context.requireOne(this.specificQuestionParameter);
         try {
-            final Question modifiedQuestion = this.questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, position, command);
+            final Question modifiedQuestion = this.questionModifier.add(question, QuestionComponent.PRIZE_COMMANDS, position, commands);
             this.questionRegister.replace(question, modifiedQuestion);
             this.questionPool.replace(question, modifiedQuestion);
-            context.sendMessage(TextUtils.composed( "Command ", command , " added to position ", String.valueOf(position), " !"));
+            context.sendMessage(TextUtils.composed( "Command added to position ", String.valueOf(position), " !"));
             return CommandResult.success();
         } catch (final QuestionException | IllegalArgumentException e) {
             return CommandResult.error(TextUtils.errorWithPrefix(e.getMessage()));
